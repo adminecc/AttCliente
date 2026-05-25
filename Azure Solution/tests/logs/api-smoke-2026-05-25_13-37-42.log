@@ -1,0 +1,18 @@
+API smoke tests
+Inicio: 2026-05-25T13:37:42
+Fin: 2026-05-25T13:37:42
+Comando: node api_harness.js
+Codigo salida: 0
+
+Total: 7
+OK: 7
+Fallos: 0
+
+Detalle:
+- PASS: validateRequest acepta una incidencia valida
+- PASS: validateRequest rechaza payload incompleto
+- PASS: generateToken genera token con formato esperado
+- PASS: generateToken rechaza listaDestino invalida
+- PASS: createSharePointItem rechaza listaDestino invalida sin llamar a Graph
+- PASS: consultarSolicitud exige email y token
+- PASS: consultarSolicitud rechaza token con prefijo desconocido sin llamar a Graph
