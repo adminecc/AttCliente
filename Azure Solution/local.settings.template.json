@@ -1,0 +1,22 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+
+    "AZURE_TENANT_ID":           "REEMPLAZAR-CON-TENANT-ID",
+    "AZURE_CLIENT_ID":           "REEMPLAZAR-CON-CLIENT-ID",
+    "AZURE_CERT_THUMBPRINT":     "REEMPLAZAR-CON-THUMBPRINT-SHA1-HEX",
+    "AZURE_CERT_PRIVATE_KEY":    "REEMPLAZAR-CON-CLAVE-PRIVADA-PEM",
+
+    "SHAREPOINT_SITE_ID":        "REEMPLAZAR-CON-SITE-ID",
+    "SHAREPOINT_SITE_URL":       "https://TENANT.sharepoint.com/sites/MetroMalaga",
+
+    "HCAPTCHA_SECRET_KEY":       "REEMPLAZAR-CON-HCAPTCHA-SECRET",
+    "HCAPTCHA_ENABLED":          "true"
+  },
+  "Host": {
+    "LocalHttpPort": 7071,
+    "CORS": "*"
+  }
+}

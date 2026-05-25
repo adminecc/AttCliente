@@ -1,0 +1,858 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Atención al Cliente - Metro</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                    <circle cx="24" cy="24" r="22" fill="#E31837"/>
+                    <text x="24" y="30" text-anchor="middle" fill="white" font-size="18" font-weight="bold">M</text>
+                </svg>
+                <div class="header-text">
+                    <h1>Atención al Cliente</h1>
+                    <p>Formulario unificado de gestión</p>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <form id="mainForm" class="form" novalidate>
+                <!-- Selector de tipo de formulario -->
+                <section class="form-section selector-section">
+                    <div class="form-group">
+                        <label for="tipoFormulario" class="label required">Tipo de formulario</label>
+                        <select id="tipoFormulario" name="tipoFormulario" class="select select-primary" required>
+                            <option value="">Seleccione el tipo de gestión...</option>
+                            <option value="reclamaciones">Reclamaciones y quejas</option>
+                            <option value="sugerencias">Sugerencias</option>
+                            <option value="agradecimientos">Agradecimientos y felicitaciones</option>
+                            <option value="objetos">Objetos perdidos</option>
+                            <option value="tarjetas">Datos personales para confección tarjetas +Metro</option>
+                        </select>
+                    </div>
+                </section>
+
+                <!-- Contenedor dinámico de formularios -->
+                <div id="formContainer" class="form-container hidden">
+                    
+                    <!-- Sección común: Datos personales -->
+                    <section class="form-section" id="datosPersonales">
+                        <h2 class="section-title">
+                            <span class="section-icon">👤</span>
+                            Datos personales
+                        </h2>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="tipoDocumento" class="label required">Tipo de documento</label>
+                                <select id="tipoDocumento" name="tipoDocumento" class="select" required>
+                                    <option value="">Seleccione...</option>
+                                    <option value="NIF">NIF</option>
+                                    <option value="PAS">Pasaporte</option>
+                                    <option value="NIE">NIE</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="numeroDocumento" class="label required">Número de documento</label>
+                                <input type="text" id="numeroDocumento" name="numeroDocumento" class="input" required placeholder="Ej: 12345678A">
+                            </div>
+                            <div class="form-group">
+                                <label for="nombre" class="label required">Nombre</label>
+                                <input type="text" id="nombre" name="nombre" class="input" required placeholder="Nombre">
+                            </div>
+                            <div class="form-group">
+                                <label for="apellidos" class="label required">Apellidos</label>
+                                <input type="text" id="apellidos" name="apellidos" class="input" required placeholder="Apellidos">
+                            </div>
+                            <div class="form-group">
+                                <label for="email" class="label required">Correo electrónico</label>
+                                <input type="email" id="email" name="email" class="input" required placeholder="ejemplo@correo.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="telefono" class="label">Teléfono</label>
+                                <input type="tel" id="telefono" name="telefono" class="input" placeholder="612 345 678">
+                            </div>
+                            <div class="form-group">
+                                <label for="nacionalidad" class="label">Nacionalidad</label>
+                                <select id="nacionalidad" name="nacionalidad" class="select">
+                                    <option value="">Seleccione país...</option>
+                                    <option value="ES">España</option>
+                                    <option value="MA">Marruecos</option>
+                                    <option value="GB">Reino Unido</option>
+                                    <option value="FR">Francia</option>
+                                    <option value="IT">Italia</option>
+                                    <option value="DE">Alemania</option>
+                                    <option value="PT">Portugal</option>
+                                    <option value="UA">Ucrania</option>
+                                    <option value="RO">Rumanía</option>
+                                    <option value="CN">China</option>
+                                    <option value="CO">Colombia</option>
+                                    <option value="AR">Argentina</option>
+                                    <option value="VE">Venezuela</option>
+                                    <option value="PE">Perú</option>
+                                    <option value="EC">Ecuador</option>
+                                    <option value="CL">Chile</option>
+                                    <option value="BO">Bolivia</option>
+                                    <option value="PY">Paraguay</option>
+                                    <option value="UY">Uruguay</option>
+                                    <option value="BR">Brasil</option>
+                                    <option value="MX">México</option>
+                                    <option value="US">Estados Unidos</option>
+                                    <option value="IE">Irlanda</option>
+                                    <option value="NL">Países Bajos</option>
+                                    <option value="BE">Bélgica</option>
+                                    <option value="CH">Suiza</option>
+                                    <option value="AT">Austria</option>
+                                    <option value="PL">Polonia</option>
+                                    <option value="BG">Bulgaria</option>
+                                    <option value="RU">Rusia</option>
+                                    <option value="DZ">Argelia</option>
+                                    <option value="TN">Túnez</option>
+                                    <option value="SN">Senegal</option>
+                                    <option value="NG">Nigeria</option>
+                                    <option value="IN">India</option>
+                                    <option value="PK">Pakistán</option>
+                                    <option value="BD">Bangladés</option>
+                                    <option value="PH">Filipinas</option>
+                                    <option value="JP">Japón</option>
+                                    <option value="KR">Corea del Sur</option>
+                                    <option value="AF">Afganistán</option>
+                                    <option value="AL">Albania</option>
+                                    <option value="AD">Andorra</option>
+                                    <option value="AO">Angola</option>
+                                    <option value="SA">Arabia Saudí</option>
+                                    <option value="AM">Armenia</option>
+                                    <option value="AU">Australia</option>
+                                    <option value="AZ">Azerbaiyán</option>
+                                    <option value="BS">Bahamas</option>
+                                    <option value="BH">Baréin</option>
+                                    <option value="BB">Barbados</option>
+                                    <option value="BY">Bielorrusia</option>
+                                    <option value="BZ">Belice</option>
+                                    <option value="BJ">Benín</option>
+                                    <option value="BA">Bosnia y Herzegovina</option>
+                                    <option value="BW">Botsuana</option>
+                                    <option value="CA">Canadá</option>
+                                    <option value="QA">Catar</option>
+                                    <option value="CY">Chipre</option>
+                                    <option value="CR">Costa Rica</option>
+                                    <option value="CI">Costa de Marfil</option>
+                                    <option value="HR">Croacia</option>
+                                    <option value="CU">Cuba</option>
+                                    <option value="DK">Dinamarca</option>
+                                    <option value="DO">República Dominicana</option>
+                                    <option value="EG">Egipto</option>
+                                    <option value="SV">El Salvador</option>
+                                    <option value="AE">Emiratos Árabes Unidos</option>
+                                    <option value="SK">Eslovaquia</option>
+                                    <option value="SI">Eslovenia</option>
+                                    <option value="EE">Estonia</option>
+                                    <option value="ET">Etiopía</option>
+                                    <option value="FI">Finlandia</option>
+                                    <option value="GE">Georgia</option>
+                                    <option value="GH">Ghana</option>
+                                    <option value="GR">Grecia</option>
+                                    <option value="GT">Guatemala</option>
+                                    <option value="GN">Guinea</option>
+                                    <option value="GQ">Guinea Ecuatorial</option>
+                                    <option value="HN">Honduras</option>
+                                    <option value="HU">Hungría</option>
+                                    <option value="ID">Indonesia</option>
+                                    <option value="IQ">Irak</option>
+                                    <option value="IR">Irán</option>
+                                    <option value="IS">Islandia</option>
+                                    <option value="IL">Israel</option>
+                                    <option value="JM">Jamaica</option>
+                                    <option value="JO">Jordania</option>
+                                    <option value="KZ">Kazajistán</option>
+                                    <option value="KE">Kenia</option>
+                                    <option value="KW">Kuwait</option>
+                                    <option value="LV">Letonia</option>
+                                    <option value="LB">Líbano</option>
+                                    <option value="LT">Lituania</option>
+                                    <option value="LU">Luxemburgo</option>
+                                    <option value="ML">Mali</option>
+                                    <option value="MT">Malta</option>
+                                    <option value="MD">Moldavia</option>
+                                    <option value="MC">Mónaco</option>
+                                    <option value="ME">Montenegro</option>
+                                    <option value="MZ">Mozambique</option>
+                                    <option value="NI">Nicaragua</option>
+                                    <option value="NO">Noruega</option>
+                                    <option value="NZ">Nueva Zelanda</option>
+                                    <option value="PA">Panamá</option>
+                                    <option value="PR">Puerto Rico</option>
+                                    <option value="CZ">República Checa</option>
+                                    <option value="RS">Serbia</option>
+                                    <option value="SY">Siria</option>
+                                    <option value="SE">Suecia</option>
+                                    <option value="TH">Tailandia</option>
+                                    <option value="TR">Turquía</option>
+                                    <option value="VN">Vietnam</option>
+                                    <option value="OTHER">Otro</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="direccion" class="label">Dirección</label>
+                                <input type="text" id="direccion" name="direccion" class="input" placeholder="Calle, número, piso...">
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Sección específica: Reclamaciones y quejas -->
+                    <section class="form-section hidden" id="seccionReclamaciones">
+                        <h2 class="section-title">
+                            <span class="section-icon">📋</span>
+                            Datos de la reclamación
+                        </h2>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="clasificacion" class="label required">Clasificación</label>
+                                <select id="clasificacion" name="clasificacion" class="select" required>
+                                    <option value="">Seleccione...</option>
+                                    <option value="reclamacion">Reclamación</option>
+                                    <option value="queja">Queja</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="canalRecepcion" class="label required">Canal de recepción</label>
+                                <select id="canalRecepcion" name="canalRecepcion" class="select" required>
+                                    <option value="">Seleccione...</option>
+                                    <option value="presencial">Presencial</option>
+                                    <option value="linea902">Línea 902</option>
+                                    <option value="email">Correo Electrónico</option>
+                                    <option value="web">Formulario web</option>
+                                    <option value="postal">Escrito postal / fax</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="fechaIncidencia" class="label required">Fecha de la incidencia</label>
+                                <input type="date" id="fechaIncidencia" name="fechaIncidencia" class="input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="horaIncidencia" class="label">Hora aproximada</label>
+                                <input type="time" id="horaIncidencia" name="horaIncidencia" class="input">
+                            </div>
+                            <div class="form-group">
+                                <label for="tipologia" class="label required">Tipología</label>
+                                <select id="tipologia" name="tipologia" class="select" required>
+                                    <option value="">Seleccione...</option>
+                                    <option value="titulo">Títulos de transporte</option>
+                                    <option value="accesibilidad">Accesibilidad</option>
+                                    <option value="informacion">Información</option>
+                                    <option value="instalaciones">Instalaciones</option>
+                                    <option value="personal">Personal</option>
+                                    <option value="seguridad">Seguridad</option>
+                                    <option value="servicio">Servicio de trenes</option>
+                                    <option value="limpieza">Limpieza</option>
+                                    <option value="otros">Otros</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="subtipologia" class="label">Subtipología</label>
+                                <select id="subtipologia" name="subtipologia" class="select">
+                                    <option value="">Seleccione primero una tipología...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="lugarIncidencia" class="label required">Estación / Lugar</label>
+                                <select id="lugarIncidencia" name="lugarIncidencia" class="select" required>
+                                    <option value="">Seleccione estación...</option>
+                                    <optgroup label="Línea 1">
+                                        <option value="guadalmedina-l1">Guadalmedina</option>
+                                        <option value="atarazanas">Atarazanas</option>
+                                        <option value="andalucia-tech">Andalucía Tech</option>
+                                        <option value="carranque">Carranque</option>
+                                        <option value="barbarela">Barbarela</option>
+                                        <option value="el-clinico">El Clínico</option>
+                                        <option value="la-union">La Unión</option>
+                                        <option value="universidad">Universidad</option>
+                                        <option value="ciudad-justicia">Ciudad de la Justicia</option>
+                                        <option value="el-consul">El Cónsul</option>
+                                        <option value="el-perchel-l1">El Perchel</option>
+                                        <option value="paraninfo">Paraninfo</option>
+                                        <option value="portada-alta">Portada Alta</option>
+                                    </optgroup>
+                                    <optgroup label="Línea 2">
+                                        <option value="guadalmedina-l2">Guadalmedina</option>
+                                        <option value="la-luz-la-paz">La Luz - La Paz</option>
+                                        <option value="la-isla">La Isla</option>
+                                        <option value="el-perchel-l2">El Perchel</option>
+                                        <option value="puerta-blanca">Puerta Blanca</option>
+                                        <option value="princesa-huelin">Princesa - Huelin</option>
+                                        <option value="el-torcal">El Torcal</option>
+                                        <option value="palacio-deportes">Palacio de los Deportes</option>
+                                    </optgroup>
+                                    <optgroup label="Otras ubicaciones">
+                                        <option value="tren">Interior del tren</option>
+                                        <option value="otro">Otra ubicación</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div class="form-group hidden" id="grupoTrenIncidencia">
+                                <label for="trenIncidencia" class="label">Tren</label>
+                                <select id="trenIncidencia" name="trenIncidencia" class="select">
+                                    <option value="">Seleccione tren...</option>
+                                    <option value="1">Tren 1</option>
+                                    <option value="2">Tren 2</option>
+                                    <option value="3">Tren 3</option>
+                                    <option value="4">Tren 4</option>
+                                    <option value="5">Tren 5</option>
+                                    <option value="6">Tren 6</option>
+                                    <option value="7">Tren 7</option>
+                                    <option value="8">Tren 8</option>
+                                    <option value="9">Tren 9</option>
+                                    <option value="10">Tren 10</option>
+                                    <option value="11">Tren 11</option>
+                                    <option value="12">Tren 12</option>
+                                    <option value="13">Tren 13</option>
+                                    <option value="14">Tren 14</option>
+                                    <option value="15">Tren 15</option>
+                                    <option value="16">Tren 16</option>
+                                    <option value="17">Tren 17</option>
+                                    <option value="18">Tren 18</option>
+                                    <option value="19">Tren 19</option>
+                                    <option value="20">Tren 20</option>
+                                    <option value="21">Tren 21</option>
+                                </select>
+                            </div>
+                            <div class="form-group hidden" id="grupoOtroLugarIncidencia">
+                                <label for="otroLugarIncidencia" class="label">Otro lugar</label>
+                                <input type="text" id="otroLugarIncidencia" name="otroLugarIncidencia" class="input" placeholder="Indique el lugar...">
+                            </div>
+                            <div class="form-group">
+                                <label for="tipoInstalacion" class="label">Tipo de instalación</label>
+                                <select id="tipoInstalacion" name="tipoInstalacion" class="select">
+                                    <option value="">Seleccione...</option>
+                                    <option value="dab">DAB (Dispensador Automático de Billetes)</option>
+                                    <option value="torno">Torno de acceso</option>
+                                    <option value="tren">Tren</option>
+                                    <option value="escalera">Escalera mecánica</option>
+                                    <option value="ascensor">Ascensor</option>
+                                    <option value="anden">Andén</option>
+                                    <option value="vestibulo">Vestíbulo</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="tipoTitulo" class="label">Tipo de título afectado</label>
+                                <select id="tipoTitulo" name="tipoTitulo" class="select">
+                                    <option value="">Seleccione si procede</option>
+                                    <option value="billete-ocasional">Billete ocasional</option>
+                                    <option value="monedero-metro-malaga">Monedero Metro Málaga</option>
+                                    <option value="tarjeta-consorcio">Tarjeta Consorcio</option>
+                                    <option value="tarjeta-consorcio-familia-numerosa">Tarjeta Consorcio Familia Numerosa</option>
+                                    <option value="tarjeta-consorcio-joven">Tarjeta Consorcio Joven</option>
+                                    <option value="pago-tarjeta-ocasional">Pago con tarjeta (ocasional)</option>
+                                    <option value="metropay">MetroPay (Pago con tarjeta registrado)</option>
+                                    <option value="masmetro">MásMetro</option>
+                                </select>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="descripcionCorta" class="label required">Descripción breve</label>
+                                <input type="text" id="descripcionCorta" name="descripcionCorta" class="input" required placeholder="Resumen en una línea..." maxlength="150">
+                                <span class="char-counter"><span id="charCount">0</span>/150</span>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="descripcionDetallada" class="label required">Descripción detallada</label>
+                                <textarea id="descripcionDetallada" name="descripcionDetallada" class="textarea" required placeholder="Describa los hechos con el mayor detalle posible..." rows="5"></textarea>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="adjuntos" class="label">Documentación adjunta</label>
+                                <div class="file-upload">
+                                    <input type="file" id="adjuntos" name="adjuntos" class="file-input" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                                    <label for="adjuntos" class="file-label">
+                                        <span class="file-icon">📎</span>
+                                        <span class="file-text">Arrastra archivos aquí o haz clic para seleccionar</span>
+                                        <span class="file-hint">PDF, imágenes o documentos (máx. 10MB)</span>
+                                    </label>
+                                    <div id="fileList" class="file-list"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Sección específica: Sugerencias -->
+                    <section class="form-section hidden" id="seccionSugerencias">
+                        <h2 class="section-title">
+                            <span class="section-icon">💡</span>
+                            Su sugerencia
+                        </h2>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="areaSugerencia" class="label required">Área de mejora</label>
+                                <select id="areaSugerencia" name="areaSugerencia" class="select" required>
+                                    <option value="">Seleccione...</option>
+                                    <option value="accesibilidad">Accesibilidad</option>
+                                    <option value="frecuencia">Frecuencia de servicio</option>
+                                    <option value="horarios">Horarios</option>
+                                    <option value="informacion">Información al viajero</option>
+                                    <option value="instalaciones">Instalaciones</option>
+                                    <option value="limpieza">Limpieza</option>
+                                    <option value="seguridad">Seguridad</option>
+                                    <option value="tecnologia">Tecnología y apps</option>
+                                    <option value="titulos">Títulos de transporte</option>
+                                    <option value="otros">Otros</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="estacionSugerencia" class="label">Estación relacionada</label>
+                                <select id="estacionSugerencia" name="estacionSugerencia" class="select">
+                                    <option value="">General / Ninguna específica</option>
+                                    <optgroup label="Línea 1">
+                                        <option value="guadalmedina-l1">Guadalmedina</option>
+                                        <option value="atarazanas">Atarazanas</option>
+                                        <option value="andalucia-tech">Andalucía Tech</option>
+                                        <option value="carranque">Carranque</option>
+                                        <option value="barbarela">Barbarela</option>
+                                        <option value="el-clinico">El Clínico</option>
+                                        <option value="la-union">La Unión</option>
+                                        <option value="universidad">Universidad</option>
+                                        <option value="ciudad-justicia">Ciudad de la Justicia</option>
+                                        <option value="el-consul">El Cónsul</option>
+                                        <option value="el-perchel-l1">El Perchel</option>
+                                        <option value="paraninfo">Paraninfo</option>
+                                        <option value="portada-alta">Portada Alta</option>
+                                    </optgroup>
+                                    <optgroup label="Línea 2">
+                                        <option value="guadalmedina-l2">Guadalmedina</option>
+                                        <option value="la-luz-la-paz">La Luz - La Paz</option>
+                                        <option value="la-isla">La Isla</option>
+                                        <option value="el-perchel-l2">El Perchel</option>
+                                        <option value="puerta-blanca">Puerta Blanca</option>
+                                        <option value="princesa-huelin">Princesa - Huelin</option>
+                                        <option value="el-torcal">El Torcal</option>
+                                        <option value="palacio-deportes">Palacio de los Deportes</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="tituloSugerencia" class="label required">Título de la sugerencia</label>
+                                <input type="text" id="tituloSugerencia" name="tituloSugerencia" class="input" required placeholder="Resuma su sugerencia...">
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="descripcionSugerencia" class="label required">Descripción de la sugerencia</label>
+                                <textarea id="descripcionSugerencia" name="descripcionSugerencia" class="textarea" required placeholder="Explique su propuesta de mejora con detalle..." rows="5"></textarea>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Sección específica: Agradecimientos -->
+                    <section class="form-section hidden" id="seccionAgradecimientos">
+                        <h2 class="section-title">
+                            <span class="section-icon">🎉</span>
+                            Su agradecimiento
+                        </h2>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="motivoAgradecimiento" class="label required">Motivo</label>
+                                <select id="motivoAgradecimiento" name="motivoAgradecimiento" class="select" required>
+                                    <option value="">Seleccione...</option>
+                                    <option value="atencion-personal">Atención del personal</option>
+                                    <option value="resolucion-incidencia">Resolución de incidencia</option>
+                                    <option value="mejora-servicio">Mejora del servicio</option>
+                                    <option value="instalaciones">Estado de instalaciones</option>
+                                    <option value="informacion">Información proporcionada</option>
+                                    <option value="seguridad">Actuación de seguridad</option>
+                                    <option value="otros">Otros</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="fechaAgradecimiento" class="label">Fecha del suceso</label>
+                                <input type="date" id="fechaAgradecimiento" name="fechaAgradecimiento" class="input">
+                            </div>
+                            <div class="form-group">
+                                <label for="estacionAgradecimiento" class="label">Estación</label>
+                                <select id="estacionAgradecimiento" name="estacionAgradecimiento" class="select">
+                                    <option value="">Seleccione...</option>
+                                    <optgroup label="Línea 1">
+                                        <option value="guadalmedina-l1">Guadalmedina</option>
+                                        <option value="atarazanas">Atarazanas</option>
+                                        <option value="andalucia-tech">Andalucía Tech</option>
+                                        <option value="carranque">Carranque</option>
+                                        <option value="barbarela">Barbarela</option>
+                                        <option value="el-clinico">El Clínico</option>
+                                        <option value="la-union">La Unión</option>
+                                        <option value="universidad">Universidad</option>
+                                        <option value="ciudad-justicia">Ciudad de la Justicia</option>
+                                        <option value="el-consul">El Cónsul</option>
+                                        <option value="el-perchel-l1">El Perchel</option>
+                                        <option value="paraninfo">Paraninfo</option>
+                                        <option value="portada-alta">Portada Alta</option>
+                                    </optgroup>
+                                    <optgroup label="Línea 2">
+                                        <option value="guadalmedina-l2">Guadalmedina</option>
+                                        <option value="la-luz-la-paz">La Luz - La Paz</option>
+                                        <option value="la-isla">La Isla</option>
+                                        <option value="el-perchel-l2">El Perchel</option>
+                                        <option value="puerta-blanca">Puerta Blanca</option>
+                                        <option value="princesa-huelin">Princesa - Huelin</option>
+                                        <option value="el-torcal">El Torcal</option>
+                                        <option value="palacio-deportes">Palacio de los Deportes</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="nombreEmpleado" class="label">Nombre del empleado (si lo conoce)</label>
+                                <input type="text" id="nombreEmpleado" name="nombreEmpleado" class="input" placeholder="Nombre o identificación">
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="descripcionAgradecimiento" class="label required">Descripción</label>
+                                <textarea id="descripcionAgradecimiento" name="descripcionAgradecimiento" class="textarea" required placeholder="Cuéntenos qué sucedió..." rows="5"></textarea>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Sección específica: Objetos perdidos -->
+                    <section class="form-section hidden" id="seccionObjetos">
+                        <h2 class="section-title">
+                            <span class="section-icon">🔍</span>
+                            Datos del objeto
+                        </h2>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="tipoObjeto" class="label required">Tipo de gestión</label>
+                                <select id="tipoObjeto" name="tipoObjeto" class="select" required>
+                                    <option value="">Seleccione...</option>
+                                    <option value="perdido">Objeto perdido (reclamación)</option>
+                                    <option value="encontrado">Objeto encontrado (entrega)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="estadoObjeto" class="label">Estado del objeto</label>
+                                <select id="estadoObjeto" name="estadoObjeto" class="select">
+                                    <option value="">Seleccione...</option>
+                                    <option value="nuevo">Nuevo / Buen estado</option>
+                                    <option value="usado">Usado</option>
+                                    <option value="deteriorado">Deteriorado</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="categoriaObjeto" class="label required">Categoría</label>
+                                <select id="categoriaObjeto" name="categoriaObjeto" class="select" required>
+                                    <option value="">Seleccione...</option>
+                                    <option value="documentacion">Documentación</option>
+                                    <option value="electronico">Dispositivo electrónico</option>
+                                    <option value="ropa">Ropa / Complementos</option>
+                                    <option value="bolso">Bolso / Mochila / Maleta</option>
+                                    <option value="llaves">Llaves</option>
+                                    <option value="gafas">Gafas</option>
+                                    <option value="paraguas">Paraguas</option>
+                                    <option value="juguete">Juguete</option>
+                                    <option value="otros">Otros</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="colorObjeto" class="label">Color principal</label>
+                                <select id="colorObjeto" name="colorObjeto" class="select">
+                                    <option value="">Seleccione...</option>
+                                    <option value="negro">Negro</option>
+                                    <option value="blanco">Blanco</option>
+                                    <option value="azul">Azul</option>
+                                    <option value="rojo">Rojo</option>
+                                    <option value="verde">Verde</option>
+                                    <option value="amarillo">Amarillo</option>
+                                    <option value="marron">Marrón</option>
+                                    <option value="gris">Gris</option>
+                                    <option value="multicolor">Multicolor</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="fechaPerdida" class="label required">Fecha de pérdida / hallazgo</label>
+                                <input type="date" id="fechaPerdida" name="fechaPerdida" class="input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="horaPerdida" class="label">Hora aproximada</label>
+                                <input type="time" id="horaPerdida" name="horaPerdida" class="input">
+                            </div>
+                            <div class="form-group">
+                                <label for="lineaObjeto" class="label">Línea</label>
+                                <select id="lineaObjeto" name="lineaObjeto" class="select">
+                                    <option value="">Seleccione...</option>
+                                    <option value="1">Línea 1</option>
+                                    <option value="2">Línea 2</option>
+                                    <option value="desconocida">No lo sé</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="estacionOrigen" class="label">Estación origen del trayecto</label>
+                                <select id="estacionOrigen" name="estacionOrigen" class="select">
+                                    <option value="">Seleccione...</option>
+                                    <optgroup label="Línea 1">
+                                        <option value="guadalmedina-l1">Guadalmedina</option>
+                                        <option value="atarazanas">Atarazanas</option>
+                                        <option value="andalucia-tech">Andalucía Tech</option>
+                                        <option value="carranque">Carranque</option>
+                                        <option value="barbarela">Barbarela</option>
+                                        <option value="el-clinico">El Clínico</option>
+                                        <option value="la-union">La Unión</option>
+                                        <option value="universidad">Universidad</option>
+                                        <option value="ciudad-justicia">Ciudad de la Justicia</option>
+                                        <option value="el-consul">El Cónsul</option>
+                                        <option value="el-perchel-l1">El Perchel</option>
+                                        <option value="paraninfo">Paraninfo</option>
+                                        <option value="portada-alta">Portada Alta</option>
+                                    </optgroup>
+                                    <optgroup label="Línea 2">
+                                        <option value="guadalmedina-l2">Guadalmedina</option>
+                                        <option value="la-luz-la-paz">La Luz - La Paz</option>
+                                        <option value="la-isla">La Isla</option>
+                                        <option value="el-perchel-l2">El Perchel</option>
+                                        <option value="puerta-blanca">Puerta Blanca</option>
+                                        <option value="princesa-huelin">Princesa - Huelin</option>
+                                        <option value="el-torcal">El Torcal</option>
+                                        <option value="palacio-deportes">Palacio de los Deportes</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="estacionDestino" class="label">Estación destino del trayecto</label>
+                                <select id="estacionDestino" name="estacionDestino" class="select">
+                                    <option value="">Seleccione...</option>
+                                    <optgroup label="Línea 1">
+                                        <option value="guadalmedina-l1">Guadalmedina</option>
+                                        <option value="atarazanas">Atarazanas</option>
+                                        <option value="andalucia-tech">Andalucía Tech</option>
+                                        <option value="carranque">Carranque</option>
+                                        <option value="barbarela">Barbarela</option>
+                                        <option value="el-clinico">El Clínico</option>
+                                        <option value="la-union">La Unión</option>
+                                        <option value="universidad">Universidad</option>
+                                        <option value="ciudad-justicia">Ciudad de la Justicia</option>
+                                        <option value="el-consul">El Cónsul</option>
+                                        <option value="el-perchel-l1">El Perchel</option>
+                                        <option value="paraninfo">Paraninfo</option>
+                                        <option value="portada-alta">Portada Alta</option>
+                                    </optgroup>
+                                    <optgroup label="Línea 2">
+                                        <option value="guadalmedina-l2">Guadalmedina</option>
+                                        <option value="la-luz-la-paz">La Luz - La Paz</option>
+                                        <option value="la-isla">La Isla</option>
+                                        <option value="el-perchel-l2">El Perchel</option>
+                                        <option value="puerta-blanca">Puerta Blanca</option>
+                                        <option value="princesa-huelin">Princesa - Huelin</option>
+                                        <option value="el-torcal">El Torcal</option>
+                                        <option value="palacio-deportes">Palacio de los Deportes</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="descripcionObjeto" class="label required">Descripción del objeto</label>
+                                <textarea id="descripcionObjeto" name="descripcionObjeto" class="textarea" required placeholder="Describa el objeto con el mayor detalle posible: marca, modelo, características distintivas..." rows="4"></textarea>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="fotoObjeto" class="label">Foto del objeto (si la tiene)</label>
+                                <div class="file-upload">
+                                    <input type="file" id="fotoObjeto" name="fotoObjeto" class="file-input" accept=".jpg,.jpeg,.png">
+                                    <label for="fotoObjeto" class="file-label">
+                                        <span class="file-icon">📷</span>
+                                        <span class="file-text">Adjuntar fotografía</span>
+                                        <span class="file-hint">JPG o PNG (máx. 5MB)</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Sección específica: Tarjetas +Metro -->
+                    <section class="form-section hidden" id="seccionTarjetas">
+                        <h2 class="section-title">
+                            <span class="section-icon">💳</span>
+                            Datos para tarjeta +Metro
+                        </h2>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="motivoTarjeta" class="label required">Motivo de la solicitud</label>
+                                <select id="motivoTarjeta" name="motivoTarjeta" class="select" required>
+                                    <option value="">Seleccione...</option>
+                                    <option value="nueva">Nueva tarjeta</option>
+                                    <option value="renovacion">Renovación</option>
+                                    <option value="duplicado">Duplicado por pérdida/robo</option>
+                                    <option value="deterioro">Duplicado por deterioro</option>
+                                    <option value="modificacion">Modificación de datos</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="tipoTarjeta" class="label required">Tipo de tarjeta</label>
+                                <select id="tipoTarjeta" name="tipoTarjeta" class="select" required>
+                                    <option value="">Seleccione...</option>
+                                    <option value="estandar">+Metro Estándar</option>
+                                    <option value="joven">+Metro Joven</option>
+                                    <option value="senior">+Metro Senior</option>
+                                    <option value="familia-numerosa">+Metro Familia Numerosa</option>
+                                    <option value="discapacidad">+Metro Discapacidad</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="fechaNacimiento" class="label required">Fecha de nacimiento</label>
+                                <input type="date" id="fechaNacimiento" name="fechaNacimiento" class="input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="genero" class="label">Género</label>
+                                <select id="genero" name="genero" class="select">
+                                    <option value="">Seleccione...</option>
+                                    <option value="H">Hombre</option>
+                                    <option value="M">Mujer</option>
+                                    <option value="O">Otro / Prefiero no indicar</option>
+                                </select>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="direccionCompleta" class="label required">Dirección completa</label>
+                                <input type="text" id="direccionCompleta" name="direccionCompleta" class="input" required placeholder="Calle, número, piso, puerta...">
+                            </div>
+                            <div class="form-group">
+                                <label for="codigoPostal" class="label required">Código postal</label>
+                                <input type="text" id="codigoPostal" name="codigoPostal" class="input" required placeholder="28001" maxlength="5">
+                            </div>
+                            <div class="form-group">
+                                <label for="municipio" class="label required">Municipio</label>
+                                <input type="text" id="municipio" name="municipio" class="input" required placeholder="Málaga">
+                            </div>
+                            <div class="form-group">
+                                <label for="provincia" class="label required">Provincia</label>
+                                <select id="provincia" name="provincia" class="select" required>
+                                    <option value="">Seleccione...</option>
+                                    <option value="NA">N/A</option>
+                                    <option value="alava">Álava</option>
+                                    <option value="albacete">Albacete</option>
+                                    <option value="alicante">Alicante</option>
+                                    <option value="almeria">Almería</option>
+                                    <option value="asturias">Asturias</option>
+                                    <option value="avila">Ávila</option>
+                                    <option value="badajoz">Badajoz</option>
+                                    <option value="barcelona">Barcelona</option>
+                                    <option value="burgos">Burgos</option>
+                                    <option value="caceres">Cáceres</option>
+                                    <option value="cadiz">Cádiz</option>
+                                    <option value="cantabria">Cantabria</option>
+                                    <option value="castellon">Castellón</option>
+                                    <option value="ciudad-real">Ciudad Real</option>
+                                    <option value="cordoba">Córdoba</option>
+                                    <option value="a-coruna">A Coruña</option>
+                                    <option value="cuenca">Cuenca</option>
+                                    <option value="girona">Girona</option>
+                                    <option value="granada">Granada</option>
+                                    <option value="guadalajara">Guadalajara</option>
+                                    <option value="gipuzkoa">Gipuzkoa</option>
+                                    <option value="huelva">Huelva</option>
+                                    <option value="huesca">Huesca</option>
+                                    <option value="illes-balears">Illes Balears</option>
+                                    <option value="jaen">Jaén</option>
+                                    <option value="leon">León</option>
+                                    <option value="lleida">Lleida</option>
+                                    <option value="lugo">Lugo</option>
+                                    <option value="madrid">Madrid</option>
+                                    <option value="malaga">Málaga</option>
+                                    <option value="murcia">Murcia</option>
+                                    <option value="navarra">Navarra</option>
+                                    <option value="ourense">Ourense</option>
+                                    <option value="palencia">Palencia</option>
+                                    <option value="las-palmas">Las Palmas</option>
+                                    <option value="pontevedra">Pontevedra</option>
+                                    <option value="la-rioja">La Rioja</option>
+                                    <option value="salamanca">Salamanca</option>
+                                    <option value="santa-cruz-tenerife">Santa Cruz de Tenerife</option>
+                                    <option value="segovia">Segovia</option>
+                                    <option value="sevilla">Sevilla</option>
+                                    <option value="soria">Soria</option>
+                                    <option value="tarragona">Tarragona</option>
+                                    <option value="teruel">Teruel</option>
+                                    <option value="toledo">Toledo</option>
+                                    <option value="valencia">Valencia</option>
+                                    <option value="valladolid">Valladolid</option>
+                                    <option value="bizkaia">Bizkaia</option>
+                                    <option value="zamora">Zamora</option>
+                                    <option value="zaragoza">Zaragoza</option>
+                                    <option value="ceuta">Ceuta</option>
+                                    <option value="melilla">Melilla</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="puntoRecogida" class="label required">Punto de recogida preferido</label>
+                                <select id="puntoRecogida" name="puntoRecogida" class="select" required>
+                                    <option value="">Seleccione...</option>
+                                    <option value="sol">Oficina de Atención al Cliente (El Perchel)</option>
+                                </select>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="fotoCarnet" class="label">Fotografía tipo carnet</label>
+                                <div class="file-upload">
+                                    <input type="file" id="fotoCarnet" name="fotoCarnet" class="file-input" accept=".jpg,.jpeg,.png">
+                                    <label for="fotoCarnet" class="file-label">
+                                        <span class="file-icon">📷</span>
+                                        <span class="file-text">Adjuntar fotografía</span>
+                                        <span class="file-hint">Fondo blanco, cara visible, sin gafas de sol</span>
+                                    </label>
+                                    <div id="fotoPreview" class="foto-preview"></div>
+                                </div>
+                            </div>
+                            <div class="form-group full-width" id="documentacionAdicional">
+                                <label for="docAdicional" class="label">Documentación adicional</label>
+                                <div class="file-upload">
+                                    <input type="file" id="docAdicional" name="docAdicional" class="file-input" multiple accept=".pdf,.jpg,.jpeg,.png">
+                                    <label for="docAdicional" class="file-label">
+                                        <span class="file-icon">📄</span>
+                                        <span class="file-text">Adjuntar documentación</span>
+                                        <span class="file-hint">Libro de familia, certificado discapacidad, etc.</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Consentimiento y envío -->
+                    <section class="form-section" id="seccionConsentimiento">
+                        <div class="consent-box">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="consentimiento" name="consentimiento" class="checkbox" required>
+                                <label for="consentimiento" class="checkbox-label">
+                                    He leído y acepto la <a href="#" class="link" target="_blank">política de privacidad</a> y el tratamiento de mis datos personales para la gestión de esta solicitud. <span class="required">*</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="comunicaciones" name="comunicaciones" class="checkbox">
+                                <label for="comunicaciones" class="checkbox-label">
+                                    Deseo recibir comunicaciones sobre mejoras y novedades del servicio de Metro.
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" id="btnLimpiar">
+                                <span class="btn-icon">🗑️</span>
+                                Limpiar formulario
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="btnEnviar">
+                                <span class="btn-icon">📤</span>
+                                Enviar solicitud
+                            </button>
+                        </div>
+                    </section>
+                </div>
+            </form>
+        </main>
+
+        <!-- Modal de confirmación -->
+        <div class="modal-overlay hidden" id="modalOverlay">
+            <div class="modal">
+                <div class="modal-icon">✅</div>
+                <h3 class="modal-title">Solicitud enviada correctamente</h3>
+                <p class="modal-text">Hemos recibido su solicitud. Recibirá una confirmación en su correo electrónico.</p>
+                <p class="modal-reference">Referencia: <strong id="modalReference">ATT-2025-XXXXX</strong></p>
+                <button class="btn btn-primary" id="modalClose">Aceptar</button>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>© 2026 Metro de Málaga · <a href="#">Aviso legal</a> · <a href="#">Privacidad</a> · <a href="#">Accesibilidad</a></p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

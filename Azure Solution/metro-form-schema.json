@@ -1,0 +1,488 @@
+{
+  "formSchema": {
+    "version": "1.0.0",
+    "meta": {
+      "description": "Esquema de formularios dinámicos para el portal de Atención al Cliente de Metro Málaga",
+      "apiEndpoint": "/api/solicitudes/crear",
+      "consultaEndpoint": "/api/solicitudes/consultar",
+      "jwtAudience": "api://metro-malaga-att-cliente"
+    },
+
+    "listasDestino": [
+      "INCIDENCIAS",
+      "SUGERENCIAS",
+      "RECLAMACIONES",
+      "INFORMACION",
+      "OBJETOS_PERDIDOS",
+      "ACCESIBILIDAD"
+    ],
+
+    "camposComunes": [
+      {
+        "id": "listaDestino",
+        "tipo": "select",
+        "etiqueta": "Tipo de solicitud",
+        "placeholder": "Seleccione el tipo de consulta",
+        "requerido": true,
+        "orden": 1,
+        "opciones": [
+          { "valor": "INCIDENCIAS",      "etiqueta": "🚨 Incidencia técnica o de servicio" },
+          { "valor": "SUGERENCIAS",      "etiqueta": "💡 Sugerencia de mejora" },
+          { "valor": "RECLAMACIONES",    "etiqueta": "📋 Reclamación formal" },
+          { "valor": "INFORMACION",      "etiqueta": "ℹ️  Solicitud de información" },
+          { "valor": "OBJETOS_PERDIDOS", "etiqueta": "🎒 Objeto perdido" },
+          { "valor": "ACCESIBILIDAD",    "etiqueta": "♿ Problema de accesibilidad" }
+        ],
+        "validacion": {
+          "requerido": true,
+          "mensajeError": "Debe seleccionar el tipo de solicitud"
+        }
+      },
+      {
+        "id": "nombreCompleto",
+        "tipo": "text",
+        "etiqueta": "Nombre completo",
+        "placeholder": "Introduzca su nombre y apellidos",
+        "requerido": true,
+        "orden": 2,
+        "validacion": {
+          "minLength": 3,
+          "maxLength": 120,
+          "patron": "^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\\s'-]+$",
+          "mensajeError": "Nombre inválido. Solo letras y espacios."
+        }
+      },
+      {
+        "id": "email",
+        "tipo": "email",
+        "etiqueta": "Correo electrónico",
+        "placeholder": "ejemplo@correo.com",
+        "requerido": true,
+        "orden": 3,
+        "nota": "Se enviará el token de consulta a este correo",
+        "validacion": {
+          "patron": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+          "mensajeError": "Dirección de correo electrónico no válida"
+        }
+      },
+      {
+        "id": "telefonoContacto",
+        "tipo": "tel",
+        "etiqueta": "Teléfono de contacto",
+        "placeholder": "+34 6XX XXX XXX",
+        "requerido": false,
+        "orden": 4,
+        "validacion": {
+          "patron": "^(\\+34|0034|34)?[6789][0-9]{8}$",
+          "mensajeError": "Número de teléfono español no válido"
+        }
+      },
+      {
+        "id": "fechaIncidente",
+        "tipo": "date",
+        "etiqueta": "Fecha del suceso",
+        "requerido": false,
+        "orden": 5,
+        "validacion": {
+          "maxFecha": "hoy",
+          "mensajeError": "La fecha no puede ser futura"
+        }
+      }
+    ],
+
+    "formulariosPorTipo": {
+
+      "INCIDENCIAS": {
+        "titulo": "Reportar Incidencia",
+        "descripcion": "Informe sobre problemas técnicos, fallos de servicio o situaciones anómalas",
+        "colorTema": "#DC2626",
+        "icono": "alert-triangle",
+        "camposEspecificos": [
+          {
+            "id": "lineaAfectada",
+            "tipo": "select",
+            "etiqueta": "Línea afectada",
+            "requerido": true,
+            "orden": 6,
+            "opciones": [
+              { "valor": "L1", "etiqueta": "Línea 1 (Alhaurín de la Torre – La Isla)" },
+              { "valor": "L2", "etiqueta": "Línea 2 (futura extensión)" },
+              { "valor": "GENERAL", "etiqueta": "General / No aplica" }
+            ]
+          },
+          {
+            "id": "estacionAfectada",
+            "tipo": "select",
+            "etiqueta": "Estación afectada",
+            "requerido": true,
+            "orden": 7,
+            "dependeDe": "lineaAfectada",
+            "opcionesPorDependencia": {
+              "L1": [
+                { "valor": "ALHAURIN", "etiqueta": "Alhaurín de la Torre" },
+                { "valor": "PUERTA_BLANCA", "etiqueta": "Puerta Blanca" },
+                { "valor": "PALACIO_DEPORTES", "etiqueta": "Palacio de los Deportes" },
+                { "valor": "NUEVA_MÁLAGA", "etiqueta": "Nueva Málaga" },
+                { "valor": "MÁLAGA_TEATRO", "etiqueta": "Málaga – Teatro Romano" },
+                { "valor": "EL_PERCHEL", "etiqueta": "El Perchel" },
+                { "valor": "GUADALMEDINA", "etiqueta": "Guadalmedina" },
+                { "valor": "VICTORIA", "etiqueta": "Victoria" },
+                { "valor": "CAMPAMENTO", "etiqueta": "Campamento" },
+                { "valor": "LA_ISLA", "etiqueta": "La Isla" }
+              ],
+              "GENERAL": [
+                { "valor": "NA", "etiqueta": "No aplica" }
+              ]
+            }
+          },
+          {
+            "id": "tipoIncidencia",
+            "tipo": "select",
+            "etiqueta": "Tipo de incidencia",
+            "requerido": true,
+            "orden": 8,
+            "opciones": [
+              { "valor": "AVERIA_TREN",         "etiqueta": "Avería en el tren" },
+              { "valor": "AVERIA_ESCALERA",      "etiqueta": "Avería escalera/ascensor" },
+              { "valor": "FALLO_VALIDADORA",     "etiqueta": "Fallo en validadora/torniquete" },
+              { "valor": "INCIDENCIA_SEGURIDAD", "etiqueta": "Incidencia de seguridad" },
+              { "valor": "RETRASO",              "etiqueta": "Retraso significativo" },
+              { "valor": "LIMPIEZA",             "etiqueta": "Problema de limpieza" },
+              { "valor": "OTRO",                 "etiqueta": "Otro (especificar en descripción)" }
+            ]
+          },
+          {
+            "id": "horaAproximada",
+            "tipo": "time",
+            "etiqueta": "Hora aproximada del incidente",
+            "requerido": false,
+            "orden": 9
+          },
+          {
+            "id": "descripcion",
+            "tipo": "textarea",
+            "etiqueta": "Descripción detallada",
+            "placeholder": "Describa la incidencia con el mayor detalle posible...",
+            "requerido": true,
+            "orden": 10,
+            "validacion": {
+              "minLength": 20,
+              "maxLength": 2000,
+              "mensajeError": "La descripción debe tener entre 20 y 2000 caracteres"
+            }
+          },
+          {
+            "id": "adjuntos",
+            "tipo": "file",
+            "etiqueta": "Adjuntar imágenes (opcional)",
+            "requerido": false,
+            "orden": 11,
+            "config": {
+              "tiposPermitidos": ["image/jpeg", "image/png", "image/webp"],
+              "maxTamañoMB": 5,
+              "maxArchivos": 3
+            }
+          }
+        ]
+      },
+
+      "SUGERENCIAS": {
+        "titulo": "Enviar Sugerencia",
+        "descripcion": "Comparta ideas para mejorar el servicio de Metro Málaga",
+        "colorTema": "#2563EB",
+        "icono": "lightbulb",
+        "camposEspecificos": [
+          {
+            "id": "ambitoSugerencia",
+            "tipo": "select",
+            "etiqueta": "Ámbito de la sugerencia",
+            "requerido": true,
+            "orden": 6,
+            "opciones": [
+              { "valor": "SERVICIO",       "etiqueta": "Frecuencia/horarios de servicio" },
+              { "valor": "INFRAESTRUCTURA","etiqueta": "Infraestructura y estaciones" },
+              { "valor": "APP_DIGITAL",    "etiqueta": "App / Canal digital" },
+              { "valor": "TARIFAS",        "etiqueta": "Tarifas y abonos" },
+              { "valor": "SOSTENIBILIDAD", "etiqueta": "Sostenibilidad y medio ambiente" },
+              { "valor": "OTRO",           "etiqueta": "Otro" }
+            ]
+          },
+          {
+            "id": "titulo",
+            "tipo": "text",
+            "etiqueta": "Título de la sugerencia",
+            "placeholder": "Resume tu idea en una frase",
+            "requerido": true,
+            "orden": 7,
+            "validacion": {
+              "minLength": 5,
+              "maxLength": 100
+            }
+          },
+          {
+            "id": "descripcion",
+            "tipo": "textarea",
+            "etiqueta": "Descripción de la sugerencia",
+            "placeholder": "Explique su idea con detalle...",
+            "requerido": true,
+            "orden": 8,
+            "validacion": {
+              "minLength": 30,
+              "maxLength": 3000
+            }
+          },
+          {
+            "id": "valoracion",
+            "tipo": "rating",
+            "etiqueta": "Valoración actual del servicio",
+            "requerido": false,
+            "orden": 9,
+            "config": {
+              "min": 1,
+              "max": 5,
+              "etiquetas": ["Muy malo", "Malo", "Regular", "Bueno", "Excelente"]
+            }
+          }
+        ]
+      },
+
+      "RECLAMACIONES": {
+        "titulo": "Presentar Reclamación",
+        "descripcion": "Inicie un expediente formal de reclamación ante Metro Málaga",
+        "colorTema": "#7C3AED",
+        "icono": "file-text",
+        "camposEspecificos": [
+          {
+            "id": "tipoReclamacion",
+            "tipo": "select",
+            "etiqueta": "Tipo de reclamación",
+            "requerido": true,
+            "orden": 6,
+            "opciones": [
+              { "valor": "COBRO_INDEBIDO",   "etiqueta": "Cobro incorrecto / duplicado" },
+              { "valor": "TRATO_PERSONAL",   "etiqueta": "Trato inadecuado del personal" },
+              { "valor": "INCUMPLIMIENTO",   "etiqueta": "Incumplimiento normativa servicio" },
+              { "valor": "DANOS_MATERIALES", "etiqueta": "Daños materiales" },
+              { "valor": "ACCESIBILIDAD",    "etiqueta": "Vulneración derechos accesibilidad" },
+              { "valor": "OTRO",             "etiqueta": "Otra reclamación" }
+            ]
+          },
+          {
+            "id": "importeReclamado",
+            "tipo": "number",
+            "etiqueta": "Importe reclamado (€) si aplica",
+            "requerido": false,
+            "orden": 7,
+            "validacion": {
+              "min": 0,
+              "max": 9999.99,
+              "paso": 0.01
+            }
+          },
+          {
+            "id": "descripcion",
+            "tipo": "textarea",
+            "etiqueta": "Hechos que motivan la reclamación",
+            "placeholder": "Describa cronológicamente los hechos...",
+            "requerido": true,
+            "orden": 8,
+            "validacion": {
+              "minLength": 50,
+              "maxLength": 4000
+            }
+          },
+          {
+            "id": "documentacionAdjunta",
+            "tipo": "file",
+            "etiqueta": "Documentación acreditativa",
+            "requerido": false,
+            "orden": 9,
+            "config": {
+              "tiposPermitidos": ["image/jpeg", "image/png", "application/pdf"],
+              "maxTamañoMB": 10,
+              "maxArchivos": 5
+            }
+          },
+          {
+            "id": "aceptaNotificacionEmail",
+            "tipo": "checkbox",
+            "etiqueta": "Acepto recibir resolución por email en el plazo legal establecido (30 días hábiles)",
+            "requerido": true,
+            "orden": 10
+          }
+        ]
+      },
+
+      "INFORMACION": {
+        "titulo": "Solicitar Información",
+        "descripcion": "Consulte tarifas, horarios, normativa o cualquier información del servicio",
+        "colorTema": "#0891B2",
+        "icono": "info",
+        "camposEspecificos": [
+          {
+            "id": "temaConsulta",
+            "tipo": "select",
+            "etiqueta": "Tema de la consulta",
+            "requerido": true,
+            "orden": 6,
+            "opciones": [
+              { "valor": "TARIFAS_ABONOS",   "etiqueta": "Tarifas y tipos de abono" },
+              { "valor": "HORARIOS",          "etiqueta": "Horarios y frecuencias" },
+              { "valor": "NORMATIVA",         "etiqueta": "Normativa de uso" },
+              { "valor": "ACCESIBILIDAD",     "etiqueta": "Servicios de accesibilidad" },
+              { "valor": "OBRAS",             "etiqueta": "Obras y alteraciones de servicio" },
+              { "valor": "OTRO",              "etiqueta": "Otro" }
+            ]
+          },
+          {
+            "id": "descripcion",
+            "tipo": "textarea",
+            "etiqueta": "Detalle su consulta",
+            "placeholder": "¿En qué podemos ayudarle?",
+            "requerido": true,
+            "orden": 7,
+            "validacion": {
+              "minLength": 10,
+              "maxLength": 1000
+            }
+          }
+        ]
+      },
+
+      "OBJETOS_PERDIDOS": {
+        "titulo": "Objeto Perdido",
+        "descripcion": "Declare la pérdida de un objeto en las instalaciones de Metro Málaga",
+        "colorTema": "#D97706",
+        "icono": "package",
+        "camposEspecificos": [
+          {
+            "id": "descripcionObjeto",
+            "tipo": "text",
+            "etiqueta": "Descripción del objeto",
+            "placeholder": "Ej: Mochila azul de deporte, marca Nike",
+            "requerido": true,
+            "orden": 6,
+            "validacion": {
+              "minLength": 5,
+              "maxLength": 200
+            }
+          },
+          {
+            "id": "lugarPerdida",
+            "tipo": "select",
+            "etiqueta": "Lugar probable de pérdida",
+            "requerido": true,
+            "orden": 7,
+            "opciones": [
+              { "valor": "TREN",      "etiqueta": "Dentro del tren" },
+              { "valor": "ANDEN",     "etiqueta": "Andén de la estación" },
+              { "valor": "ACCESOS",   "etiqueta": "Accesos / torniquetes" },
+              { "valor": "DESCONOCE", "etiqueta": "Se desconoce" }
+            ]
+          },
+          {
+            "id": "valorEconomico",
+            "tipo": "select",
+            "etiqueta": "Valor económico aproximado",
+            "requerido": false,
+            "orden": 8,
+            "opciones": [
+              { "valor": "BAJO",   "etiqueta": "Menos de 50€" },
+              { "valor": "MEDIO",  "etiqueta": "Entre 50€ y 500€" },
+              { "valor": "ALTO",   "etiqueta": "Más de 500€" },
+              { "valor": "SENTIMENTAL", "etiqueta": "Valor sentimental" }
+            ]
+          },
+          {
+            "id": "descripcionDetallada",
+            "tipo": "textarea",
+            "etiqueta": "Señas particulares del objeto",
+            "placeholder": "Cualquier detalle que ayude a identificarlo...",
+            "requerido": false,
+            "orden": 9,
+            "validacion": {
+              "maxLength": 500
+            }
+          }
+        ]
+      },
+
+      "ACCESIBILIDAD": {
+        "titulo": "Problema de Accesibilidad",
+        "descripcion": "Reporte fallos en elementos de accesibilidad o solicite asistencia especial",
+        "colorTema": "#059669",
+        "icono": "accessibility",
+        "camposEspecificos": [
+          {
+            "id": "tipoProblema",
+            "tipo": "select",
+            "etiqueta": "Tipo de problema de accesibilidad",
+            "requerido": true,
+            "orden": 6,
+            "opciones": [
+              { "valor": "ASCENSOR_AVERIA",   "etiqueta": "Ascensor averiado" },
+              { "valor": "RAMPA",             "etiqueta": "Rampa o acceso bloqueado" },
+              { "valor": "SEÑALIZACION",      "etiqueta": "Señalización inadecuada" },
+              { "valor": "ASISTENCIA_PMR",    "etiqueta": "Necesito asistencia PMR" },
+              { "valor": "OTRO",              "etiqueta": "Otro" }
+            ]
+          },
+          {
+            "id": "estacionAfectada",
+            "tipo": "select",
+            "etiqueta": "Estación afectada",
+            "requerido": true,
+            "orden": 7,
+            "opciones": [
+              { "valor": "ALHAURIN",         "etiqueta": "Alhaurín de la Torre" },
+              { "valor": "PUERTA_BLANCA",    "etiqueta": "Puerta Blanca" },
+              { "valor": "PALACIO_DEPORTES", "etiqueta": "Palacio de los Deportes" },
+              { "valor": "NUEVA_MÁLAGA",     "etiqueta": "Nueva Málaga" },
+              { "valor": "MÁLAGA_TEATRO",    "etiqueta": "Málaga – Teatro Romano" },
+              { "valor": "EL_PERCHEL",       "etiqueta": "El Perchel" },
+              { "valor": "GUADALMEDINA",     "etiqueta": "Guadalmedina" },
+              { "valor": "VICTORIA",         "etiqueta": "Victoria" },
+              { "valor": "CAMPAMENTO",       "etiqueta": "Campamento" },
+              { "valor": "LA_ISLA",          "etiqueta": "La Isla" }
+            ]
+          },
+          {
+            "id": "descripcion",
+            "tipo": "textarea",
+            "etiqueta": "Descripción del problema",
+            "requerido": true,
+            "orden": 8,
+            "validacion": {
+              "minLength": 10,
+              "maxLength": 1000
+            }
+          }
+        ]
+      }
+    },
+
+    "captcha": {
+      "proveedor": "hcaptcha",
+      "siteKey": "HCAPTCHA_SITE_KEY_PLACEHOLDER",
+      "requerido": true,
+      "umbralScore": 0.5
+    },
+
+    "honeypot": {
+      "campoId": "_hp_metro",
+      "cssClass": "metro-hp-field",
+      "nota": "Campo oculto via CSS. Si llega relleno en el POST, se rechaza como bot."
+    },
+
+    "submit": {
+      "endpoint": "POST /api/solicitudes/crear",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {JWT_TOKEN}"
+      },
+      "textoBoton": "Enviar solicitud",
+      "mensajeExito": "Solicitud registrada correctamente. Recibirá su token de consulta en el correo indicado.",
+      "mensajeError": "Ha ocurrido un error. Por favor, inténtelo de nuevo o contacte con nosotros."
+    }
+  }
+}
