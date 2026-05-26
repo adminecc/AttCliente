@@ -40,7 +40,7 @@ const { app }  = require("@azure/functions");
 const axios    = require("axios");
 const jwt      = require("jsonwebtoken");
 const crypto   = require("crypto");
-const { generarToken } = require("../fn2-generateToken/index");
+const { generarToken } = require("./fn2-generateToken");
 
 // ─── Configuración desde variables de entorno ─────────────────────────────────
 

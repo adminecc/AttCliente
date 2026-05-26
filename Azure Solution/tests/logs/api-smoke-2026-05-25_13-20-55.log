@@ -1,0 +1,26 @@
+API smoke tests
+Inicio: 2026-05-25T13:20:55
+Fin: 2026-05-25T13:20:55
+Comando: node api_harness.js
+Codigo salida: 1
+
+No se pudo interpretar la salida JSON del arnes.
+
+STDOUT:
+(vacio)
+
+STDERR:
+Error: Cannot find module '../fn2-generateToken'
+Require stack:
+- C:\Users\d.jauregui\Desktop\MetroProyectos\2026_DigitalizacionOAC\AttCliente\Azure Solution\fn3-createSharePointItem.js
+- C:\Users\d.jauregui\Desktop\MetroProyectos\2026_DigitalizacionOAC\AttCliente\Azure Solution\tests\api_harness.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1456:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at node:internal/modules/cjs/loader:1242:25
+    at Module.patchedLoad [as _load] (C:\Users\d.jauregui\Desktop\MetroProyectos\2026_DigitalizacionOAC\AttCliente\Azure Solution\tests\api_harness.js:37:10)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.require (node:internal/modules/cjs/loader:1556:12)
+    at require (node:internal/modules/helpers:152:16)
+    at Object.<anonymous> (C:\Users\d.jauregui\Desktop\MetroProyectos\2026_DigitalizacionOAC\AttCliente\Azure Solution\fn3-createSharePointItem.js:43:26)
+    at Module._compile (node:internal/modules/cjs/loader:1812:14)
