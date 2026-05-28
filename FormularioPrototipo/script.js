@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Campos específicos por tipo
         const camposEspecificos = {
             reclamaciones: ['clasificacion', 'canalRecepcion', 'fechaIncidencia', 'tipologia', 'lugarIncidencia', 'descripcionCorta', 'descripcionDetallada'],
-            consultas: ['descripcionConsulta'],
+            consultas: ['descripcionCortaConsulta', 'descripcionDetalladaConsulta'],
             sugerencias: ['areaSugerencia', 'tituloSugerencia', 'descripcionSugerencia'],
             agradecimientos: ['motivoAgradecimiento', 'descripcionAgradecimiento'],
             objetos: ['tipoObjeto', 'categoriaObjeto', 'fechaPerdida', 'descripcionObjeto'],
@@ -317,9 +317,15 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Resetear contador de caracteres
         if (charCount) charCount.textContent = '0';
+        const charCountConsulta = document.getElementById('charCountConsulta');
+        if (charCountConsulta) charCountConsulta.textContent = '0';
 
         // Ocultar campos opcionales de ubicación
         actualizarCamposLugarIncidencia('');
+        const grupoTrenConsulta = document.getElementById('grupoTrenConsulta');
+        if (grupoTrenConsulta) grupoTrenConsulta.classList.add('hidden');
+        const grupoOtroLugarConsulta = document.getElementById('grupoOtroLugarConsulta');
+        if (grupoOtroLugarConsulta) grupoOtroLugarConsulta.classList.add('hidden');
         
         // Scroll al inicio
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -498,4 +504,56 @@ document.addEventListener('DOMContentLoaded', () => {
             input.setAttribute('max', today);
         }
     });
+
+    // ============================================
+    // GESTIÓN DINÁMICA DE SECCIÓN CONSULTAS
+    // ============================================
+    function actualizarSubtipologiasConsulta(tipologiaValue) {
+        const subtipologiaConsulta = document.getElementById('subtipologiaConsulta');
+        if (!subtipologiaConsulta) return;
+        subtipologiaConsulta.innerHTML = '<option value="">Seleccione...</option>';
+        
+        if (tipologiaValue && subtipologias[tipologiaValue]) {
+            subtipologias[tipologiaValue].forEach(opcion => {
+                const option = document.createElement('option');
+                option.value = opcion.value;
+                option.textContent = opcion.text;
+                subtipologiaConsulta.appendChild(option);
+            });
+        }
+    }
+
+    const tipologiaConsulta = document.getElementById('tipologiaConsulta');
+    if (tipologiaConsulta) {
+        tipologiaConsulta.addEventListener('change', (e) => {
+            actualizarSubtipologiasConsulta(e.target.value);
+        });
+    }
+
+    const lugarConsulta = document.getElementById('lugarConsulta');
+    const grupoTrenConsulta = document.getElementById('grupoTrenConsulta');
+    const trenConsulta = document.getElementById('trenConsulta');
+    const grupoOtroLugarConsulta = document.getElementById('grupoOtroLugarConsulta');
+    const otroLugarConsulta = document.getElementById('otroLugarConsulta');
+    if (lugarConsulta) {
+        lugarConsulta.addEventListener('change', (e) => {
+            const value = e.target.value;
+            if (grupoTrenConsulta && trenConsulta) {
+                grupoTrenConsulta.classList.toggle('hidden', value !== 'tren');
+                if (value !== 'tren') trenConsulta.value = '';
+            }
+            if (grupoOtroLugarConsulta && otroLugarConsulta) {
+                grupoOtroLugarConsulta.classList.toggle('hidden', value !== 'otro');
+                if (value !== 'otro') otroLugarConsulta.value = '';
+            }
+        });
+    }
+
+    const descripcionCortaConsulta = document.getElementById('descripcionCortaConsulta');
+    const charCountConsulta = document.getElementById('charCountConsulta');
+    if (descripcionCortaConsulta && charCountConsulta) {
+        descripcionCortaConsulta.addEventListener('input', (e) => {
+            charCountConsulta.textContent = e.target.value.length;
+        });
+    }
 });
