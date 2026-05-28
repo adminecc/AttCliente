@@ -31,6 +31,7 @@
                         <select id="tipoFormulario" name="tipoFormulario" class="select select-primary" required>
                             <option value="">Seleccione el tipo de gestión...</option>
                             <option value="reclamaciones">Reclamaciones y quejas</option>
+                            <option value="consultas">Consulta de Información</option>
                             <option value="sugerencias">Sugerencias</option>
                             <option value="agradecimientos">Agradecimientos y felicitaciones</option>
                             <option value="objetos">Objetos perdidos</option>
@@ -372,6 +373,32 @@
                                         <span class="file-hint">PDF, imágenes o documentos (máx. 10MB)</span>
                                     </label>
                                     <div id="fileList" class="file-list"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Sección específica: Consulta de Información -->
+                    <section class="form-section hidden" id="seccionConsultas">
+                        <h2 class="section-title">
+                            <span class="section-icon">ℹ️</span>
+                            Consulta de Información
+                        </h2>
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label for="descripcionConsulta" class="label required">Consulta de información</label>
+                                <textarea id="descripcionConsulta" name="descripcionConsulta" class="textarea" required placeholder="Escriba aquí su consulta con el mayor detalle posible..." rows="5"></textarea>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="adjuntosConsultas" class="label">Documentación adjunta</label>
+                                <div class="file-upload">
+                                    <input type="file" id="adjuntosConsultas" name="adjuntosConsultas" class="file-input" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                                    <label for="adjuntosConsultas" class="file-label">
+                                        <span class="file-icon">📎</span>
+                                        <span class="file-text">Arrastra archivos aquí o haz clic para seleccionar</span>
+                                        <span class="file-hint">PDF, imágenes o documentos (máx. 10MB)</span>
+                                    </label>
+                                    <div id="fileListConsultas" class="file-list"></div>
                                 </div>
                             </div>
                         </div>

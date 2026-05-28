@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const secciones = {
         datosPersonales: document.getElementById('datosPersonales'),
         reclamaciones: document.getElementById('seccionReclamaciones'),
+        consultas: document.getElementById('seccionConsultas'),
         sugerencias: document.getElementById('seccionSugerencias'),
         agradecimientos: document.getElementById('seccionAgradecimientos'),
         objetos: document.getElementById('seccionObjetos'),
@@ -111,6 +112,10 @@ document.addEventListener('DOMContentLoaded', () => {
             titulo: 'Reclamaciones y Quejas',
             secciones: ['datosPersonales', 'reclamaciones', 'consentimiento']
         },
+        consultas: {
+            titulo: 'Consulta de Información',
+            secciones: ['datosPersonales', 'consultas', 'consentimiento']
+        },
         sugerencias: {
             titulo: 'Sugerencias',
             secciones: ['datosPersonales', 'sugerencias', 'consentimiento']
@@ -184,6 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Campos específicos por tipo
         const camposEspecificos = {
             reclamaciones: ['clasificacion', 'canalRecepcion', 'fechaIncidencia', 'tipologia', 'lugarIncidencia', 'descripcionCorta', 'descripcionDetallada'],
+            consultas: ['descripcionConsulta'],
             sugerencias: ['areaSugerencia', 'tituloSugerencia', 'descripcionSugerencia'],
             agradecimientos: ['motivoAgradecimiento', 'descripcionAgradecimiento'],
             objetos: ['tipoObjeto', 'categoriaObjeto', 'fechaPerdida', 'descripcionObjeto'],
@@ -306,6 +312,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Limpiar lista de archivos
         const fileList = document.getElementById('fileList');
         if (fileList) fileList.innerHTML = '';
+        const fileListConsultas = document.getElementById('fileListConsultas');
+        if (fileListConsultas) fileListConsultas.innerHTML = '';
         
         // Resetear contador de caracteres
         if (charCount) charCount.textContent = '0';
