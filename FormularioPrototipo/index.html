@@ -31,11 +31,11 @@
                         <select id="tipoFormulario" name="tipoFormulario" class="select select-primary" required>
                             <option value="">Seleccione el tipo de gestión...</option>
                             <option value="reclamaciones">Reclamaciones y quejas</option>
-                            <option value="consultas">Consulta de Información</option>
                             <option value="sugerencias">Sugerencias</option>
                             <option value="agradecimientos">Agradecimientos y felicitaciones</option>
                             <option value="objetos">Objetos perdidos</option>
                             <option value="tarjetas">Datos personales para confección tarjetas +Metro</option>
+                            <option value="consultas">Consulta de Información</option>
                         </select>
                     </div>
                 </section>
@@ -385,9 +385,128 @@
                             Consulta de Información
                         </h2>
                         <div class="form-grid">
+                            <div class="form-group">
+                                <label for="tipologiaConsulta" class="label">Tipología</label>
+                                <select id="tipologiaConsulta" name="tipologiaConsulta" class="select">
+                                    <option value="">Seleccione...</option>
+                                    <option value="titulo">Títulos de transporte</option>
+                                    <option value="accesibilidad">Accesibilidad</option>
+                                    <option value="informacion">Información</option>
+                                    <option value="instalaciones">Instalaciones</option>
+                                    <option value="personal">Personal</option>
+                                    <option value="seguridad">Seguridad</option>
+                                    <option value="servicio">Servicio de trenes</option>
+                                    <option value="limpieza">Limpieza</option>
+                                    <option value="otros">Otros</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="subtipologiaConsulta" class="label">Subtipología</label>
+                                <select id="subtipologiaConsulta" name="subtipologiaConsulta" class="select">
+                                    <option value="">Seleccione primero una tipología...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="lugarConsulta" class="label">Estación / Lugar</label>
+                                <select id="lugarConsulta" name="lugarConsulta" class="select">
+                                    <option value="">Seleccione estación...</option>
+                                    <optgroup label="Línea 1">
+                                        <option value="guadalmedina-l1">Guadalmedina</option>
+                                        <option value="atarazanas">Atarazanas</option>
+                                        <option value="andalucia-tech">Andalucía Tech</option>
+                                        <option value="carranque">Carranque</option>
+                                        <option value="barbarela">Barbarela</option>
+                                        <option value="el-clinico">El Clínico</option>
+                                        <option value="la-union">La Unión</option>
+                                        <option value="universidad">Universidad</option>
+                                        <option value="ciudad-justicia">Ciudad de la Justicia</option>
+                                        <option value="el-consul">El Cónsul</option>
+                                        <option value="el-perchel-l1">El Perchel</option>
+                                        <option value="paraninfo">Paraninfo</option>
+                                        <option value="portada-alta">Portada Alta</option>
+                                    </optgroup>
+                                    <optgroup label="Línea 2">
+                                        <option value="guadalmedina-l2">Guadalmedina</option>
+                                        <option value="la-luz-la-paz">La Luz - La Paz</option>
+                                        <option value="la-isla">La Isla</option>
+                                        <option value="el-perchel-l2">El Perchel</option>
+                                        <option value="puerta-blanca">Puerta Blanca</option>
+                                        <option value="princesa-huelin">Princesa - Huelin</option>
+                                        <option value="el-torcal">El Torcal</option>
+                                        <option value="palacio-deportes">Palacio de los Deportes</option>
+                                    </optgroup>
+                                    <optgroup label="Otras ubicaciones">
+                                        <option value="tren">Interior del tren</option>
+                                        <option value="otro">Otra ubicación</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div class="form-group hidden" id="grupoTrenConsulta">
+                                <label for="trenConsulta" class="label">Tren</label>
+                                <select id="trenConsulta" name="trenConsulta" class="select">
+                                    <option value="">Seleccione tren...</option>
+                                    <option value="1">Tren 1</option>
+                                    <option value="2">Tren 2</option>
+                                    <option value="3">Tren 3</option>
+                                    <option value="4">Tren 4</option>
+                                    <option value="5">Tren 5</option>
+                                    <option value="6">Tren 6</option>
+                                    <option value="7">Tren 7</option>
+                                    <option value="8">Tren 8</option>
+                                    <option value="9">Tren 9</option>
+                                    <option value="10">Tren 10</option>
+                                    <option value="11">Tren 11</option>
+                                    <option value="12">Tren 12</option>
+                                    <option value="13">Tren 13</option>
+                                    <option value="14">Tren 14</option>
+                                    <option value="15">Tren 15</option>
+                                    <option value="16">Tren 16</option>
+                                    <option value="17">Tren 17</option>
+                                    <option value="18">Tren 18</option>
+                                    <option value="19">Tren 19</option>
+                                    <option value="20">Tren 20</option>
+                                    <option value="21">Tren 21</option>
+                                </select>
+                            </div>
+                            <div class="form-group hidden" id="grupoOtroLugarConsulta">
+                                <label for="otroLugarConsulta" class="label">Otro lugar</label>
+                                <input type="text" id="otroLugarConsulta" name="otroLugarConsulta" class="input" placeholder="Indique el lugar...">
+                            </div>
+                            <div class="form-group">
+                                <label for="tipoInstalacionConsulta" class="label">Tipo de instalación</label>
+                                <select id="tipoInstalacionConsulta" name="tipoInstalacionConsulta" class="select">
+                                    <option value="">Seleccione...</option>
+                                    <option value="dab">DAB (Dispensador Automático de Billetes)</option>
+                                    <option value="torno">Torno de acceso</option>
+                                    <option value="tren">Tren</option>
+                                    <option value="escalera">Escalera mecánica</option>
+                                    <option value="ascensor">Ascensor</option>
+                                    <option value="anden">Andén</option>
+                                    <option value="vestibulo">Vestíbulo</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="tipoTituloConsulta" class="label">Tipo de título afectado</label>
+                                <select id="tipoTituloConsulta" name="tipoTituloConsulta" class="select">
+                                    <option value="">Seleccione si procede</option>
+                                    <option value="billete-ocasional">Billete ocasional</option>
+                                    <option value="monedero-metro-malaga">Monedero Metro Málaga</option>
+                                    <option value="tarjeta-consorcio">Tarjeta Consorcio</option>
+                                    <option value="tarjeta-consorcio-familia-numerosa">Tarjeta Consorcio Familia Numerosa</option>
+                                    <option value="tarjeta-consorcio-joven">Tarjeta Consorcio Joven</option>
+                                    <option value="pago-tarjeta-ocasional">Pago con tarjeta (ocasional)</option>
+                                    <option value="metropay">MetroPay (Pago con tarjeta registrado)</option>
+                                    <option value="masmetro">MásMetro</option>
+                                </select>
+                            </div>
                             <div class="form-group full-width">
-                                <label for="descripcionConsulta" class="label required">Consulta de información</label>
-                                <textarea id="descripcionConsulta" name="descripcionConsulta" class="textarea" required placeholder="Escriba aquí su consulta con el mayor detalle posible..." rows="5"></textarea>
+                                <label for="descripcionCortaConsulta" class="label required">Descripción breve</label>
+                                <input type="text" id="descripcionCortaConsulta" name="descripcionCortaConsulta" class="input" required placeholder="Resumen en una línea..." maxlength="150">
+                                <span class="char-counter"><span id="charCountConsulta">0</span>/150</span>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="descripcionDetalladaConsulta" class="label required">Descripción detallada</label>
+                                <textarea id="descripcionDetalladaConsulta" name="descripcionDetalladaConsulta" class="textarea" required placeholder="Describa su consulta con el mayor detalle posible..." rows="5"></textarea>
                             </div>
                             <div class="form-group full-width">
                                 <label for="adjuntosConsultas" class="label">Documentación adjunta</label>
