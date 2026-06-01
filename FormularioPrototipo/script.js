@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         agradecimientos: document.getElementById('seccionAgradecimientos'),
         objetos: document.getElementById('seccionObjetos'),
         tarjetas: document.getElementById('seccionTarjetas'),
-        direccionContacto: document.getElementById('seccionDireccionContacto'),
+
         consentimiento: document.getElementById('seccionConsentimiento')
     };
     
@@ -111,23 +111,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const configuracionTipos = {
         reclamaciones: {
             titulo: 'Reclamaciones y Quejas',
-            secciones: ['datosPersonales', 'reclamaciones', 'direccionContacto', 'consentimiento']
+            secciones: ['datosPersonales', 'reclamaciones', 'consentimiento']
         },
         consultas: {
             titulo: 'Consulta de Información',
-            secciones: ['datosPersonales', 'consultas', 'direccionContacto', 'consentimiento']
+            secciones: ['datosPersonales', 'consultas', 'consentimiento']
         },
         sugerencias: {
             titulo: 'Sugerencias',
-            secciones: ['datosPersonales', 'sugerencias', 'direccionContacto', 'consentimiento']
+            secciones: ['datosPersonales', 'sugerencias', 'consentimiento']
         },
         agradecimientos: {
             titulo: 'Agradecimientos y Felicitaciones',
-            secciones: ['datosPersonales', 'agradecimientos', 'direccionContacto', 'consentimiento']
+            secciones: ['datosPersonales', 'agradecimientos', 'consentimiento']
         },
         objetos: {
             titulo: 'Objetos Perdidos',
-            secciones: ['datosPersonales', 'objetos', 'direccionContacto', 'consentimiento']
+            secciones: ['datosPersonales', 'objetos', 'consentimiento']
         },
         tarjetas: {
             titulo: 'Tarjetas +Metro',
@@ -165,6 +165,18 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Resetear campos required según la sección
         actualizarCamposRequired(tipo);
+        
+        // Mostrar u ocultar la opción de respuesta postal según proceda (no aplica a tarjetas)
+        const recibirPostal = document.getElementById('recibirPostal');
+        const containerRecibirPostal = recibirPostal ? recibirPostal.closest('.form-group') : null;
+        if (containerRecibirPostal) {
+            containerRecibirPostal.classList.toggle('hidden', tipo === 'tarjetas');
+            if (tipo === 'tarjetas') {
+                recibirPostal.checked = false;
+                const direccionContactoContainer = document.getElementById('direccionContactoContainer');
+                if (direccionContactoContainer) direccionContactoContainer.classList.add('hidden');
+            }
+        }
         
         // Scroll suave al inicio del formulario
         formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -329,6 +341,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Ocultar campos opcionales de ubicación
         actualizarCamposLugarIncidencia('');
+        const recibirPostal = document.getElementById('recibirPostal');
+        if (recibirPostal) recibirPostal.checked = false;
+        const direccionContactoContainer = document.getElementById('direccionContactoContainer');
+        if (direccionContactoContainer) direccionContactoContainer.classList.add('hidden');
         const grupoTrenConsulta = document.getElementById('grupoTrenConsulta');
         if (grupoTrenConsulta) grupoTrenConsulta.classList.add('hidden');
         const grupoOtroLugarConsulta = document.getElementById('grupoOtroLugarConsulta');
@@ -588,6 +604,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (descripcionCortaConsulta && charCountConsulta) {
         descripcionCortaConsulta.addEventListener('input', (e) => {
             charCountConsulta.textContent = e.target.value.length;
+        });
+    }
+
+    // Listener para desplegar Dirección de Contacto al marcar "Deseo recibir respuesta por correo postal"
+    const recibirPostal = document.getElementById('recibirPostal');
+    const direccionContactoContainer = document.getElementById('direccionContactoContainer');
+    if (recibirPostal && direccionContactoContainer) {
+        recibirPostal.addEventListener('change', (e) => {
+            direccionContactoContainer.classList.toggle('hidden', !e.target.checked);
         });
     }
 });
