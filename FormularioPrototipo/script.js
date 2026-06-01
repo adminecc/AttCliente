@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         agradecimientos: document.getElementById('seccionAgradecimientos'),
         objetos: document.getElementById('seccionObjetos'),
         tarjetas: document.getElementById('seccionTarjetas'),
+        direccionContacto: document.getElementById('seccionDireccionContacto'),
         consentimiento: document.getElementById('seccionConsentimiento')
     };
     
@@ -110,23 +111,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const configuracionTipos = {
         reclamaciones: {
             titulo: 'Reclamaciones y Quejas',
-            secciones: ['datosPersonales', 'reclamaciones', 'consentimiento']
+            secciones: ['datosPersonales', 'reclamaciones', 'direccionContacto', 'consentimiento']
         },
         consultas: {
             titulo: 'Consulta de Información',
-            secciones: ['datosPersonales', 'consultas', 'consentimiento']
+            secciones: ['datosPersonales', 'consultas', 'direccionContacto', 'consentimiento']
         },
         sugerencias: {
             titulo: 'Sugerencias',
-            secciones: ['datosPersonales', 'sugerencias', 'consentimiento']
+            secciones: ['datosPersonales', 'sugerencias', 'direccionContacto', 'consentimiento']
         },
         agradecimientos: {
             titulo: 'Agradecimientos y Felicitaciones',
-            secciones: ['datosPersonales', 'agradecimientos', 'consentimiento']
+            secciones: ['datosPersonales', 'agradecimientos', 'direccionContacto', 'consentimiento']
         },
         objetos: {
             titulo: 'Objetos Perdidos',
-            secciones: ['datosPersonales', 'objetos', 'consentimiento']
+            secciones: ['datosPersonales', 'objetos', 'direccionContacto', 'consentimiento']
         },
         tarjetas: {
             titulo: 'Tarjetas +Metro',
@@ -180,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         // Los campos de datos personales siempre son required
-        const camposPersonalesRequired = ['tipoDocumento', 'numeroDocumento', 'nombre', 'apellidos', 'email'];
+        const camposPersonalesRequired = ['tipoDocumento', 'numeroDocumento', 'nombre', 'apellidos', 'email', 'confirmEmail', 'telefono'];
         camposPersonalesRequired.forEach(id => {
             const campo = document.getElementById(id);
             if (campo) campo.setAttribute('required', '');
@@ -277,10 +278,16 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Validar email
         const email = document.getElementById('email');
+        const confirmEmail = document.getElementById('confirmEmail');
         if (email.value && !validarEmail(email.value)) {
             email.classList.add('error');
             esValido = false;
             if (!primerError) primerError = email;
+        }
+        if (confirmEmail && confirmEmail.value && (confirmEmail.value !== email.value || !validarEmail(confirmEmail.value))) {
+            confirmEmail.classList.add('error');
+            esValido = false;
+            if (!primerError) primerError = confirmEmail;
         }
         
         if (primerError) {
@@ -477,6 +484,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.target.classList.add('error');
             } else {
                 e.target.classList.remove('error');
+            }
+        });
+    }
+    
+    // Validación en tiempo real del confirmEmail y bloqueo de paste
+    const confirmEmailInput = document.getElementById('confirmEmail');
+    if (confirmEmailInput && emailInput) {
+        confirmEmailInput.addEventListener('blur', (e) => {
+            if (e.target.value && (e.target.value !== emailInput.value || !validarEmail(e.target.value))) {
+                e.target.classList.add('error');
+            } else {
+                e.target.classList.remove('error');
+            }
+        });
+
+        confirmEmailInput.addEventListener('paste', (e) => {
+            e.preventDefault();
+        });
+
+        // Al perder el foco el email principal, si ya hay valor en la confirmación, re-validar coincidencia
+        emailInput.addEventListener('blur', (e) => {
+            if (confirmEmailInput.value) {
+                if (confirmEmailInput.value !== e.target.value) {
+                    confirmEmailInput.classList.add('error');
+                } else {
+                    confirmEmailInput.classList.remove('error');
+                }
             }
         });
     }
