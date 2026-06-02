@@ -324,14 +324,14 @@
                         </h2>
                         <div class="form-grid">
                             <div class="form-group">
-                                <label for="clasificacion" class="label required">Clasificación</label>
+                                <label for="clasificacion" class="label required">Tipo</label>
                                 <select id="clasificacion" name="clasificacion" class="select" required>
                                     <option value="">Seleccione...</option>
-                                    <option value="reclamacion">Reclamación</option>
+                                    <option value="reclamacion">Reclamación (si solicita devolución económica)</option>
                                     <option value="queja">Queja</option>
                                 </select>
                             </div>
-                            <div class="form-group">
+                            <!--<div class="form-group">
                                 <label for="canalRecepcion" class="label required">Canal de recepción</label>
                                 <select id="canalRecepcion" name="canalRecepcion" class="select" required>
                                     <option value="">Seleccione...</option>
@@ -341,16 +341,16 @@
                                     <option value="web">Formulario web</option>
                                     <option value="postal">Escrito postal / fax</option>
                                 </select>
-                            </div>
+                            </div>-->
                             <div class="form-group">
-                                <label for="fechaIncidencia" class="label required">Fecha de la incidencia</label>
+                                <label for="fechaIncidencia" class="label required">Fecha de los hechos reclamados</label>
                                 <input type="date" id="fechaIncidencia" name="fechaIncidencia" class="input" required>
                             </div>
                             <div class="form-group">
                                 <label for="horaIncidencia" class="label">Hora aproximada</label>
                                 <input type="time" id="horaIncidencia" name="horaIncidencia" class="input">
                             </div>
-                            <div class="form-group">
+                            <!--<div class="form-group">
                                 <label for="tipologia" class="label required">Tipología</label>
                                 <select id="tipologia" name="tipologia" class="select" required>
                                     <option value="">Seleccione...</option>
@@ -370,7 +370,7 @@
                                 <select id="subtipologia" name="subtipologia" class="select">
                                     <option value="">Seleccione primero una tipología...</option>
                                 </select>
-                            </div>
+                            </div>-->
                             <div class="form-group">
                                 <label for="lugarIncidencia" class="label required">Estación / Lugar</label>
                                 <select id="lugarIncidencia" name="lugarIncidencia" class="select" required>
@@ -437,7 +437,7 @@
                                 <label for="otroLugarIncidencia" class="label">Otro lugar</label>
                                 <input type="text" id="otroLugarIncidencia" name="otroLugarIncidencia" class="input" placeholder="Indique el lugar...">
                             </div>
-                            <div class="form-group">
+                            <!--<div class="form-group">
                                 <label for="tipoInstalacion" class="label">Tipo de instalación</label>
                                 <select id="tipoInstalacion" name="tipoInstalacion" class="select">
                                     <option value="">Seleccione...</option>
@@ -449,28 +449,216 @@
                                     <option value="anden">Andén</option>
                                     <option value="vestibulo">Vestíbulo</option>
                                 </select>
-                            </div>
+                            </div>-->
                             <div class="form-group">
-                                <label for="tipoTitulo" class="label">Tipo de título afectado</label>
+                                <label for="tipoTitulo" class="label">Tipo de título de viaje</label>
                                 <select id="tipoTitulo" name="tipoTitulo" class="select">
                                     <option value="">Seleccione si procede</option>
-                                    <option value="billete-ocasional">Billete ocasional</option>
                                     <option value="monedero-metro-malaga">Monedero Metro Málaga</option>
-                                    <option value="tarjeta-consorcio">Tarjeta Consorcio</option>
-                                    <option value="tarjeta-consorcio-familia-numerosa">Tarjeta Consorcio Familia Numerosa</option>
-                                    <option value="tarjeta-consorcio-joven">Tarjeta Consorcio Joven</option>
-                                    <option value="pago-tarjeta-ocasional">Pago con tarjeta (ocasional)</option>
-                                    <option value="metropay">MetroPay (Pago con tarjeta registrado)</option>
-                                    <option value="masmetro">MásMetro</option>
+                                    <option value="billete-ocasional">Ocasional Metro de Málaga</option>
+                                    <option value="masmetro">Tarjeta MásMetro</option>
+                                    <option value="tarjeta-consorcio">Tarjeta Monedero Consorcio de Transportes de Andalucía</option>
+                                    <option value="tarjeta-consorcio-joven">Tarjeta Consorcio de Transportes de Andalucía Joven</option>
+                                    <option value="tarjeta-consorcio-familia-numerosa">Tarjeta Consorcio de Transportes de Andalucía Familia Numerosa</option>
+                                    <option value="pago-tarjeta-ocasional">Pago del viaje con sistema EMV (Tarjeta de Crédito/Débito o móvil no registrada)</option>
+                                    <option value="metropay">Pago del viaje con ABT (Tarjeta de Crédito/Débito registrada en MetroPay)</option>
                                 </select>
                             </div>
-                            <div class="form-group full-width">
-                                <label for="descripcionCorta" class="label required">Descripción breve</label>
-                                <input type="text" id="descripcionCorta" name="descripcionCorta" class="input" required placeholder="Resumen en una línea..." maxlength="150">
-                                <span class="char-counter"><span id="charCount">0</span>/150</span>
+                            <!-- ============================================
+                                 BLOQUES CONDICIONALES POR TIPO DE TÍTULO
+                                 ============================================ -->
+
+                            <!-- BLOQUE 1: Monedero, Ocasional, MásMetro, Consorcio, Joven, Fam. Numerosa -->
+                            <div id="bloqueTituloViaje" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
+                                <div class="form-group">
+                                    <label for="numeracion_titulo_viaje" class="label required">Numeración del título de viaje</label>
+                                    <input type="text" id="numeracion_titulo_viaje" name="numeracion_titulo_viaje" class="input" required placeholder="Ej: 1000234567">
+                                </div>
+                                <div class="form-group">
+                                    <label for="importe_reclamado_1" class="label required">Importe reclamado</label>
+                                    <input type="number" id="importe_reclamado_1" name="importe_reclamado_1" class="input" required min="0" step="0.01" placeholder="0.00">
+                                </div>
+                                
+                                <div class="form-group full-width" style="margin-top: var(--spacing-xs); margin-bottom: var(--spacing-xs); color: var(--color-gray-600); font-weight: 500;">
+                                    Si es reclamación por incidencia en recarga o compra de títulos, indique:
+                                </div>
+
+                                <div class="form-group full-width">
+                                    <label for="punto_venta_recarga" class="label">Punto de venta o recarga</label>
+                                    <select id="punto_venta_recarga" name="punto_venta_recarga" class="select">
+                                        <option value="">Seleccione...</option>
+                                        <option value="Online">Online</option>
+                                        <option value="Maquina">Máquina automática de billetes</option>
+                                    </select>
+                                </div>
+
+                                <!-- Sub-bloque 1.1: Online -->
+                                <div id="bloqueOnline" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
+                                    <div class="form-group">
+                                        <label for="pan_tarjeta_primeros_6_11" class="label required">PAN tarjeta — primeros seis dígitos</label>
+                                        <input type="text" id="pan_tarjeta_primeros_6_11" name="pan_tarjeta_primeros_6_11" class="input input-pan" required placeholder="123456" maxlength="6">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pan_tarjeta_ultimos_4_11" class="label required">PAN tarjeta — cuatro últimos dígitos</label>
+                                        <input type="text" id="pan_tarjeta_ultimos_4_11" name="pan_tarjeta_ultimos_4_11" class="input input-pan" required placeholder="1234" maxlength="4">
+                                    </div>
+                                    <div class="form-group full-width">
+                                        <label for="plataforma_pago" class="label">Plataforma de pago</label>
+                                        <select id="plataforma_pago" name="plataforma_pago" class="select">
+                                            <option value="">Seleccione...</option>
+                                            <option value="AppWeb">Recarga online app/Web recargas Metro de Málaga</option>
+                                            <option value="PayPal">Recarga por PayPal</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Sub-bloque 1.2: Máquina automática de billetes -->
+                                <div id="bloqueMaquina" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
+                                    <div class="form-group">
+                                        <label for="estacion" class="label required">Estación</label>
+                                        <select id="estacion" name="estacion" class="select" required>
+                                            <option value="">Seleccione estación...</option>
+                                            <optgroup label="Línea 1">
+                                                <option value="guadalmedina-l1">Guadalmedina</option>
+                                                <option value="atarazanas">Atarazanas</option>
+                                                <option value="andalucia-tech">Andalucía Tech</option>
+                                                <option value="carranque">Carranque</option>
+                                                <option value="barbarela">Barbarela</option>
+                                                <option value="el-clinico">El Clínico</option>
+                                                <option value="la-union">La Unión</option>
+                                                <option value="universidad">Universidad</option>
+                                                <option value="ciudad-justicia">Ciudad de la Justicia</option>
+                                                <option value="el-consul">El Cónsul</option>
+                                                <option value="el-perchel-l1">El Perchel</option>
+                                                <option value="paraninfo">Paraninfo</option>
+                                                <option value="portada-alta">Portada Alta</option>
+                                            </optgroup>
+                                            <optgroup label="Línea 2">
+                                                <option value="guadalmedina-l2">Guadalmedina</option>
+                                                <option value="la-luz-la-paz">La Luz - La Paz</option>
+                                                <option value="la-isla">La Isla</option>
+                                                <option value="el-perchel-l2">El Perchel</option>
+                                                <option value="puerta-blanca">Puerta Blanca</option>
+                                                <option value="princesa-huelin">Princesa - Huelin</option>
+                                                <option value="el-torcal">El Torcal</option>
+                                                <option value="palacio-deportes">Palacio de los Deportes</option>
+                                            </optgroup>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="numero_dab" class="label required">Nº DAB</label>
+                                        <select id="numero_dab" name="numero_dab" class="select" required>
+                                            <option value="">Seleccione primero una estación...</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group full-width">
+                                        <label for="tipo_operacion" class="label required">Tipo de operación</label>
+                                        <select id="tipo_operacion" name="tipo_operacion" class="select" required>
+                                            <option value="">Seleccione...</option>
+                                            <option value="Compra">Compra de un título nuevo</option>
+                                            <option value="Recarga">Recarga de un título existente</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Sub-sub-bloque: Numeración título recargado -->
+                                    <div id="bloqueTituloRecargado" class="form-group full-width hidden">
+                                        <label for="numeracion_titulo_recarga" class="label required">Numeración del título recargado</label>
+                                        <input type="text" id="numeracion_titulo_recarga" name="numeracion_titulo_recarga" class="input" required placeholder="Ej: 1000234567">
+                                    </div>
+
+                                    <div class="form-group full-width">
+                                        <label for="modo_pago" class="label required">Modo de pago</label>
+                                        <select id="modo_pago" name="modo_pago" class="select" required>
+                                            <option value="">Seleccione...</option>
+                                            <option value="Efectivo">Efectivo</option>
+                                            <option value="Tarjeta">Tarjeta bancaria</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Sub-sub-bloque: Modo pago = Tarjeta -->
+                                    <div id="bloqueDabTarjeta" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
+                                        <div class="form-group">
+                                            <label for="pan_tarjeta_primeros_6_12" class="label required">PAN tarjeta — primeros seis dígitos</label>
+                                            <input type="text" id="pan_tarjeta_primeros_6_12" name="pan_tarjeta_primeros_6_12" class="input input-pan" required placeholder="123456" maxlength="6">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="pan_tarjeta_ultimos_4_12" class="label required">PAN tarjeta — cuatro últimos dígitos</label>
+                                            <input type="text" id="pan_tarjeta_ultimos_4_12" name="pan_tarjeta_ultimos_4_12" class="input input-pan" required placeholder="1234" maxlength="4">
+                                        </div>
+                                        <div class="form-group full-width" style="margin-top: var(--spacing-xs); color: var(--color-warning); font-size: 0.875rem; font-weight: 500;">
+                                            ⚠️ Recuerde que si realizó la operación con contactless debe indicar el PAN de la tarjeta virtualizada.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- BLOQUE 2: EMV -->
+                            <div id="bloqueEMV" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
+                                <div class="form-group full-width">
+                                    <label for="importe_reclamado_2" class="label required">Importe reclamado</label>
+                                    <input type="number" id="importe_reclamado_2" name="importe_reclamado_2" class="input" required min="0" step="0.01" placeholder="0.00">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pan_tarjeta_virtualizada_primeros_6" class="label required">PAN tarjeta virtualizada — primeros seis dígitos</label>
+                                    <input type="text" id="pan_tarjeta_virtualizada_primeros_6" name="pan_tarjeta_virtualizada_primeros_6" class="input input-pan" required placeholder="123456" maxlength="6">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pan_tarjeta_virtualizada_ultimos_4" class="label required">PAN tarjeta virtualizada — cuatro últimos dígitos</label>
+                                    <input type="text" id="pan_tarjeta_virtualizada_ultimos_4" name="pan_tarjeta_virtualizada_ultimos_4" class="input input-pan" required placeholder="1234" maxlength="4">
+                                </div>
+                                <div class="form-group full-width">
+                                    <label for="tipo_tarjeta_bancaria_2" class="label required">Tipo de tarjeta bancaria</label>
+                                    <select id="tipo_tarjeta_bancaria_2" name="tipo_tarjeta_bancaria_2" class="select" required>
+                                        <option value="">Seleccione...</option>
+                                        <option value="Mastercard">Mastercard</option>
+                                        <option value="Visa">Visa</option>
+                                        <option value="Revolut">Revolut</option>
+                                        <option value="Prepago">Tarjeta prepago de transporte</option>
+                                        <option value="Otras">Otras</option>
+                                    </select>
+                                </div>
+                                <div id="bloqueTarjetaOtras2" class="form-group full-width hidden">
+                                    <label for="tipo_tarjeta_bancaria_otras_2" class="label required">Indique el tipo de tarjeta</label>
+                                    <input type="text" id="tipo_tarjeta_bancaria_otras_2" name="tipo_tarjeta_bancaria_otras_2" class="input" required placeholder="Ej: American Express">
+                                </div>
+                            </div>
+
+                            <!-- BLOQUE 3: ABT / MetroPay -->
+                            <div id="bloqueABT" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
+                                <div class="form-group">
+                                    <label for="importe_reclamado_3" class="label required">Importe reclamado</label>
+                                    <input type="number" id="importe_reclamado_3" name="importe_reclamado_3" class="input" required min="0" step="0.01" placeholder="0.00">
+                                </div>
+                                <div class="form-group">
+                                    <label for="email_usuario_metro_pay" class="label required">Correo electrónico de usuario/a en Metro Pay</label>
+                                    <input type="email" id="email_usuario_metro_pay" name="email_usuario_metro_pay" class="input" required placeholder="ejemplo@correo.com">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pan_tarjeta_registrada_primeros_6" class="label required">PAN tarjeta registrada — primeros seis dígitos</label>
+                                    <input type="text" id="pan_tarjeta_registrada_primeros_6" name="pan_tarjeta_registrada_primeros_6" class="input input-pan" required placeholder="123456" maxlength="6">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pan_tarjeta_registrada_ultimos_4" class="label required">PAN tarjeta registrada — cuatro últimos dígitos</label>
+                                    <input type="text" id="pan_tarjeta_registrada_ultimos_4" name="pan_tarjeta_registrada_ultimos_4" class="input input-pan" required placeholder="1234" maxlength="4">
+                                </div>
+                                <div class="form-group full-width">
+                                    <label for="tipo_tarjeta_bancaria_3" class="label required">Tipo de tarjeta bancaria</label>
+                                    <select id="tipo_tarjeta_bancaria_3" name="tipo_tarjeta_bancaria_3" class="select" required>
+                                        <option value="">Seleccione...</option>
+                                        <option value="Mastercard">Mastercard</option>
+                                        <option value="Visa">Visa</option>
+                                        <option value="Revolut">Revolut</option>
+                                        <option value="Prepago">Tarjeta prepago de transporte</option>
+                                        <option value="Otras">Otras</option>
+                                    </select>
+                                </div>
+                                <div id="bloqueTarjetaOtras3" class="form-group full-width hidden">
+                                    <label for="tipo_tarjeta_bancaria_otras_3" class="label required">Indique el tipo de tarjeta</label>
+                                    <input type="text" id="tipo_tarjeta_bancaria_otras_3" name="tipo_tarjeta_bancaria_otras_3" class="input" required placeholder="Ej: American Express">
+                                </div>
                             </div>
                             <div class="form-group full-width">
-                                <label for="descripcionDetallada" class="label required">Descripción detallada</label>
+                                <label for="descripcionDetallada" class="label required"> Descripción de la queja o reclamación</label>
                                 <textarea id="descripcionDetallada" name="descripcionDetallada" class="textarea" required placeholder="Describa los hechos con el mayor detalle posible..." rows="5"></textarea>
                             </div>
                             <div class="form-group full-width">
@@ -1070,12 +1258,12 @@
                                     He leído y acepto la <a href="#" class="link" target="_blank">política de privacidad</a> y el tratamiento de mis datos personales para la gestión de esta solicitud. <span class="required">*</span>
                                 </label>
                             </div>
-                            <div class="checkbox-group">
+                            <!--<div class="checkbox-group">
                                 <input type="checkbox" id="comunicaciones" name="comunicaciones" class="checkbox">
                                 <label for="comunicaciones" class="checkbox-label">
                                     Deseo recibir comunicaciones sobre mejoras y novedades del servicio de Metro.
                                 </label>
-                            </div>
+                            </div>-->
                         </div>
 
                         <div class="form-actions">

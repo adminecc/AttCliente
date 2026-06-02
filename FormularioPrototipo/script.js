@@ -271,12 +271,26 @@ document.addEventListener('DOMContentLoaded', () => {
         
         camposRequired.forEach(campo => {
             // Solo validar campos visibles
-            const seccion = campo.closest('.form-section');
-            if (seccion && !seccion.classList.contains('hidden')) {
+
+            if (!campo.closest('.hidden')) {
                 if (!campo.value.trim()) {
                     campo.classList.add('error');
                     esValido = false;
                     if (!primerError) primerError = campo;
+                }
+            }
+        });
+
+        // Validar campos PAN con longitudes exactas (solo si son visibles)
+        const inputsPan = form.querySelectorAll('.input-pan');
+        inputsPan.forEach(input => {
+            if (!input.closest('.hidden')) {
+                const val = input.value.trim();
+                const maxLength = parseInt(input.getAttribute('maxlength'), 10);
+                if (val.length !== maxLength || /\D/.test(val)) {
+                    input.classList.add('error');
+                    esValido = false;
+                    if (!primerError) primerError = input;
                 }
             }
         });
@@ -350,6 +364,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const grupoOtroLugarConsulta = document.getElementById('grupoOtroLugarConsulta');
         if (grupoOtroLugarConsulta) grupoOtroLugarConsulta.classList.add('hidden');
         
+        // Limpiar y ocultar bloques condicionales de títulos de viaje
+        if (typeof ocultarYResetearTodosLosBloques === 'function') {
+            ocultarYResetearTodosLosBloques();
+        }
+
         // Scroll al inicio
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -613,6 +632,233 @@ document.addEventListener('DOMContentLoaded', () => {
     if (recibirPostal && direccionContactoContainer) {
         recibirPostal.addEventListener('change', (e) => {
             direccionContactoContainer.classList.toggle('hidden', !e.target.checked);
+        });
+    }
+
+    // ============================================
+    // GESTIÓN CONDICIONAL POR TIPO DE TÍTULO (RECLAMACIONES)
+    // ============================================
+    const dabsPorEstacion = {
+        'guadalmedina-l1': ['DAB-G1-01', 'DAB-G1-02'],
+        'guadalmedina-l2': ['DAB-G2-01', 'DAB-G2-02'],
+        'atarazanas': ['DAB-AT-01', 'DAB-AT-02', 'DAB-AT-03'],
+        'andalucia-tech': ['DAB-AT-04', 'DAB-AT-05'],
+        'carranque': ['DAB-CA-01', 'DAB-CA-02'],
+        'barbarela': ['DAB-BA-01', 'DAB-BA-02'],
+        'el-clinico': ['DAB-EC-01', 'DAB-EC-02'],
+        'la-union': ['DAB-LU-01', 'DAB-LU-02'],
+        'universidad': ['DAB-UN-01', 'DAB-UN-02'],
+        'ciudad-justicia': ['DAB-CJ-01', 'DAB-CJ-02'],
+        'el-consul': ['DAB-CO-01', 'DAB-CO-02'],
+        'el-perchel-l1': ['DAB-P1-01', 'DAB-P1-02', 'DAB-P1-03'],
+        'el-perchel-l2': ['DAB-P2-01', 'DAB-P2-02'],
+        'paraninfo': ['DAB-PA-01', 'DAB-PA-02'],
+        'portada-alta': ['DAB-PO-01', 'DAB-PO-02'],
+        'la-luz-la-paz': ['DAB-LL-01', 'DAB-LL-02'],
+        'la-isla': ['DAB-LI-01', 'DAB-LI-02'],
+        'puerta-blanca': ['DAB-PB-01', 'DAB-PB-02'],
+        'princesa-huelin': ['DAB-PH-01', 'DAB-PH-02'],
+        'el-torcal': ['DAB-TO-01', 'DAB-TO-02'],
+        'palacio-deportes': ['DAB-PD-01', 'DAB-PD-02']
+    };
+
+    function resetearBloque(bloque) {
+        if (!bloque) return;
+        bloque.querySelectorAll('input, select, textarea').forEach(campo => {
+            if (campo.type === 'checkbox' || campo.type === 'radio') {
+                campo.checked = false;
+            } else {
+                campo.value = '';
+            }
+            campo.classList.remove('error');
+        });
+        bloque.querySelectorAll('.form-grid, .form-group').forEach(subBloque => {
+            if (subBloque.id && (
+                subBloque.id.startsWith('bloqueOnline') || 
+                subBloque.id.startsWith('bloqueMaquina') || 
+                subBloque.id.startsWith('bloqueTituloRecargado') || 
+                subBloque.id.startsWith('bloqueDabTarjeta') || 
+                subBloque.id.startsWith('bloqueTarjetaOtras')
+            )) {
+                subBloque.classList.add('hidden');
+            }
+        });
+    }
+
+    function ocultarYResetearTodosLosBloques() {
+        const bloques = [
+            'bloqueTituloViaje',
+            'bloqueEMV',
+            'bloqueABT',
+            'bloqueOnline',
+            'bloqueMaquina',
+            'bloqueTituloRecargado',
+            'bloqueDabTarjeta',
+            'bloqueTarjetaOtras2',
+            'bloqueTarjetaOtras3'
+        ];
+        bloques.forEach(id => {
+            const bloque = document.getElementById(id);
+            if (bloque) {
+                resetearBloque(bloque);
+                bloque.classList.add('hidden');
+            }
+        });
+    }
+
+    // Sanitizador PAN: Solo números
+    const inputsPan = document.querySelectorAll('.input-pan');
+    inputsPan.forEach(input => {
+        input.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+    });
+
+    // Event Listener Principal para tipo de título
+    const tipoTitulo = document.getElementById('tipoTitulo');
+    const bloqueTituloViaje = document.getElementById('bloqueTituloViaje');
+    const bloqueEMV = document.getElementById('bloqueEMV');
+    const bloqueABT = document.getElementById('bloqueABT');
+
+    if (tipoTitulo) {
+        tipoTitulo.addEventListener('change', (e) => {
+            ocultarYResetearTodosLosBloques();
+            const opcion = e.target.value;
+            const opcionesTituloViaje = [
+                'monedero-metro-malaga',
+                'billete-ocasional',
+                'masmetro',
+                'tarjeta-consorcio',
+                'tarjeta-consorcio-joven',
+                'tarjeta-consorcio-familia-numerosa'
+            ];
+
+            if (opcionesTituloViaje.includes(opcion)) {
+                if (bloqueTituloViaje) bloqueTituloViaje.classList.remove('hidden');
+            } else if (opcion === 'pago-tarjeta-ocasional') {
+                if (bloqueEMV) bloqueEMV.classList.remove('hidden');
+            } else if (opcion === 'metropay') {
+                if (bloqueABT) bloqueABT.classList.remove('hidden');
+            }
+        });
+    }
+
+    // Sub-condicionales: Punto de venta o recarga
+    const puntoVentaRecarga = document.getElementById('punto_venta_recarga');
+    const bloqueOnline = document.getElementById('bloqueOnline');
+    const bloqueMaquina = document.getElementById('bloqueMaquina');
+    if (puntoVentaRecarga) {
+        puntoVentaRecarga.addEventListener('change', (e) => {
+            const opcion = e.target.value;
+            if (opcion === 'Online') {
+                if (bloqueOnline) bloqueOnline.classList.remove('hidden');
+                if (bloqueMaquina) {
+                    resetearBloque(bloqueMaquina);
+                    bloqueMaquina.classList.add('hidden');
+                }
+            } else if (opcion === 'Maquina') {
+                if (bloqueMaquina) bloqueMaquina.classList.remove('hidden');
+                if (bloqueOnline) {
+                    resetearBloque(bloqueOnline);
+                    bloqueOnline.classList.add('hidden');
+                }
+            } else {
+                if (bloqueOnline) {
+                    resetearBloque(bloqueOnline);
+                    bloqueOnline.classList.add('hidden');
+                }
+                if (bloqueMaquina) {
+                    resetearBloque(bloqueMaquina);
+                    bloqueMaquina.classList.add('hidden');
+                }
+            }
+        });
+    }
+
+    // Filtrado de DABs por estación
+    const estacionSelect = document.getElementById('estacion');
+    const numeroDabSelect = document.getElementById('numero_dab');
+    if (estacionSelect && numeroDabSelect) {
+        estacionSelect.addEventListener('change', (e) => {
+            const estacion = e.target.value;
+            numeroDabSelect.innerHTML = '<option value="">Seleccione...</option>';
+            if (estacion && dabsPorEstacion[estacion]) {
+                dabsPorEstacion[estacion].forEach(dab => {
+                    const option = document.createElement('option');
+                    option.value = dab;
+                    option.textContent = dab;
+                    numeroDabSelect.appendChild(option);
+                });
+            } else {
+                const option = document.createElement('option');
+                option.value = "";
+                option.textContent = "Seleccione primero una estación...";
+                numeroDabSelect.appendChild(option);
+            }
+        });
+    }
+
+    // Sub-condicionales de tipo_operacion
+    const tipoOperacion = document.getElementById('tipo_operacion');
+    const bloqueTituloRecargado = document.getElementById('bloqueTituloRecargado');
+    if (tipoOperacion) {
+        tipoOperacion.addEventListener('change', (e) => {
+            if (e.target.value === 'Recarga') {
+                if (bloqueTituloRecargado) bloqueTituloRecargado.classList.remove('hidden');
+            } else {
+                if (bloqueTituloRecargado) {
+                    resetearBloque(bloqueTituloRecargado);
+                    bloqueTituloRecargado.classList.add('hidden');
+                }
+            }
+        });
+    }
+
+    // Sub-condicionales de modo_pago
+    const modoPago = document.getElementById('modo_pago');
+    const bloqueDabTarjeta = document.getElementById('bloqueDabTarjeta');
+    if (modoPago) {
+        modoPago.addEventListener('change', (e) => {
+            if (e.target.value === 'Tarjeta') {
+                if (bloqueDabTarjeta) bloqueDabTarjeta.classList.remove('hidden');
+            } else {
+                if (bloqueDabTarjeta) {
+                    resetearBloque(bloqueDabTarjeta);
+                    bloqueDabTarjeta.classList.add('hidden');
+                }
+            }
+        });
+    }
+
+    // Sub-condicionales de tipo_tarjeta_bancaria_2 (EMV)
+    const tipoTarjetaBancaria2 = document.getElementById('tipo_tarjeta_bancaria_2');
+    const bloqueTarjetaOtras2 = document.getElementById('bloqueTarjetaOtras2');
+    if (tipoTarjetaBancaria2) {
+        tipoTarjetaBancaria2.addEventListener('change', (e) => {
+            if (e.target.value === 'Otras') {
+                if (bloqueTarjetaOtras2) bloqueTarjetaOtras2.classList.remove('hidden');
+            } else {
+                if (bloqueTarjetaOtras2) {
+                    resetearBloque(bloqueTarjetaOtras2);
+                    bloqueTarjetaOtras2.classList.add('hidden');
+                }
+            }
+        });
+    }
+
+    // Sub-condicionales de tipo_tarjeta_bancaria_3 (ABT)
+    const tipoTarjetaBancaria3 = document.getElementById('tipo_tarjeta_bancaria_3');
+    const bloqueTarjetaOtras3 = document.getElementById('bloqueTarjetaOtras3');
+    if (tipoTarjetaBancaria3) {
+        tipoTarjetaBancaria3.addEventListener('change', (e) => {
+            if (e.target.value === 'Otras') {
+                if (bloqueTarjetaOtras3) bloqueTarjetaOtras3.classList.remove('hidden');
+            } else {
+                if (bloqueTarjetaOtras3) {
+                    resetearBloque(bloqueTarjetaOtras3);
+                    bloqueTarjetaOtras3.classList.add('hidden');
+                }
+            }
         });
     }
 });
