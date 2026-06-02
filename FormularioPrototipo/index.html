@@ -84,7 +84,7 @@
                                 <input type="tel" id="telefono" name="telefono" class="input" required placeholder="612 345 678">
                             </div>
                             <div class="form-group">
-                                <label for="nacionalidad" class="label">Nacionalidad</label>
+                                <label for="nacionalidad" class="label required">Nacionalidad</label>
                                 <select id="nacionalidad" name="nacionalidad" class="select">
                                     <option value="">Seleccione país...</option>
                                     <option value="ES">España</option>
@@ -475,8 +475,8 @@
                                     <input type="text" id="numeracion_titulo_viaje" name="numeracion_titulo_viaje" class="input" required placeholder="Ej: 1000234567">
                                 </div>
                                 <div class="form-group">
-                                    <label for="importe_reclamado_1" class="label required">Importe reclamado</label>
-                                    <input type="number" id="importe_reclamado_1" name="importe_reclamado_1" class="input" required min="0" step="0.01" placeholder="0.00">
+                                    <label for="importe_reclamado_1" class="label required">Importe reclamado (€)</label>
+                                    <input type="number" id="importe_reclamado_1" name="importe_reclamado_1" class="input" required min="0" step="0.01" placeholder="0,00">
                                 </div>
                                 
                                 <div class="form-group full-width" style="margin-top: var(--spacing-xs); margin-bottom: var(--spacing-xs); color: var(--color-gray-600); font-weight: 500;">
@@ -595,8 +595,8 @@
                             <!-- BLOQUE 2: EMV -->
                             <div id="bloqueEMV" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
                                 <div class="form-group full-width">
-                                    <label for="importe_reclamado_2" class="label required">Importe reclamado</label>
-                                    <input type="number" id="importe_reclamado_2" name="importe_reclamado_2" class="input" required min="0" step="0.01" placeholder="0.00">
+                                    <label for="importe_reclamado_2" class="label required">Importe reclamado (€)</label>
+                                    <input type="number" id="importe_reclamado_2" name="importe_reclamado_2" class="input" required min="0" step="0.01" placeholder="0,00">
                                 </div>
                                 <div class="form-group">
                                     <label for="pan_tarjeta_virtualizada_primeros_6" class="label required">PAN tarjeta virtualizada — primeros seis dígitos</label>
@@ -626,8 +626,8 @@
                             <!-- BLOQUE 3: ABT / MetroPay -->
                             <div id="bloqueABT" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
                                 <div class="form-group">
-                                    <label for="importe_reclamado_3" class="label required">Importe reclamado</label>
-                                    <input type="number" id="importe_reclamado_3" name="importe_reclamado_3" class="input" required min="0" step="0.01" placeholder="0.00">
+                                    <label for="importe_reclamado_3" class="label required">Importe reclamado (€)</label>
+                                    <input type="number" id="importe_reclamado_3" name="importe_reclamado_3" class="input" required min="0" step="0.01" placeholder="0,00">
                                 </div>
                                 <div class="form-group">
                                     <label for="email_usuario_metro_pay" class="label required">Correo electrónico de usuario/a en Metro Pay</label>
@@ -959,6 +959,41 @@
                             Datos del objeto
                         </h2>
                         <div class="form-grid">
+                            <div class="form-group full-width" style="grid-column: 1 / -1;">
+                                <label for="tipoTituloObjetos" class="label">Tipo de título de viaje (si procede)</label>
+                                <select id="tipoTituloObjetos" name="tipoTituloObjetos" class="select">
+                                    <option value="">Seleccione si procede</option>
+                                    <option value="monedero-metro-malaga">Monedero Metro Málaga</option>
+                                    <option value="billete-ocasional">Ocasional Metro de Málaga</option>
+                                    <option value="masmetro">Tarjeta +Metro</option>
+                                    <option value="tarjeta-consorcio">Tarjeta Monedero Consorcio de Transportes</option>
+                                    <option value="tarjeta-consorcio-joven">Tarjeta Joven Consorcio de Transportes</option>
+                                    <option value="tarjeta-consorcio-familia-numerosa">Tarjeta Familia Numerosa Consorcio de Transportes</option>
+                                    <option value="pago-tarjeta-ocasional">Pago del viaje con sistema EMV (teléfono móvil o tarjeta de crédito no registrada)</option>
+                                    <option value="metropay">Pago del viaje con ABT (tarjeta de crédito registrada en Metro Pay)</option>
+                                </select>
+                            </div>
+
+                            <!-- Bloque condicional 1: Títulos físicos -->
+                            <div id="bloqueTituloViajeObjetos" class="form-grid full-width hidden" style="grid-column: 1 / -1; display: grid; gap: var(--spacing-md); grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-bottom: var(--spacing-sm);">
+                                <div class="form-group">
+                                    <label for="numeracion_titulo_viaje_objetos" class="label required">Numeración del título de viaje</label>
+                                    <input type="text" id="numeracion_titulo_viaje_objetos" name="numeracion_titulo_viaje_objetos" class="input" required placeholder="Ej: 1000234567">
+                                </div>
+                            </div>
+
+                            <!-- Bloque condicional 2: Pago EMV / ABT (Tarjetas Bancarias) -->
+                            <div id="bloqueTarjetaObjetos" class="form-grid full-width hidden" style="grid-column: 1 / -1; display: grid; gap: var(--spacing-md); grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-bottom: var(--spacing-sm);">
+                                <div class="form-group">
+                                    <label for="pan_tarjeta_primeros_6_objetos" class="label required">PAN tarjeta — primeros seis dígitos</label>
+                                    <input type="text" id="pan_tarjeta_primeros_6_objetos" name="pan_tarjeta_primeros_6_objetos" class="input input-pan" required placeholder="123456" maxlength="6">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pan_tarjeta_ultimos_4_objetos" class="label required">PAN tarjeta — cuatro últimos dígitos</label>
+                                    <input type="text" id="pan_tarjeta_ultimos_4_objetos" name="pan_tarjeta_ultimos_4_objetos" class="input input-pan" required placeholder="1234" maxlength="4">
+                                </div>
+                            </div>
+
                             <div class="form-group">
                                 <label for="tipoObjeto" class="label required">Tipo de gestión</label>
                                 <select id="tipoObjeto" name="tipoObjeto" class="select" required>

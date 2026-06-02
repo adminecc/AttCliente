@@ -695,7 +695,9 @@ document.addEventListener('DOMContentLoaded', () => {
             'bloqueTituloRecargado',
             'bloqueDabTarjeta',
             'bloqueTarjetaOtras2',
-            'bloqueTarjetaOtras3'
+            'bloqueTarjetaOtras3',
+            'bloqueTituloViajeObjetos',
+            'bloqueTarjetaObjetos'
         ];
         bloques.forEach(id => {
             const bloque = document.getElementById(id);
@@ -858,6 +860,42 @@ document.addEventListener('DOMContentLoaded', () => {
                     resetearBloque(bloqueTarjetaOtras3);
                     bloqueTarjetaOtras3.classList.add('hidden');
                 }
+            }
+        });
+    }
+
+    // ============================================
+    // GESTIÓN CONDICIONAL POR TIPO DE TÍTULO (OBJETOS PERDIDOS)
+    // ============================================
+    const tipoTituloObjetos = document.getElementById('tipoTituloObjetos');
+    const bloqueTituloViajeObjetos = document.getElementById('bloqueTituloViajeObjetos');
+    const bloqueTarjetaObjetos = document.getElementById('bloqueTarjetaObjetos');
+
+    if (tipoTituloObjetos) {
+        tipoTituloObjetos.addEventListener('change', (e) => {
+            if (bloqueTituloViajeObjetos) {
+                resetearBloque(bloqueTituloViajeObjetos);
+                bloqueTituloViajeObjetos.classList.add('hidden');
+            }
+            if (bloqueTarjetaObjetos) {
+                resetearBloque(bloqueTarjetaObjetos);
+                bloqueTarjetaObjetos.classList.add('hidden');
+            }
+
+            const opcion = e.target.value;
+            const opcionesTituloViaje = [
+                'monedero-metro-malaga',
+                'billete-ocasional',
+                'masmetro',
+                'tarjeta-consorcio',
+                'tarjeta-consorcio-joven',
+                'tarjeta-consorcio-familia-numerosa'
+            ];
+
+            if (opcionesTituloViaje.includes(opcion)) {
+                if (bloqueTituloViajeObjetos) bloqueTituloViajeObjetos.classList.remove('hidden');
+            } else if (opcion === 'pago-tarjeta-ocasional' || opcion === 'metropay') {
+                if (bloqueTarjetaObjetos) bloqueTarjetaObjetos.classList.remove('hidden');
             }
         });
     }
