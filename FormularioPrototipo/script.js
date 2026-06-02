@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
             consultas: ['descripcionCortaConsulta', 'descripcionDetalladaConsulta'],
             sugerencias: ['areaSugerencia', 'tituloSugerencia', 'descripcionSugerencia'],
             agradecimientos: ['motivoAgradecimiento', 'descripcionAgradecimiento'],
-            objetos: ['tipoObjeto', 'categoriaObjeto', 'fechaPerdida', 'descripcionObjeto'],
+            objetos: ['fechaPerdida', 'lineaMetroObjetos', 'dondePerdidoObjetos', 'nombreObjetoObjetos', 'descripcionObjeto'],
             tarjetas: ['motivoTarjeta', 'tipoTarjeta', 'fechaNacimiento', 'direccionCompleta', 'codigoPostal', 'municipio', 'provincia', 'puntoRecogida']
         };
         
@@ -678,7 +678,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 subBloque.id.startsWith('bloqueMaquina') || 
                 subBloque.id.startsWith('bloqueTituloRecargado') || 
                 subBloque.id.startsWith('bloqueDabTarjeta') || 
-                subBloque.id.startsWith('bloqueTarjetaOtras')
+                subBloque.id.startsWith('bloqueTarjetaOtras') ||
+                subBloque.id.startsWith('bloqueTituloViajeObjetos') ||
+                subBloque.id.startsWith('bloqueTarjetaBancariaObjetos') ||
+                subBloque.id.startsWith('bloqueEstacionObjetos') ||
+                subBloque.id.startsWith('bloqueTrenObjetos')
             )) {
                 subBloque.classList.add('hidden');
             }
@@ -697,7 +701,9 @@ document.addEventListener('DOMContentLoaded', () => {
             'bloqueTarjetaOtras2',
             'bloqueTarjetaOtras3',
             'bloqueTituloViajeObjetos',
-            'bloqueTarjetaObjetos'
+            'bloqueTarjetaBancariaObjetos',
+            'bloqueEstacionObjetos',
+            'bloqueTrenObjetos'
         ];
         bloques.forEach(id => {
             const bloque = document.getElementById(id);
@@ -865,25 +871,56 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ============================================
-    // GESTIÓN CONDICIONAL POR TIPO DE TÍTULO (OBJETOS PERDIDOS)
+    // GESTIÓN DINÁMICA DE OBJETOS PERDIDOS
     // ============================================
+    const estacionesPorLinea = {
+        '1': [
+            { value: 'guadalmedina-l1', text: 'Guadalmedina' },
+            { value: 'atarazanas', text: 'Atarazanas' },
+            { value: 'andalucia-tech', text: 'Andalucía Tech' },
+            { value: 'carranque', text: 'Carranque' },
+            { value: 'barbarela', text: 'Barbarela' },
+            { value: 'el-clinico', text: 'El Clínico' },
+            { value: 'la-union', text: 'La Unión' },
+            { value: 'universidad', text: 'Universidad' },
+            { value: 'ciudad-justicia', text: 'Ciudad de la Justicia' },
+            { value: 'el-consul', text: 'El Cónsul' },
+            { value: 'el-perchel-l1', text: 'El Perchel' },
+            { value: 'paraninfo', text: 'Paraninfo' },
+            { value: 'portada-alta', text: 'Portada Alta' }
+        ],
+        '2': [
+            { value: 'guadalmedina-l2', text: 'Guadalmedina' },
+            { value: 'la-luz-la-paz', text: 'La Luz - La Paz' },
+            { value: 'la-isla', text: 'La Isla' },
+            { value: 'el-perchel-l2', text: 'El Perchel' },
+            { value: 'puerta-blanca', text: 'Puerta Blanca' },
+            { value: 'princesa-huelin', text: 'Princesa - Huelin' },
+            { value: 'el-torcal', text: 'El Torcal' },
+            { value: 'palacio-deportes', text: 'Palacio de los Deportes' }
+        ]
+    };
+
+    // 1. Desplegable tipo de título para Objetos
     const tipoTituloObjetos = document.getElementById('tipoTituloObjetos');
     const bloqueTituloViajeObjetos = document.getElementById('bloqueTituloViajeObjetos');
-    const bloqueTarjetaObjetos = document.getElementById('bloqueTarjetaObjetos');
+    const bloqueTarjetaBancariaObjetos = document.getElementById('bloqueTarjetaBancariaObjetos');
 
     if (tipoTituloObjetos) {
         tipoTituloObjetos.addEventListener('change', (e) => {
+            const opcion = e.target.value;
+            
+            // Ocultar y resetear bloques específicos de Objetos
             if (bloqueTituloViajeObjetos) {
                 resetearBloque(bloqueTituloViajeObjetos);
                 bloqueTituloViajeObjetos.classList.add('hidden');
             }
-            if (bloqueTarjetaObjetos) {
-                resetearBloque(bloqueTarjetaObjetos);
-                bloqueTarjetaObjetos.classList.add('hidden');
+            if (bloqueTarjetaBancariaObjetos) {
+                resetearBloque(bloqueTarjetaBancariaObjetos);
+                bloqueTarjetaBancariaObjetos.classList.add('hidden');
             }
 
-            const opcion = e.target.value;
-            const opcionesTituloViaje = [
+            const opcionesFisicas = [
                 'monedero-metro-malaga',
                 'billete-ocasional',
                 'masmetro',
@@ -891,11 +928,102 @@ document.addEventListener('DOMContentLoaded', () => {
                 'tarjeta-consorcio-joven',
                 'tarjeta-consorcio-familia-numerosa'
             ];
+            const opcionesBancarias = [
+                'pago-tarjeta-ocasional',
+                'metropay'
+            ];
 
-            if (opcionesTituloViaje.includes(opcion)) {
+            if (opcionesFisicas.includes(opcion)) {
                 if (bloqueTituloViajeObjetos) bloqueTituloViajeObjetos.classList.remove('hidden');
-            } else if (opcion === 'pago-tarjeta-ocasional' || opcion === 'metropay') {
-                if (bloqueTarjetaObjetos) bloqueTarjetaObjetos.classList.remove('hidden');
+            } else if (opcionesBancarias.includes(opcion)) {
+                if (bloqueTarjetaBancariaObjetos) bloqueTarjetaBancariaObjetos.classList.remove('hidden');
+            }
+        });
+    }
+
+    // 2. Filtrado dinámico de estaciones por línea
+    const lineaMetroObjetos = document.getElementById('lineaMetroObjetos');
+    const estacionPerdidaObjetos = document.getElementById('estacionPerdidaObjetos');
+    const estacionOrigenObjetos = document.getElementById('estacionOrigenObjetos');
+    const estacionDestinoObjetos = document.getElementById('estacionDestinoObjetos');
+
+    function poblarSelectEstaciones(select, lista) {
+        if (!select) return;
+        select.innerHTML = '<option value="">Seleccione...</option>';
+        lista.forEach(estacion => {
+            const option = document.createElement('option');
+            option.value = estacion.value;
+            option.textContent = estacion.text;
+            select.appendChild(option);
+        });
+    }
+
+    function resetearSelectEstaciones(select) {
+        if (!select) return;
+        select.innerHTML = '<option value="">Seleccione primero una línea...</option>';
+    }
+
+    if (lineaMetroObjetos) {
+        lineaMetroObjetos.addEventListener('change', (e) => {
+            const linea = e.target.value;
+            
+            // Si cambia la línea, resetear valores seleccionados de ubicación
+            if (estacionPerdidaObjetos) {
+                estacionPerdidaObjetos.value = '';
+                estacionPerdidaObjetos.classList.remove('error');
+            }
+            if (estacionOrigenObjetos) {
+                estacionOrigenObjetos.value = '';
+                estacionOrigenObjetos.classList.remove('error');
+            }
+            if (estacionDestinoObjetos) {
+                estacionDestinoObjetos.value = '';
+                estacionDestinoObjetos.classList.remove('error');
+            }
+
+            if (linea && estacionesPorLinea[linea]) {
+                const lista = estacionesPorLinea[linea];
+                poblarSelectEstaciones(estacionPerdidaObjetos, lista);
+                poblarSelectEstaciones(estacionOrigenObjetos, lista);
+                poblarSelectEstaciones(estacionDestinoObjetos, lista);
+            } else {
+                resetearSelectEstaciones(estacionPerdidaObjetos);
+                resetearSelectEstaciones(estacionOrigenObjetos);
+                resetearSelectEstaciones(estacionDestinoObjetos);
+            }
+        });
+    }
+
+    // 3. ¿Dónde lo has perdido? (Estación vs Tren)
+    const dondePerdidoObjetos = document.getElementById('dondePerdidoObjetos');
+    const bloqueEstacionObjetos = document.getElementById('bloqueEstacionObjetos');
+    const bloqueTrenObjetos = document.getElementById('bloqueTrenObjetos');
+
+    if (dondePerdidoObjetos) {
+        dondePerdidoObjetos.addEventListener('change', (e) => {
+            const opcion = e.target.value;
+            
+            if (opcion === 'estacion') {
+                if (bloqueEstacionObjetos) bloqueEstacionObjetos.classList.remove('hidden');
+                if (bloqueTrenObjetos) {
+                    resetearBloque(bloqueTrenObjetos);
+                    bloqueTrenObjetos.classList.add('hidden');
+                }
+            } else if (opcion === 'tren') {
+                if (bloqueTrenObjetos) bloqueTrenObjetos.classList.remove('hidden');
+                if (bloqueEstacionObjetos) {
+                    resetearBloque(bloqueEstacionObjetos);
+                    bloqueEstacionObjetos.classList.add('hidden');
+                }
+            } else {
+                if (bloqueEstacionObjetos) {
+                    resetearBloque(bloqueEstacionObjetos);
+                    bloqueEstacionObjetos.classList.add('hidden');
+                }
+                if (bloqueTrenObjetos) {
+                    resetearBloque(bloqueTrenObjetos);
+                    bloqueTrenObjetos.classList.add('hidden');
+                }
             }
         });
     }
