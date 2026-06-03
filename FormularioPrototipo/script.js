@@ -723,6 +723,8 @@ document.addEventListener('DOMContentLoaded', () => {
             'bloqueMaquina',
             'bloqueTituloRecargado',
             'bloqueDabTarjeta',
+            'bloqueDabTarjetaFisica',
+            'bloqueDabTarjetaMovil',
             'bloqueTarjetaOtras2',
             'bloqueTarjetaOtras3',
             'bloqueTituloViajeObjetos',
@@ -859,8 +861,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const bloqueDabTarjeta = document.getElementById('bloqueDabTarjeta');
     if (modoPago) {
         modoPago.addEventListener('change', (e) => {
-            if (e.target.value === 'Tarjeta') {
+            const opcion = e.target.value;
+            if (opcion === 'Tarjeta-fisica' || opcion === 'Tarjeta-movil') {
                 if (bloqueDabTarjeta) bloqueDabTarjeta.classList.remove('hidden');
+                const bloqueDabTarjetaFisica = document.getElementById('bloqueDabTarjetaFisica');
+                const bloqueDabTarjetaMovil = document.getElementById('bloqueDabTarjetaMovil');
+                if (opcion === 'Tarjeta-fisica') {
+                    if (bloqueDabTarjetaFisica) bloqueDabTarjetaFisica.classList.remove('hidden');
+                    if (bloqueDabTarjetaMovil) {
+                        resetearBloque(bloqueDabTarjetaMovil);
+                        bloqueDabTarjetaMovil.classList.add('hidden');
+                    }
+                } else {
+                    if (bloqueDabTarjetaMovil) bloqueDabTarjetaMovil.classList.remove('hidden');
+                    if (bloqueDabTarjetaFisica) {
+                        resetearBloque(bloqueDabTarjetaFisica);
+                        bloqueDabTarjetaFisica.classList.add('hidden');
+                    }
+                }
             } else {
                 if (bloqueDabTarjeta) {
                     resetearBloque(bloqueDabTarjeta);
