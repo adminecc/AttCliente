@@ -1267,17 +1267,6 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="tipoTarjeta" class="label required">Tipo de tarjeta</label>
-                                <select id="tipoTarjeta" name="tipoTarjeta" class="select" required>
-                                    <option value="">Seleccione...</option>
-                                    <option value="estandar">+Metro Estándar</option>
-                                    <option value="joven">+Metro Joven</option>
-                                    <option value="senior">+Metro Senior</option>
-                                    <option value="familia-numerosa">+Metro Familia Numerosa</option>
-                                    <option value="discapacidad">+Metro Discapacidad</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
                                 <label for="fechaNacimiento" class="label required">Fecha de nacimiento</label>
                                 <input type="date" id="fechaNacimiento" name="fechaNacimiento" class="input" required>
                             </div>
@@ -1290,14 +1279,7 @@
                                     <option value="O">Otro / Prefiero no indicar</option>
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <label for="puntoRecogida" class="label required">Punto de recogida preferido</label>
-                                <select id="puntoRecogida" name="puntoRecogida" class="select" required>
-                                    <option value="">Seleccione...</option>
-                                    <option value="sol">Oficina de Atención al Cliente (El Perchel)</option>
-                                </select>
-                            </div>
-                            <div class="form-group full-width">
+                            <!--<div class="form-group full-width">
                                 <label for="fotoCarnet" class="label">Fotografía tipo carnet</label>
                                 <div class="file-upload">
                                     <input type="file" id="fotoCarnet" name="fotoCarnet" class="file-input" accept=".jpg,.jpeg,.png">
@@ -1308,8 +1290,8 @@
                                     </label>
                                     <div id="fotoPreview" class="foto-preview"></div>
                                 </div>
-                            </div>
-                            <div class="form-group full-width" id="documentacionAdicional">
+                            </div>-->
+                            <!--<div class="form-group full-width" id="documentacionAdicional">
                                 <label for="docAdicional" class="label">Documentación adicional</label>
                                 <div class="file-upload">
                                     <input type="file" id="docAdicional" name="docAdicional" class="file-input" multiple accept=".pdf,.jpg,.jpeg,.png">
@@ -1319,6 +1301,22 @@
                                         <span class="file-hint">Libro de familia, certificado discapacidad, etc.</span>
                                     </label>
                                 </div>
+                            </div>-->
+                            <div class="form-group full-width" id="firmaDigital">
+                                <label for="firmaDigital" class="label">Firma digital</label>
+                                <div class="file-upload">
+                                    <input type="file" id="firmaDigital" name="firmaDigital" class="file-input" accept=".pdf,.jpg,.jpeg,.png">
+                                    <label for="firmaDigital" class="file-label">
+                                        <span class="file-icon">🖊️</span>
+                                        <span class="file-text">Adjuntar firma digital</span>
+                                        <span class="file-hint">Imagen clara de la firma, sin firmas en blanco</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group full-width" style="margin-top: var(--spacing-md); background-color: var(--color-info-light); color: var(--color-info); border: 1.5px solid var(--color-info); padding: var(--spacing-md); border-radius: var(--radius); font-size: 0.9375rem; font-weight: 500; display: flex; align-items: center; gap: var(--spacing-sm);">
+                                <span>ℹ️</span>
+                                <span>Para finalizar la confección de su tarjeta, deberá acudir presencialmente a la Oficina de Atención al Cliente (El Perchel).</span>
                             </div>
                         </div>
                     </section>
