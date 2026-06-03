@@ -734,27 +734,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // GESTIÓN CONDICIONAL POR TIPO DE TÍTULO (RECLAMACIONES)
     // ============================================
     const dabsPorEstacion = {
-        'guadalmedina-l1': ['DAB-G1-01', 'DAB-G1-02'],
-        'guadalmedina-l2': ['DAB-G2-01', 'DAB-G2-02'],
-        'atarazanas': ['DAB-AT-01', 'DAB-AT-02', 'DAB-AT-03'],
-        'andalucia-tech': ['DAB-AT-04', 'DAB-AT-05'],
-        'carranque': ['DAB-CA-01', 'DAB-CA-02'],
-        'barbarela': ['DAB-BA-01', 'DAB-BA-02'],
-        'el-clinico': ['DAB-EC-01', 'DAB-EC-02'],
-        'la-union': ['DAB-LU-01', 'DAB-LU-02'],
-        'universidad': ['DAB-UN-01', 'DAB-UN-02'],
-        'ciudad-justicia': ['DAB-CJ-01', 'DAB-CJ-02'],
-        'el-consul': ['DAB-CO-01', 'DAB-CO-02'],
-        'el-perchel-l1': ['DAB-P1-01', 'DAB-P1-02', 'DAB-P1-03'],
-        'el-perchel-l2': ['DAB-P2-01', 'DAB-P2-02'],
-        'paraninfo': ['DAB-PA-01', 'DAB-PA-02'],
-        'portada-alta': ['DAB-PO-01', 'DAB-PO-02'],
-        'la-luz-la-paz': ['DAB-LL-01', 'DAB-LL-02'],
-        'la-isla': ['DAB-LI-01', 'DAB-LI-02'],
-        'puerta-blanca': ['DAB-PB-01', 'DAB-PB-02'],
-        'princesa-huelin': ['DAB-PH-01', 'DAB-PH-02'],
-        'el-torcal': ['DAB-TO-01', 'DAB-TO-02'],
-        'palacio-deportes': ['DAB-PD-01', 'DAB-PD-02']
+        'guadalmedina-l1': ['GDL-DAB-101', 'GDL-DAB-102', 'GDL-DAB-103', 'GDL-DAB-104'],
+        'guadalmedina-l2': ['GDL-DAB-101', 'GDL-DAB-102', 'GDL-DAB-103', 'GDL-DAB-104'],
+        'atarazanas': ['ATZ-DAB-101', 'ATZ-DAB-102', 'ATZ-DAB-103'],
+        'andalucia-tech': ['TCH-DAB-101', 'TCH-DAB-102'],
+        'carranque': ['CRR-DAB-101', 'CRR-DAB-102'],
+        'barbarela': ['BBL-DAB-101', 'BBL-DAB-102'],
+        'el-clinico': ['CLI-DAB-101', 'CLI-DAB-102'],
+        'la-union': ['LUN-DAB-101', 'LUN-DAB-102'],
+        'universidad': ['UNI-DAB-101', 'UNI-DAB-102'],
+        'ciudad-justicia': ['CDJ-DAB-101', 'CDJ-DAB-102', 'CDJ-DAB-201'],
+        'el-consul': ['CNS-DAB-101', 'CNS-DAB-102'],
+        'el-perchel-l1': ['PCH-DAB-101', 'PCH-DAB-102', 'PCH-DAB-103', 'PCH-DAB-104', 'PCH-DAB-105'],
+        'el-perchel-l2': ['PCH-DAB-101', 'PCH-DAB-102', 'PCH-DAB-103', 'PCH-DAB-104', 'PCH-DAB-105'],
+        'paraninfo': ['PRF-DAB-101'],
+        'portada-alta': ['PTD-DAB-101', 'PTD-DAB-102'],
+        'la-luz-la-paz': ['LZP-DAB-101', 'LZP-DAB-102', 'LZP-DAB-201'],
+        'la-isla': ['ISL-DAB-101', 'ISL-DAB-102'],
+        'puerta-blanca': ['PBL-DAB-101', 'PBL-DAB-102', 'PBL-DAB-201'],
+        'princesa-huelin': ['PRI-DAB-101', 'PRI-DAB-102'],
+        'el-torcal': ['TOR-DAB-101', 'TOR-DAB-102'],
+        'palacio-deportes': ['PDD-DAB-101', 'PDD-DAB-102', 'PDD-DAB-103']
     };
 
     function resetearBloque(bloque) {
