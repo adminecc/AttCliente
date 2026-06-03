@@ -376,6 +376,12 @@ document.addEventListener('DOMContentLoaded', () => {
             ocultarYResetearTodosLosBloques();
         }
 
+        // Resetear contadores de textareas
+        document.querySelectorAll('textarea.textarea').forEach(textarea => {
+            const currentCount = document.getElementById('charCount_' + textarea.id);
+            if (currentCount) currentCount.textContent = '0';
+        });
+
         // Scroll al inicio
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -1092,4 +1098,34 @@ document.addEventListener('DOMContentLoaded', () => {
             direccionContactoContainer.classList.toggle('hidden', !e.target.checked);
         });
     }
+
+    // Contador de caracteres dinámico para campos de descripción (textarea)
+    const textareas = document.querySelectorAll('textarea.textarea');
+    textareas.forEach(textarea => {
+        textarea.setAttribute('maxlength', '2500');
+        
+        // Crear el span del contador
+        const counterSpan = document.createElement('span');
+        counterSpan.className = 'char-counter';
+        counterSpan.style.display = 'block';
+        counterSpan.style.textAlign = 'right';
+        counterSpan.style.marginTop = '0.25rem';
+        counterSpan.style.fontSize = '0.75rem';
+        counterSpan.style.color = 'var(--color-gray-500)';
+        
+        const currentCount = document.createElement('span');
+        currentCount.id = 'charCount_' + textarea.id;
+        currentCount.textContent = textarea.value.length;
+        
+        counterSpan.appendChild(currentCount);
+        counterSpan.appendChild(document.createTextNode('/2500'));
+        
+        // Insertar después de la textarea en el DOM
+        textarea.parentNode.insertBefore(counterSpan, textarea.nextSibling);
+        
+        // Escuchar el input para actualizar el valor
+        textarea.addEventListener('input', (e) => {
+            currentCount.textContent = e.target.value.length;
+        });
+    });
 });
