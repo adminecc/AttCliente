@@ -594,6 +594,12 @@ body {
 /* ============================================
    UTILIDADES
    ============================================ */
+.grid-3-cols {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-lg);
+}
+
 .hidden {
     display: none !important;
 }
@@ -631,6 +637,11 @@ body {
     }
     
     .form-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+    
+    .grid-3-cols {
         grid-template-columns: 1fr;
         gap: var(--spacing-md);
     }
