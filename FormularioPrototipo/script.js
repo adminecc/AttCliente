@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         agradecimientos: document.getElementById('seccionAgradecimientos'),
         objetos: document.getElementById('seccionObjetos'),
         tarjetas: document.getElementById('seccionTarjetas'),
+
         consentimiento: document.getElementById('seccionConsentimiento')
     };
     
@@ -39,6 +40,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const trenIncidencia = document.getElementById('trenIncidencia');
     const grupoOtroLugarIncidencia = document.getElementById('grupoOtroLugarIncidencia');
     const otroLugarIncidencia = document.getElementById('otroLugarIncidencia');
+    const lugarSugerencia = document.getElementById('lugarSugerencia');
+    const grupoTrenSugerencia = document.getElementById('grupoTrenSugerencia');
+    const trenSugerencia = document.getElementById('trenSugerencia');
+    const grupoOtroLugarSugerencia = document.getElementById('grupoOtroLugarSugerencia');
+    const otroLugarSugerencia = document.getElementById('otroLugarSugerencia');
     const descripcionCorta = document.getElementById('descripcionCorta');
     const charCount = document.getElementById('charCount');
     
@@ -165,6 +171,18 @@ document.addEventListener('DOMContentLoaded', () => {
         // Resetear campos required según la sección
         actualizarCamposRequired(tipo);
         
+        // Mostrar u ocultar la opción de respuesta postal según proceda (no aplica a tarjetas)
+        const recibirPostal = document.getElementById('recibirPostal');
+        const containerRecibirPostal = recibirPostal ? recibirPostal.closest('.form-group') : null;
+        if (containerRecibirPostal) {
+            containerRecibirPostal.classList.toggle('hidden', tipo === 'tarjetas');
+            if (tipo === 'tarjetas') {
+                recibirPostal.checked = false;
+                const direccionContactoContainer = document.getElementById('direccionContactoContainer');
+                if (direccionContactoContainer) direccionContactoContainer.classList.add('hidden');
+            }
+        }
+        
         // Scroll suave al inicio del formulario
         formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -180,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         // Los campos de datos personales siempre son required
-        const camposPersonalesRequired = ['tipoDocumento', 'numeroDocumento', 'nombre', 'apellidos', 'email'];
+        const camposPersonalesRequired = ['tipoDocumento', 'numeroDocumento', 'nombre', 'apellidos', 'email', 'confirmEmail', 'telefono'];
         camposPersonalesRequired.forEach(id => {
             const campo = document.getElementById(id);
             if (campo) campo.setAttribute('required', '');
@@ -190,9 +208,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const camposEspecificos = {
             reclamaciones: ['clasificacion', 'canalRecepcion', 'fechaIncidencia', 'tipologia', 'lugarIncidencia', 'descripcionCorta', 'descripcionDetallada'],
             consultas: ['descripcionCortaConsulta', 'descripcionDetalladaConsulta'],
-            sugerencias: ['areaSugerencia', 'tituloSugerencia', 'descripcionSugerencia'],
+            sugerencias: ['areaSugerencia', 'lugarSugerencia', 'descripcionSugerencia'],
             agradecimientos: ['motivoAgradecimiento', 'descripcionAgradecimiento'],
-            objetos: ['tipoObjeto', 'categoriaObjeto', 'fechaPerdida', 'descripcionObjeto'],
+            objetos: ['fechaPerdida', 'lineaMetroObjetos', 'dondePerdidoObjetos', 'nombreObjetoObjetos', 'descripcionObjeto'],
             tarjetas: ['motivoTarjeta', 'tipoTarjeta', 'fechaNacimiento', 'direccionCompleta', 'codigoPostal', 'municipio', 'provincia', 'puntoRecogida']
         };
         
@@ -223,16 +241,24 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Muestra campos opcionales según Estación / Lugar
      */
-    function actualizarCamposLugarIncidencia(lugarValue) {
-        if (grupoTrenIncidencia && trenIncidencia) {
-            grupoTrenIncidencia.classList.toggle('hidden', lugarValue !== 'tren');
-            if (lugarValue !== 'tren') trenIncidencia.value = '';
+    function actualizarCamposLugar(lugarValue, grupoTren, tren, grupoOtroLugar, otroLugar) {
+        if (grupoTren && tren) {
+            grupoTren.classList.toggle('hidden', lugarValue !== 'tren');
+            if (lugarValue !== 'tren') tren.value = '';
         }
 
-        if (grupoOtroLugarIncidencia && otroLugarIncidencia) {
-            grupoOtroLugarIncidencia.classList.toggle('hidden', lugarValue !== 'otro');
-            if (lugarValue !== 'otro') otroLugarIncidencia.value = '';
+        if (grupoOtroLugar && otroLugar) {
+            grupoOtroLugar.classList.toggle('hidden', lugarValue !== 'otro');
+            if (lugarValue !== 'otro') otroLugar.value = '';
         }
+    }
+
+    function actualizarCamposLugarIncidencia(lugarValue) {
+        actualizarCamposLugar(lugarValue, grupoTrenIncidencia, trenIncidencia, grupoOtroLugarIncidencia, otroLugarIncidencia);
+    }
+
+    function actualizarCamposLugarSugerencia(lugarValue) {
+        actualizarCamposLugar(lugarValue, grupoTrenSugerencia, trenSugerencia, grupoOtroLugarSugerencia, otroLugarSugerencia);
     }
     
     /**
@@ -258,12 +284,26 @@ document.addEventListener('DOMContentLoaded', () => {
         
         camposRequired.forEach(campo => {
             // Solo validar campos visibles
-            const seccion = campo.closest('.form-section');
-            if (seccion && !seccion.classList.contains('hidden')) {
+
+            if (!campo.closest('.hidden')) {
                 if (!campo.value.trim()) {
                     campo.classList.add('error');
                     esValido = false;
                     if (!primerError) primerError = campo;
+                }
+            }
+        });
+
+        // Validar campos PAN con longitudes exactas (solo si son visibles)
+        const inputsPan = form.querySelectorAll('.input-pan');
+        inputsPan.forEach(input => {
+            if (!input.closest('.hidden')) {
+                const val = input.value.trim();
+                const maxLength = parseInt(input.getAttribute('maxlength'), 10);
+                if (val.length !== maxLength || /\D/.test(val)) {
+                    input.classList.add('error');
+                    esValido = false;
+                    if (!primerError) primerError = input;
                 }
             }
         });
@@ -277,10 +317,16 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Validar email
         const email = document.getElementById('email');
+        const confirmEmail = document.getElementById('confirmEmail');
         if (email.value && !validarEmail(email.value)) {
             email.classList.add('error');
             esValido = false;
             if (!primerError) primerError = email;
+        }
+        if (confirmEmail && confirmEmail.value && (confirmEmail.value !== email.value || !validarEmail(confirmEmail.value))) {
+            confirmEmail.classList.add('error');
+            esValido = false;
+            if (!primerError) primerError = confirmEmail;
         }
         
         if (primerError) {
@@ -322,11 +368,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Ocultar campos opcionales de ubicación
         actualizarCamposLugarIncidencia('');
+        actualizarCamposLugarSugerencia('');
+        const recibirPostal = document.getElementById('recibirPostal');
+        if (recibirPostal) recibirPostal.checked = false;
+        const direccionContactoContainer = document.getElementById('direccionContactoContainer');
+        if (direccionContactoContainer) direccionContactoContainer.classList.add('hidden');
         const grupoTrenConsulta = document.getElementById('grupoTrenConsulta');
         if (grupoTrenConsulta) grupoTrenConsulta.classList.add('hidden');
         const grupoOtroLugarConsulta = document.getElementById('grupoOtroLugarConsulta');
         if (grupoOtroLugarConsulta) grupoOtroLugarConsulta.classList.add('hidden');
         
+        // Limpiar y ocultar bloques condicionales de títulos de viaje
+        if (typeof ocultarYResetearTodosLosBloques === 'function') {
+            ocultarYResetearTodosLosBloques();
+        }
+
         // Scroll al inicio
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -369,6 +425,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (lugarIncidencia) {
         lugarIncidencia.addEventListener('change', (e) => {
             actualizarCamposLugarIncidencia(e.target.value);
+        });
+    }
+
+    if (lugarSugerencia) {
+        lugarSugerencia.addEventListener('change', (e) => {
+            actualizarCamposLugarSugerencia(e.target.value);
         });
     }
     
@@ -481,6 +543,33 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    // Validación en tiempo real del confirmEmail y bloqueo de paste
+    const confirmEmailInput = document.getElementById('confirmEmail');
+    if (confirmEmailInput && emailInput) {
+        confirmEmailInput.addEventListener('blur', (e) => {
+            if (e.target.value && (e.target.value !== emailInput.value || !validarEmail(e.target.value))) {
+                e.target.classList.add('error');
+            } else {
+                e.target.classList.remove('error');
+            }
+        });
+
+        confirmEmailInput.addEventListener('paste', (e) => {
+            e.preventDefault();
+        });
+
+        // Al perder el foco el email principal, si ya hay valor en la confirmación, re-validar coincidencia
+        emailInput.addEventListener('blur', (e) => {
+            if (confirmEmailInput.value) {
+                if (confirmEmailInput.value !== e.target.value) {
+                    confirmEmailInput.classList.add('error');
+                } else {
+                    confirmEmailInput.classList.remove('error');
+                }
+            }
+        });
+    }
+    
     // Preview de foto carnet
     const fotoCarnet = document.getElementById('fotoCarnet');
     const fotoPreview = document.getElementById('fotoPreview');
@@ -554,6 +643,431 @@ document.addEventListener('DOMContentLoaded', () => {
     if (descripcionCortaConsulta && charCountConsulta) {
         descripcionCortaConsulta.addEventListener('input', (e) => {
             charCountConsulta.textContent = e.target.value.length;
+        });
+    }
+
+    // Listener para desplegar Dirección de Contacto al marcar "Deseo recibir respuesta por correo postal"
+    const recibirPostal = document.getElementById('recibirPostal');
+    const direccionContactoContainer = document.getElementById('direccionContactoContainer');
+    if (recibirPostal && direccionContactoContainer) {
+        recibirPostal.addEventListener('change', (e) => {
+            direccionContactoContainer.classList.toggle('hidden', !e.target.checked);
+        });
+    }
+
+    // ============================================
+    // GESTIÓN CONDICIONAL POR TIPO DE TÍTULO (RECLAMACIONES)
+    // ============================================
+    const dabsPorEstacion = {
+        'guadalmedina-l1': ['DAB-G1-01', 'DAB-G1-02'],
+        'guadalmedina-l2': ['DAB-G2-01', 'DAB-G2-02'],
+        'atarazanas': ['DAB-AT-01', 'DAB-AT-02', 'DAB-AT-03'],
+        'andalucia-tech': ['DAB-AT-04', 'DAB-AT-05'],
+        'carranque': ['DAB-CA-01', 'DAB-CA-02'],
+        'barbarela': ['DAB-BA-01', 'DAB-BA-02'],
+        'el-clinico': ['DAB-EC-01', 'DAB-EC-02'],
+        'la-union': ['DAB-LU-01', 'DAB-LU-02'],
+        'universidad': ['DAB-UN-01', 'DAB-UN-02'],
+        'ciudad-justicia': ['DAB-CJ-01', 'DAB-CJ-02'],
+        'el-consul': ['DAB-CO-01', 'DAB-CO-02'],
+        'el-perchel-l1': ['DAB-P1-01', 'DAB-P1-02', 'DAB-P1-03'],
+        'el-perchel-l2': ['DAB-P2-01', 'DAB-P2-02'],
+        'paraninfo': ['DAB-PA-01', 'DAB-PA-02'],
+        'portada-alta': ['DAB-PO-01', 'DAB-PO-02'],
+        'la-luz-la-paz': ['DAB-LL-01', 'DAB-LL-02'],
+        'la-isla': ['DAB-LI-01', 'DAB-LI-02'],
+        'puerta-blanca': ['DAB-PB-01', 'DAB-PB-02'],
+        'princesa-huelin': ['DAB-PH-01', 'DAB-PH-02'],
+        'el-torcal': ['DAB-TO-01', 'DAB-TO-02'],
+        'palacio-deportes': ['DAB-PD-01', 'DAB-PD-02']
+    };
+
+    function resetearBloque(bloque) {
+        if (!bloque) return;
+        bloque.querySelectorAll('input, select, textarea').forEach(campo => {
+            if (campo.type === 'checkbox' || campo.type === 'radio') {
+                campo.checked = false;
+            } else {
+                campo.value = '';
+            }
+            campo.classList.remove('error');
+        });
+        bloque.querySelectorAll('.form-grid, .form-group').forEach(subBloque => {
+            if (subBloque.id && (
+                subBloque.id.startsWith('bloqueOnline') || 
+                subBloque.id.startsWith('bloqueMaquina') || 
+                subBloque.id.startsWith('bloqueTituloRecargado') || 
+                subBloque.id.startsWith('bloqueDabTarjeta') || 
+                subBloque.id.startsWith('bloqueTarjetaOtras') ||
+                subBloque.id.startsWith('bloqueTituloViajeObjetos') ||
+                subBloque.id.startsWith('bloqueTarjetaBancariaObjetos') ||
+                subBloque.id.startsWith('bloqueEstacionObjetos') ||
+                subBloque.id.startsWith('bloqueTrenObjetos')
+            )) {
+                subBloque.classList.add('hidden');
+            }
+        });
+    }
+
+    function ocultarYResetearTodosLosBloques() {
+        const bloques = [
+            'bloqueTituloViaje',
+            'bloqueEMV',
+            'bloqueABT',
+            'bloqueOnline',
+            'bloqueMaquina',
+            'bloqueTituloRecargado',
+            'bloqueDabTarjeta',
+            'bloqueTarjetaOtras2',
+            'bloqueTarjetaOtras3',
+            'bloqueTituloViajeObjetos',
+            'bloqueTarjetaBancariaObjetos',
+            'bloqueEstacionObjetos',
+            'bloqueTrenObjetos'
+        ];
+        bloques.forEach(id => {
+            const bloque = document.getElementById(id);
+            if (bloque) {
+                resetearBloque(bloque);
+                bloque.classList.add('hidden');
+            }
+        });
+    }
+
+    // Sanitizador PAN: Solo números
+    const inputsPan = document.querySelectorAll('.input-pan');
+    inputsPan.forEach(input => {
+        input.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+    });
+
+    // Event Listener Principal para tipo de título
+    const tipoTitulo = document.getElementById('tipoTitulo');
+    const bloqueTituloViaje = document.getElementById('bloqueTituloViaje');
+    const bloqueEMV = document.getElementById('bloqueEMV');
+    const bloqueABT = document.getElementById('bloqueABT');
+
+    if (tipoTitulo) {
+        tipoTitulo.addEventListener('change', (e) => {
+            ocultarYResetearTodosLosBloques();
+            const opcion = e.target.value;
+            const opcionesTituloViaje = [
+                'monedero-metro-malaga',
+                'billete-ocasional',
+                'masmetro',
+                'tarjeta-consorcio',
+                'tarjeta-consorcio-joven',
+                'tarjeta-consorcio-familia-numerosa'
+            ];
+
+            if (opcionesTituloViaje.includes(opcion)) {
+                if (bloqueTituloViaje) bloqueTituloViaje.classList.remove('hidden');
+            } else if (opcion === 'pago-tarjeta-ocasional') {
+                if (bloqueEMV) bloqueEMV.classList.remove('hidden');
+            } else if (opcion === 'metropay') {
+                if (bloqueABT) bloqueABT.classList.remove('hidden');
+            }
+        });
+    }
+
+    // Sub-condicionales: Punto de venta o recarga
+    const puntoVentaRecarga = document.getElementById('punto_venta_recarga');
+    const bloqueOnline = document.getElementById('bloqueOnline');
+    const bloqueMaquina = document.getElementById('bloqueMaquina');
+    if (puntoVentaRecarga) {
+        puntoVentaRecarga.addEventListener('change', (e) => {
+            const opcion = e.target.value;
+            if (opcion === 'Online') {
+                if (bloqueOnline) bloqueOnline.classList.remove('hidden');
+                if (bloqueMaquina) {
+                    resetearBloque(bloqueMaquina);
+                    bloqueMaquina.classList.add('hidden');
+                }
+            } else if (opcion === 'Maquina') {
+                if (bloqueMaquina) bloqueMaquina.classList.remove('hidden');
+                if (bloqueOnline) {
+                    resetearBloque(bloqueOnline);
+                    bloqueOnline.classList.add('hidden');
+                }
+            } else {
+                if (bloqueOnline) {
+                    resetearBloque(bloqueOnline);
+                    bloqueOnline.classList.add('hidden');
+                }
+                if (bloqueMaquina) {
+                    resetearBloque(bloqueMaquina);
+                    bloqueMaquina.classList.add('hidden');
+                }
+            }
+        });
+    }
+
+    // Filtrado de DABs por estación
+    const estacionSelect = document.getElementById('estacion');
+    const numeroDabSelect = document.getElementById('numero_dab');
+    if (estacionSelect && numeroDabSelect) {
+        estacionSelect.addEventListener('change', (e) => {
+            const estacion = e.target.value;
+            numeroDabSelect.innerHTML = '<option value="">Seleccione...</option>';
+            if (estacion && dabsPorEstacion[estacion]) {
+                dabsPorEstacion[estacion].forEach(dab => {
+                    const option = document.createElement('option');
+                    option.value = dab;
+                    option.textContent = dab;
+                    numeroDabSelect.appendChild(option);
+                });
+            } else {
+                const option = document.createElement('option');
+                option.value = "";
+                option.textContent = "Seleccione primero una estación...";
+                numeroDabSelect.appendChild(option);
+            }
+        });
+    }
+
+    // Sub-condicionales de tipo_operacion
+    const tipoOperacion = document.getElementById('tipo_operacion');
+    const bloqueTituloRecargado = document.getElementById('bloqueTituloRecargado');
+    if (tipoOperacion) {
+        tipoOperacion.addEventListener('change', (e) => {
+            if (e.target.value === 'Recarga') {
+                if (bloqueTituloRecargado) bloqueTituloRecargado.classList.remove('hidden');
+            } else {
+                if (bloqueTituloRecargado) {
+                    resetearBloque(bloqueTituloRecargado);
+                    bloqueTituloRecargado.classList.add('hidden');
+                }
+            }
+        });
+    }
+
+    // Sub-condicionales de modo_pago
+    const modoPago = document.getElementById('modo_pago');
+    const bloqueDabTarjeta = document.getElementById('bloqueDabTarjeta');
+    if (modoPago) {
+        modoPago.addEventListener('change', (e) => {
+            if (e.target.value === 'Tarjeta') {
+                if (bloqueDabTarjeta) bloqueDabTarjeta.classList.remove('hidden');
+            } else {
+                if (bloqueDabTarjeta) {
+                    resetearBloque(bloqueDabTarjeta);
+                    bloqueDabTarjeta.classList.add('hidden');
+                }
+            }
+        });
+    }
+
+    // Sub-condicionales de tipo_tarjeta_bancaria_2 (EMV)
+    const tipoTarjetaBancaria2 = document.getElementById('tipo_tarjeta_bancaria_2');
+    const bloqueTarjetaOtras2 = document.getElementById('bloqueTarjetaOtras2');
+    if (tipoTarjetaBancaria2) {
+        tipoTarjetaBancaria2.addEventListener('change', (e) => {
+            if (e.target.value === 'Otras') {
+                if (bloqueTarjetaOtras2) bloqueTarjetaOtras2.classList.remove('hidden');
+            } else {
+                if (bloqueTarjetaOtras2) {
+                    resetearBloque(bloqueTarjetaOtras2);
+                    bloqueTarjetaOtras2.classList.add('hidden');
+                }
+            }
+        });
+    }
+
+    // Sub-condicionales de tipo_tarjeta_bancaria_3 (ABT)
+    const tipoTarjetaBancaria3 = document.getElementById('tipo_tarjeta_bancaria_3');
+    const bloqueTarjetaOtras3 = document.getElementById('bloqueTarjetaOtras3');
+    if (tipoTarjetaBancaria3) {
+        tipoTarjetaBancaria3.addEventListener('change', (e) => {
+            if (e.target.value === 'Otras') {
+                if (bloqueTarjetaOtras3) bloqueTarjetaOtras3.classList.remove('hidden');
+            } else {
+                if (bloqueTarjetaOtras3) {
+                    resetearBloque(bloqueTarjetaOtras3);
+                    bloqueTarjetaOtras3.classList.add('hidden');
+                }
+            }
+        });
+    }
+
+    // ============================================
+    // GESTIÓN DINÁMICA DE OBJETOS PERDIDOS
+    // ============================================
+    const estacionesPorLinea = {
+        '1': [
+            { value: 'guadalmedina-l1', text: 'Guadalmedina' },
+            { value: 'atarazanas', text: 'Atarazanas' },
+            { value: 'andalucia-tech', text: 'Andalucía Tech' },
+            { value: 'carranque', text: 'Carranque' },
+            { value: 'barbarela', text: 'Barbarela' },
+            { value: 'el-clinico', text: 'El Clínico' },
+            { value: 'la-union', text: 'La Unión' },
+            { value: 'universidad', text: 'Universidad' },
+            { value: 'ciudad-justicia', text: 'Ciudad de la Justicia' },
+            { value: 'el-consul', text: 'El Cónsul' },
+            { value: 'el-perchel-l1', text: 'El Perchel' },
+            { value: 'paraninfo', text: 'Paraninfo' },
+            { value: 'portada-alta', text: 'Portada Alta' }
+        ],
+        '2': [
+            { value: 'guadalmedina-l2', text: 'Guadalmedina' },
+            { value: 'la-luz-la-paz', text: 'La Luz - La Paz' },
+            { value: 'la-isla', text: 'La Isla' },
+            { value: 'el-perchel-l2', text: 'El Perchel' },
+            { value: 'puerta-blanca', text: 'Puerta Blanca' },
+            { value: 'princesa-huelin', text: 'Princesa - Huelin' },
+            { value: 'el-torcal', text: 'El Torcal' },
+            { value: 'palacio-deportes', text: 'Palacio de los Deportes' }
+        ],
+        'ambas': [
+            { value: 'guadalmedina-l1', text: 'Guadalmedina' },
+            { value: 'atarazanas', text: 'Atarazanas' },
+            { value: 'andalucia-tech', text: 'Andalucía Tech' },
+            { value: 'carranque', text: 'Carranque' },
+            { value: 'barbarela', text: 'Barbarela' },
+            { value: 'el-clinico', text: 'El Clínico' },
+            { value: 'la-union', text: 'La Unión' },
+            { value: 'universidad', text: 'Universidad' },
+            { value: 'ciudad-justicia', text: 'Ciudad de la Justicia' },
+            { value: 'el-consul', text: 'El Cónsul' },
+            { value: 'el-perchel-l1', text: 'El Perchel' },
+            { value: 'paraninfo', text: 'Paraninfo' },
+            { value: 'portada-alta', text: 'Portada Alta' },
+            { value: 'guadalmedina-l2', text: 'Guadalmedina' },
+            { value: 'la-luz-la-paz', text: 'La Luz - La Paz' },
+            { value: 'la-isla', text: 'La Isla' },
+            { value: 'el-perchel-l2', text: 'El Perchel' },
+            { value: 'puerta-blanca', text: 'Puerta Blanca' },
+            { value: 'princesa-huelin', text: 'Princesa - Huelin' },
+            { value: 'el-torcal', text: 'El Torcal' },
+            { value: 'palacio-deportes', text: 'Palacio de los Deportes' }
+        ]
+    };
+
+    // 1. Desplegable tipo de título para Objetos
+    const tipoTituloObjetos = document.getElementById('tipoTituloObjetos');
+    const bloqueTituloViajeObjetos = document.getElementById('bloqueTituloViajeObjetos');
+    const bloqueTarjetaBancariaObjetos = document.getElementById('bloqueTarjetaBancariaObjetos');
+
+    if (tipoTituloObjetos) {
+        tipoTituloObjetos.addEventListener('change', (e) => {
+            const opcion = e.target.value;
+            
+            // Ocultar y resetear bloques específicos de Objetos
+            if (bloqueTituloViajeObjetos) {
+                resetearBloque(bloqueTituloViajeObjetos);
+                bloqueTituloViajeObjetos.classList.add('hidden');
+            }
+            if (bloqueTarjetaBancariaObjetos) {
+                resetearBloque(bloqueTarjetaBancariaObjetos);
+                bloqueTarjetaBancariaObjetos.classList.add('hidden');
+            }
+
+            const opcionesFisicas = [
+                'monedero-metro-malaga',
+                'billete-ocasional',
+                'masmetro',
+                'tarjeta-consorcio',
+                'tarjeta-consorcio-joven',
+                'tarjeta-consorcio-familia-numerosa'
+            ];
+            const opcionesBancarias = [
+                'pago-tarjeta-ocasional',
+                'metropay'
+            ];
+
+            if (opcionesFisicas.includes(opcion)) {
+                if (bloqueTituloViajeObjetos) bloqueTituloViajeObjetos.classList.remove('hidden');
+            } else if (opcionesBancarias.includes(opcion)) {
+                if (bloqueTarjetaBancariaObjetos) bloqueTarjetaBancariaObjetos.classList.remove('hidden');
+            }
+        });
+    }
+
+    // 2. Filtrado dinámico de estaciones por línea
+    const lineaMetroObjetos = document.getElementById('lineaMetroObjetos');
+    const estacionPerdidaObjetos = document.getElementById('estacionPerdidaObjetos');
+    const estacionOrigenObjetos = document.getElementById('estacionOrigenObjetos');
+    const estacionDestinoObjetos = document.getElementById('estacionDestinoObjetos');
+
+    function poblarSelectEstaciones(select, lista) {
+        if (!select) return;
+        select.innerHTML = '<option value="">Seleccione...</option>';
+        lista.forEach(estacion => {
+            const option = document.createElement('option');
+            option.value = estacion.value;
+            option.textContent = estacion.text;
+            select.appendChild(option);
+        });
+    }
+
+    function resetearSelectEstaciones(select) {
+        if (!select) return;
+        select.innerHTML = '<option value="">Seleccione primero una línea...</option>';
+    }
+
+    if (lineaMetroObjetos) {
+        lineaMetroObjetos.addEventListener('change', (e) => {
+            const linea = e.target.value;
+            
+            // Si cambia la línea, resetear valores seleccionados de ubicación
+            if (estacionPerdidaObjetos) {
+                estacionPerdidaObjetos.value = '';
+                estacionPerdidaObjetos.classList.remove('error');
+            }
+            if (estacionOrigenObjetos) {
+                estacionOrigenObjetos.value = '';
+                estacionOrigenObjetos.classList.remove('error');
+            }
+            if (estacionDestinoObjetos) {
+                estacionDestinoObjetos.value = '';
+                estacionDestinoObjetos.classList.remove('error');
+            }
+
+            if (linea && estacionesPorLinea[linea]) {
+                const lista = estacionesPorLinea[linea];
+                poblarSelectEstaciones(estacionPerdidaObjetos, lista);
+                poblarSelectEstaciones(estacionOrigenObjetos, lista);
+                poblarSelectEstaciones(estacionDestinoObjetos, lista);
+            } else {
+                resetearSelectEstaciones(estacionPerdidaObjetos);
+                resetearSelectEstaciones(estacionOrigenObjetos);
+                resetearSelectEstaciones(estacionDestinoObjetos);
+            }
+        });
+    }
+
+    // 3. ¿Dónde lo has perdido? (Estación vs Tren)
+    const dondePerdidoObjetos = document.getElementById('dondePerdidoObjetos');
+    const bloqueEstacionObjetos = document.getElementById('bloqueEstacionObjetos');
+    const bloqueTrenObjetos = document.getElementById('bloqueTrenObjetos');
+
+    if (dondePerdidoObjetos) {
+        dondePerdidoObjetos.addEventListener('change', (e) => {
+            const opcion = e.target.value;
+            
+            if (opcion === 'estacion') {
+                if (bloqueEstacionObjetos) bloqueEstacionObjetos.classList.remove('hidden');
+                if (bloqueTrenObjetos) {
+                    resetearBloque(bloqueTrenObjetos);
+                    bloqueTrenObjetos.classList.add('hidden');
+                }
+            } else if (opcion === 'tren') {
+                if (bloqueTrenObjetos) bloqueTrenObjetos.classList.remove('hidden');
+                if (bloqueEstacionObjetos) {
+                    resetearBloque(bloqueEstacionObjetos);
+                    bloqueEstacionObjetos.classList.add('hidden');
+                }
+            } else {
+                if (bloqueEstacionObjetos) {
+                    resetearBloque(bloqueEstacionObjetos);
+                    bloqueEstacionObjetos.classList.add('hidden');
+                }
+                if (bloqueTrenObjetos) {
+                    resetearBloque(bloqueTrenObjetos);
+                    bloqueTrenObjetos.classList.add('hidden');
+                }
+            }
         });
     }
 });
