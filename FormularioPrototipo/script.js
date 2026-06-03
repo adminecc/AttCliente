@@ -170,6 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Resetear campos required según la sección
         actualizarCamposRequired(tipo);
+        comprobarCamposObligatorios();
         
 
         
@@ -264,6 +265,33 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Valida el formulario antes del envío
      */
+    /**
+     * Comprueba si todos los campos requeridos visibles están rellenos y habilita/deshabilita el botón de enviar
+     */
+    function comprobarCamposObligatorios() {
+        const camposRequired = form.querySelectorAll('[required]');
+        let todosRellenos = true;
+        
+        camposRequired.forEach(campo => {
+            if (!campo.closest('.hidden')) {
+                if (campo.type === 'checkbox') {
+                    if (!campo.checked) {
+                        todosRellenos = false;
+                    }
+                } else {
+                    if (!campo.value.trim()) {
+                        todosRellenos = false;
+                    }
+                }
+            }
+        });
+        
+        const btnEnviar = document.getElementById('btnEnviar');
+        if (btnEnviar) {
+            btnEnviar.disabled = !todosRellenos;
+        }
+    }
+
     function validarFormulario() {
         const camposRequired = form.querySelectorAll('[required]');
         let primerError = null;
@@ -381,6 +409,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentCount = document.getElementById('charCount_' + textarea.id);
             if (currentCount) currentCount.textContent = '0';
         });
+
+        comprobarCamposObligatorios();
 
         // Scroll al inicio
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1128,4 +1158,11 @@ document.addEventListener('DOMContentLoaded', () => {
             currentCount.textContent = e.target.value.length;
         });
     });
+
+    // Event listeners para habilitar/deshabilitar botón de enviar dinámicamente
+    form.addEventListener('input', comprobarCamposObligatorios);
+    form.addEventListener('change', comprobarCamposObligatorios);
+
+    // Ejecución inicial para asegurar el estado correcto del botón
+    comprobarCamposObligatorios();
 });
