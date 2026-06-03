@@ -546,7 +546,7 @@
                                         </select>
                                     </div>
                                     <div class="form-group">
-                                        <label for="numero_dab" class="label required">Nº DAB</label>
+                                        <label for="numero_dab" class="label">Nº de Máquina de venta y recarga (si lo conoce)</label>
                                         <select id="numero_dab" name="numero_dab" class="select" required>
                                             <option value="">Seleccione primero una estación...</option>
                                         </select>
@@ -827,8 +827,51 @@
                             <span class="section-icon">💡</span>
                             Su sugerencia
                         </h2>
+                        <!-- Subsección 1: Datos del Usuario -->
+                        <h3 class="subsection-title" style="grid-column: 1 / -1; margin-top: 0; font-size: 1.125rem; font-weight: 600; color: var(--color-primary); border-bottom: 1px solid var(--color-gray-200); padding-bottom: var(--spacing-xs); margin-bottom: var(--spacing-md);">
+                            Datos del Usuario
+                        </h3>
+                        <div class="form-grid" style="margin-bottom: var(--spacing-lg); grid-column: 1 / -1;">
+                            <div class="form-group full-width">
+                                <label for="tipoTituloObjetos" class="label">Tipo de título de viaje</label>
+                                <select id="tipoTituloObjetos" name="tipoTituloObjetos" class="select">
+                                    <option value="">Seleccione si procede...</option>
+                                    <option value="monedero-metro-malaga">Monedero Metro Málaga</option>
+                                    <option value="billete-ocasional">Ocasional Metro de Málaga</option>
+                                    <option value="masmetro">Tarjeta +Metro</option>
+                                    <option value="tarjeta-consorcio">Tarjeta Monedero Consorcio de Transportes</option>
+                                    <option value="tarjeta-consorcio-joven">Tarjeta Joven Consorcio de Transportes</option>
+                                    <option value="tarjeta-consorcio-familia-numerosa">Tarjeta Familia Numerosa Consorcio de Transportes</option>
+                                    <option value="pago-tarjeta-ocasional">Pago del viaje con sistema EMV (teléfono móvil o tarjeta de crédito no registrada)</option>
+                                    <option value="metropay">Pago del viaje con ABT (tarjeta de crédito registrada en Metro Pay)</option>
+                                </select>
+                            </div>
+
+                            <!-- Condicional Bloque 1 (Tarjetas físicas) -->
+                            <div id="bloqueTituloViajeObjetos" class="form-group full-width hidden">
+                                <label for="numeracion_titulo_viaje_objetos" class="label required">Numeración del título de viaje</label>
+                                <input type="text" id="numeracion_titulo_viaje_objetos" name="numeracion_titulo_viaje_objetos" class="input" required placeholder="Ej: 1000234567">
+                            </div>
+
+                            <!-- Condicional Bloque 2 (Tarjetas bancarias EMV/ABT) -->
+                            <div id="bloqueTarjetaBancariaObjetos" class="form-grid full-width hidden" style="grid-column: 1 / -1; gap: var(--spacing-md);">
+                                <div class="form-group">
+                                    <label for="pan_tarjeta_primeros_6_objetos" class="label required">PAN tarjeta — primeros seis dígitos</label>
+                                    <input type="text" id="pan_tarjeta_primeros_6_objetos" name="pan_tarjeta_primeros_6_objetos" class="input input-pan" required placeholder="123456" maxlength="6">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pan_tarjeta_ultimos_4_objetos" class="label required">PAN tarjeta — cuatro últimos dígitos</label>
+                                    <input type="text" id="pan_tarjeta_ultimos_4_objetos" name="pan_tarjeta_ultimos_4_objetos" class="input input-pan" required placeholder="1234" maxlength="4">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subsección 2: Sugerencia -->
+                        <h3 class="subsection-title" style="grid-column: 1 / -1; margin-top: var(--spacing-md); font-size: 1.125rem; font-weight: 600; color: var(--color-primary); border-bottom: 1px solid var(--color-gray-200); padding-bottom: var(--spacing-xs); margin-bottom: var(--spacing-md);">
+                            Sugerencia
+                        </h3>
                         <div class="form-grid">
-                            <div class="form-group">
+                            <!--<div class="form-group">
                                 <label for="areaSugerencia" class="label required">Área de mejora</label>
                                 <select id="areaSugerencia" name="areaSugerencia" class="select" required>
                                     <option value="">Seleccione...</option>
@@ -843,8 +886,8 @@
                                     <option value="titulos">Títulos de transporte</option>
                                     <option value="otros">Otros</option>
                                 </select>
-                            </div>
-                            <div class="form-group">
+                            </div>-->
+                            <!--<div class="form-group">
                                 <label for="estacionSugerencia" class="label">Estación relacionada</label>
                                 <select id="estacionSugerencia" name="estacionSugerencia" class="select">
                                     <option value="">General / Ninguna específica</option>
@@ -874,10 +917,76 @@
                                         <option value="palacio-deportes">Palacio de los Deportes</option>
                                     </optgroup>
                                 </select>
+                            </div>-->
+                            <div class="form-group">
+                                <label for="lugarSugerencia" class="label required">Estación / Lugar</label>
+                                <select id="lugarSugerencia" name="lugarSugerencia" class="select" required>
+                                    <option value="">Seleccione estación...</option>
+                                    <option value="">General / Ninguna específica</option>
+                                    <optgroup label="Línea 1">
+                                        <option value="l1-gral">Línea 1 en general</option>
+                                        <option value="guadalmedina-l1">Guadalmedina</option>
+                                        <option value="atarazanas">Atarazanas</option>
+                                        <option value="andalucia-tech">Andalucía Tech</option>
+                                        <option value="carranque">Carranque</option>
+                                        <option value="barbarela">Barbarela</option>
+                                        <option value="el-clinico">El Clínico</option>
+                                        <option value="la-union">La Unión</option>
+                                        <option value="universidad">Universidad</option>
+                                        <option value="ciudad-justicia">Ciudad de la Justicia</option>
+                                        <option value="el-consul">El Cónsul</option>
+                                        <option value="el-perchel-l1">El Perchel</option>
+                                        <option value="paraninfo">Paraninfo</option>
+                                        <option value="portada-alta">Portada Alta</option>
+                                    </optgroup>
+                                    <optgroup label="Línea 2">
+                                        <option value="l2-gral">Línea 2 en general</option>
+                                        <option value="guadalmedina-l2">Guadalmedina</option>
+                                        <option value="la-luz-la-paz">La Luz - La Paz</option>
+                                        <option value="la-isla">La Isla</option>
+                                        <option value="el-perchel-l2">El Perchel</option>
+                                        <option value="puerta-blanca">Puerta Blanca</option>
+                                        <option value="princesa-huelin">Princesa - Huelin</option>
+                                        <option value="el-torcal">El Torcal</option>
+                                        <option value="palacio-deportes">Palacio de los Deportes</option>
+                                    </optgroup>
+                                    <optgroup label="Otras ubicaciones">
+                                        <option value="general">Toda la red de Metro Málaga</option>
+                                        <option value="tren">Interior del tren</option>
+                                        <option value="otro">Otra ubicación</option>
+                                    </optgroup>
+                                </select>
                             </div>
-                            <div class="form-group full-width">
-                                <label for="tituloSugerencia" class="label required">Título de la sugerencia</label>
-                                <input type="text" id="tituloSugerencia" name="tituloSugerencia" class="input" required placeholder="Resuma su sugerencia...">
+                            <div class="form-group hidden" id="grupoTrenSugerencia">
+                                <label for="trenSugerencia" class="label">Tren</label>
+                                <select id="trenSugerencia" name="trenSugerencia" class="select">
+                                    <option value="">Seleccione tren...</option>
+                                    <option value="1">Tren 1</option>
+                                    <option value="2">Tren 2</option>
+                                    <option value="3">Tren 3</option>
+                                    <option value="4">Tren 4</option>
+                                    <option value="5">Tren 5</option>
+                                    <option value="6">Tren 6</option>
+                                    <option value="7">Tren 7</option>
+                                    <option value="8">Tren 8</option>
+                                    <option value="9">Tren 9</option>
+                                    <option value="10">Tren 10</option>
+                                    <option value="11">Tren 11</option>
+                                    <option value="12">Tren 12</option>
+                                    <option value="13">Tren 13</option>
+                                    <option value="14">Tren 14</option>
+                                    <option value="15">Tren 15</option>
+                                    <option value="16">Tren 16</option>
+                                    <option value="17">Tren 17</option>
+                                    <option value="18">Tren 18</option>
+                                    <option value="19">Tren 19</option>
+                                    <option value="20">Tren 20</option>
+                                    <option value="21">Tren 21</option>
+                                </select>
+                            </div>
+                            <div class="form-group hidden" id="grupoOtroLugarSugerencia">
+                                <label for="otroLugarSugerencia" class="label">Otro lugar</label>
+                                <input type="text" id="otroLugarSugerencia" name="otroLugarSugerencia" class="input" placeholder="Indique el lugar...">
                             </div>
                             <div class="form-group full-width">
                                 <label for="descripcionSugerencia" class="label required">Descripción de la sugerencia</label>
@@ -1019,6 +1128,7 @@
                                     <option value="">Seleccione...</option>
                                     <option value="1">Línea 1</option>
                                     <option value="2">Línea 2</option>
+                                    <option value="ambas">Ambas</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -1041,8 +1151,8 @@
                             <!-- Sub-bloque: En un tren -->
                             <div id="bloqueTrenObjetos" class="form-grid full-width hidden" style="grid-column: 1 / -1; gap: var(--spacing-md);">
                                 <div class="form-group full-width">
-                                    <label for="numeroTrenObjetos" class="label">Indique el número de tren si lo conoce</label>
-                                    <input type="text" id="numeroTrenObjetos" name="numeroTrenObjetos" class="input" placeholder="Ej: UT-105">
+                                    <label for="numeroTrenObjetos" class="label">Indique la numeración que conozca del tren en caso de conocerla</label>
+                                    <input type="text" id="numeroTrenObjetos" name="numeroTrenObjetos" class="input" placeholder="Ej: 4182, Tren 4..." maxlength="20">
                                 </div>
                                 <div class="form-group">
                                     <label for="estacionOrigenObjetos" class="label required">Estación de origen de tu viaje</label>

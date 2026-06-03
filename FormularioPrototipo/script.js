@@ -40,6 +40,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const trenIncidencia = document.getElementById('trenIncidencia');
     const grupoOtroLugarIncidencia = document.getElementById('grupoOtroLugarIncidencia');
     const otroLugarIncidencia = document.getElementById('otroLugarIncidencia');
+    const lugarSugerencia = document.getElementById('lugarSugerencia');
+    const grupoTrenSugerencia = document.getElementById('grupoTrenSugerencia');
+    const trenSugerencia = document.getElementById('trenSugerencia');
+    const grupoOtroLugarSugerencia = document.getElementById('grupoOtroLugarSugerencia');
+    const otroLugarSugerencia = document.getElementById('otroLugarSugerencia');
     const descripcionCorta = document.getElementById('descripcionCorta');
     const charCount = document.getElementById('charCount');
     
@@ -203,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const camposEspecificos = {
             reclamaciones: ['clasificacion', 'canalRecepcion', 'fechaIncidencia', 'tipologia', 'lugarIncidencia', 'descripcionCorta', 'descripcionDetallada'],
             consultas: ['descripcionCortaConsulta', 'descripcionDetalladaConsulta'],
-            sugerencias: ['areaSugerencia', 'tituloSugerencia', 'descripcionSugerencia'],
+            sugerencias: ['areaSugerencia', 'lugarSugerencia', 'descripcionSugerencia'],
             agradecimientos: ['motivoAgradecimiento', 'descripcionAgradecimiento'],
             objetos: ['fechaPerdida', 'lineaMetroObjetos', 'dondePerdidoObjetos', 'nombreObjetoObjetos', 'descripcionObjeto'],
             tarjetas: ['motivoTarjeta', 'tipoTarjeta', 'fechaNacimiento', 'direccionCompleta', 'codigoPostal', 'municipio', 'provincia', 'puntoRecogida']
@@ -236,16 +241,24 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Muestra campos opcionales según Estación / Lugar
      */
-    function actualizarCamposLugarIncidencia(lugarValue) {
-        if (grupoTrenIncidencia && trenIncidencia) {
-            grupoTrenIncidencia.classList.toggle('hidden', lugarValue !== 'tren');
-            if (lugarValue !== 'tren') trenIncidencia.value = '';
+    function actualizarCamposLugar(lugarValue, grupoTren, tren, grupoOtroLugar, otroLugar) {
+        if (grupoTren && tren) {
+            grupoTren.classList.toggle('hidden', lugarValue !== 'tren');
+            if (lugarValue !== 'tren') tren.value = '';
         }
 
-        if (grupoOtroLugarIncidencia && otroLugarIncidencia) {
-            grupoOtroLugarIncidencia.classList.toggle('hidden', lugarValue !== 'otro');
-            if (lugarValue !== 'otro') otroLugarIncidencia.value = '';
+        if (grupoOtroLugar && otroLugar) {
+            grupoOtroLugar.classList.toggle('hidden', lugarValue !== 'otro');
+            if (lugarValue !== 'otro') otroLugar.value = '';
         }
+    }
+
+    function actualizarCamposLugarIncidencia(lugarValue) {
+        actualizarCamposLugar(lugarValue, grupoTrenIncidencia, trenIncidencia, grupoOtroLugarIncidencia, otroLugarIncidencia);
+    }
+
+    function actualizarCamposLugarSugerencia(lugarValue) {
+        actualizarCamposLugar(lugarValue, grupoTrenSugerencia, trenSugerencia, grupoOtroLugarSugerencia, otroLugarSugerencia);
     }
     
     /**
@@ -355,6 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Ocultar campos opcionales de ubicación
         actualizarCamposLugarIncidencia('');
+        actualizarCamposLugarSugerencia('');
         const recibirPostal = document.getElementById('recibirPostal');
         if (recibirPostal) recibirPostal.checked = false;
         const direccionContactoContainer = document.getElementById('direccionContactoContainer');
@@ -411,6 +425,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (lugarIncidencia) {
         lugarIncidencia.addEventListener('change', (e) => {
             actualizarCamposLugarIncidencia(e.target.value);
+        });
+    }
+
+    if (lugarSugerencia) {
+        lugarSugerencia.addEventListener('change', (e) => {
+            actualizarCamposLugarSugerencia(e.target.value);
         });
     }
     
@@ -890,6 +910,29 @@ document.addEventListener('DOMContentLoaded', () => {
             { value: 'portada-alta', text: 'Portada Alta' }
         ],
         '2': [
+            { value: 'guadalmedina-l2', text: 'Guadalmedina' },
+            { value: 'la-luz-la-paz', text: 'La Luz - La Paz' },
+            { value: 'la-isla', text: 'La Isla' },
+            { value: 'el-perchel-l2', text: 'El Perchel' },
+            { value: 'puerta-blanca', text: 'Puerta Blanca' },
+            { value: 'princesa-huelin', text: 'Princesa - Huelin' },
+            { value: 'el-torcal', text: 'El Torcal' },
+            { value: 'palacio-deportes', text: 'Palacio de los Deportes' }
+        ],
+        'ambas': [
+            { value: 'guadalmedina-l1', text: 'Guadalmedina' },
+            { value: 'atarazanas', text: 'Atarazanas' },
+            { value: 'andalucia-tech', text: 'Andalucía Tech' },
+            { value: 'carranque', text: 'Carranque' },
+            { value: 'barbarela', text: 'Barbarela' },
+            { value: 'el-clinico', text: 'El Clínico' },
+            { value: 'la-union', text: 'La Unión' },
+            { value: 'universidad', text: 'Universidad' },
+            { value: 'ciudad-justicia', text: 'Ciudad de la Justicia' },
+            { value: 'el-consul', text: 'El Cónsul' },
+            { value: 'el-perchel-l1', text: 'El Perchel' },
+            { value: 'paraninfo', text: 'Paraninfo' },
+            { value: 'portada-alta', text: 'Portada Alta' },
             { value: 'guadalmedina-l2', text: 'Guadalmedina' },
             { value: 'la-luz-la-paz', text: 'La Luz - La Paz' },
             { value: 'la-isla', text: 'La Isla' },
