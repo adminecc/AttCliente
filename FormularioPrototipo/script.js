@@ -350,6 +350,32 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!primerError) primerError = confirmEmail;
         }
         
+        // Validar teléfono español (9 dígitos con prefijo opcional)
+        const telefono = document.getElementById('telefono');
+        if (telefono && telefono.value) {
+            const normalizedPhone = telefono.value.replace(/[\s-]/g, '');
+            const phoneRegex = /^(?:\+34|34|0034)?[6789]\d{8}$/;
+            if (!phoneRegex.test(normalizedPhone)) {
+                telefono.classList.add('error');
+                esValido = false;
+                if (!primerError) primerError = telefono;
+            }
+        }
+
+        // Validar DNI/NIE español
+        const tipoDocumento = document.getElementById('tipoDocumento');
+        const numeroDocumento = document.getElementById('numeroDocumento');
+        if (tipoDocumento && numeroDocumento && numeroDocumento.value) {
+            const tipo = tipoDocumento.value;
+            if (tipo === 'NIF' || tipo === 'NIE') {
+                if (!validarDNI_NIE(numeroDocumento.value)) {
+                    numeroDocumento.classList.add('error');
+                    esValido = false;
+                    if (!primerError) primerError = numeroDocumento;
+                }
+            }
+        }
+        
         if (primerError) {
             primerError.focus();
             primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -364,6 +390,33 @@ document.addEventListener('DOMContentLoaded', () => {
     function validarEmail(email) {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);
+    }
+    
+    /**
+     * Valida formato y letra de DNI/NIE español
+     */
+    function validarDNI_NIE(value) {
+        const cleanValue = value.trim().toUpperCase().replace(/[\s-]/g, '');
+        const dniNieRegex = /^[XYZ\d]\d{7}[A-Z]$/;
+        if (!dniNieRegex.test(cleanValue)) {
+            return false;
+        }
+        
+        let numberStr = cleanValue.substring(0, 8);
+        if (numberStr.startsWith('X')) {
+            numberStr = '0' + numberStr.substring(1);
+        } else if (numberStr.startsWith('Y')) {
+            numberStr = '1' + numberStr.substring(1);
+        } else if (numberStr.startsWith('Z')) {
+            numberStr = '2' + numberStr.substring(1);
+        }
+        
+        const number = parseInt(numberStr, 10);
+        const letter = cleanValue.charAt(8);
+        const validLetters = "TRWAGMYFPDXBNJZSQVHLCKE";
+        const expectedLetter = validLetters.charAt(number % 23);
+        
+        return letter === expectedLetter;
     }
     
     /**
