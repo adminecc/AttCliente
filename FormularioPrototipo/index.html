@@ -206,8 +206,18 @@
                             
 
 
+                            <!-- Checkbox Deseo recibir respuesta por correo postal -->
+                            <div class="form-group full-width" style="margin-top: var(--spacing-sm);">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="recibirPostal" name="recibirPostal" class="checkbox">
+                                    <label for="recibirPostal" class="checkbox-label">
+                                        Deseo recibir respuesta por correo postal
+                                    </label>
+                                </div>
+                            </div>
+
                             <!-- Contenedor de dirección de contacto -->
-                            <div id="direccionContactoContainer" class="form-grid full-width" style="grid-column: 1 / -1; margin-top: var(--spacing-md);">
+                            <div id="direccionContactoContainer" class="form-grid full-width hidden" style="grid-column: 1 / -1; margin-top: var(--spacing-md);">
                                 <div class="form-group">
                                     <label for="viaContacto" class="label required">Calle/plaza/avenida/camino</label>
                                     <input type="text" id="viaContacto" name="viaContacto" class="input" placeholder="Ej: Avenida de Andalucía" required>
@@ -241,13 +251,13 @@
                                     </div>
                                     
                                     <div class="form-group">
-                                        <label for="municipioContacto" class="label">Municipio</label>
-                                        <input type="text" id="municipioContacto" name="municipioContacto" class="input" placeholder="Málaga">
+                                        <label for="municipioContacto" class="label required">Municipio</label>
+                                        <input type="text" id="municipioContacto" name="municipioContacto" class="input" placeholder="Málaga" required>
                                     </div>
                                     
                                     <div class="form-group">
-                                        <label for="provinciaContacto" class="label">Provincia</label>
-                                        <select id="provinciaContacto" name="provinciaContacto" class="select">
+                                        <label for="provinciaContacto" class="label required">Provincia</label>
+                                        <select id="provinciaContacto" name="provinciaContacto" class="select" required>
                                         <option value="">Seleccione...</option>
                                         <option value="NA">N/A</option>
                                         <option value="alava">Álava</option>

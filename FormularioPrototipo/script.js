@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         // Los campos de datos personales siempre son required
-        const camposPersonalesRequired = ['tipoDocumento', 'numeroDocumento', 'nombre', 'apellidos', 'email', 'confirmEmail', 'telefono', 'viaContacto', 'numContacto', 'cpContacto'];
+        const camposPersonalesRequired = ['tipoDocumento', 'numeroDocumento', 'nombre', 'apellidos', 'email', 'confirmEmail', 'telefono', 'viaContacto', 'numContacto', 'cpContacto', 'municipioContacto', 'provinciaContacto'];
         camposPersonalesRequired.forEach(id => {
             const campo = document.getElementById(id);
             if (campo) campo.setAttribute('required', '');
@@ -362,6 +362,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Ocultar campos opcionales de ubicación
         actualizarCamposLugarIncidencia('');
         actualizarCamposLugarSugerencia('');
+        const recibirPostal = document.getElementById('recibirPostal');
+        if (recibirPostal) recibirPostal.checked = false;
+        const direccionContactoContainer = document.getElementById('direccionContactoContainer');
+        if (direccionContactoContainer) direccionContactoContainer.classList.add('hidden');
         const grupoTrenConsulta = document.getElementById('grupoTrenConsulta');
         if (grupoTrenConsulta) grupoTrenConsulta.classList.add('hidden');
         const grupoOtroLugarConsulta = document.getElementById('grupoOtroLugarConsulta');
@@ -1077,6 +1081,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     bloqueTrenObjetos.classList.add('hidden');
                 }
             }
+        });
+    }
+
+    // Listener para desplegar Dirección de Contacto al marcar "Deseo recibir respuesta por correo postal"
+    const recibirPostal = document.getElementById('recibirPostal');
+    const direccionContactoContainer = document.getElementById('direccionContactoContainer');
+    if (recibirPostal && direccionContactoContainer) {
+        recibirPostal.addEventListener('change', (e) => {
+            direccionContactoContainer.classList.toggle('hidden', !e.target.checked);
         });
     }
 });
