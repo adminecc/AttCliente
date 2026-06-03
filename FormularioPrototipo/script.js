@@ -1139,10 +1139,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. ¿Dónde lo has perdido? (Estación vs Tren)
+    // 3. ¿Dónde lo has perdido? (Estación vs Tren vs No lo sé)
     const dondePerdidoObjetos = document.getElementById('dondePerdidoObjetos');
     const bloqueEstacionObjetos = document.getElementById('bloqueEstacionObjetos');
     const bloqueTrenObjetos = document.getElementById('bloqueTrenObjetos');
+    const grupoNumeroTrenObjetos = document.getElementById('grupoNumeroTrenObjetos');
 
     if (dondePerdidoObjetos) {
         dondePerdidoObjetos.addEventListener('change', (e) => {
@@ -1155,7 +1156,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     bloqueTrenObjetos.classList.add('hidden');
                 }
             } else if (opcion === 'tren') {
-                if (bloqueTrenObjetos) bloqueTrenObjetos.classList.remove('hidden');
+                if (bloqueTrenObjetos) {
+                    bloqueTrenObjetos.classList.remove('hidden');
+                    if (grupoNumeroTrenObjetos) grupoNumeroTrenObjetos.classList.remove('hidden');
+                }
+                if (bloqueEstacionObjetos) {
+                    resetearBloque(bloqueEstacionObjetos);
+                    bloqueEstacionObjetos.classList.add('hidden');
+                }
+            } else if (opcion === 'desconocido') {
+                if (bloqueTrenObjetos) {
+                    bloqueTrenObjetos.classList.remove('hidden');
+                    if (grupoNumeroTrenObjetos) {
+                        const inputTren = grupoNumeroTrenObjetos.querySelector('input');
+                        if (inputTren) inputTren.value = '';
+                        grupoNumeroTrenObjetos.classList.add('hidden');
+                    }
+                }
                 if (bloqueEstacionObjetos) {
                     resetearBloque(bloqueEstacionObjetos);
                     bloqueEstacionObjetos.classList.add('hidden');

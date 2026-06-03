@@ -970,7 +970,7 @@
                                     <option value="">Seleccione estación...</option>
                                     <option value="">General / Ninguna específica</option>
                                     <optgroup label="Línea 1">
-                                        <option value="l1-gral">Línea 1 en general</option>
+                                        <option value="l1-gral">Cualquiera de Línea 1</option>
                                         <option value="guadalmedina-l1">Guadalmedina</option>
                                         <option value="atarazanas">Atarazanas</option>
                                         <option value="andalucia-tech">Andalucía Tech</option>
@@ -986,7 +986,7 @@
                                         <option value="portada-alta">Portada Alta</option>
                                     </optgroup>
                                     <optgroup label="Línea 2">
-                                        <option value="l2-gral">Línea 2 en general</option>
+                                        <option value="l2-gral">Cualquiera de Línea 2</option>
                                         <option value="guadalmedina-l2">Guadalmedina</option>
                                         <option value="la-luz-la-paz">La Luz - La Paz</option>
                                         <option value="la-isla">La Isla</option>
@@ -1183,6 +1183,7 @@
                                     <option value="">Seleccione...</option>
                                     <option value="estacion">En una estación</option>
                                     <option value="tren">En un tren</option>
+                                    <option value="desconocido">No lo sé</option>
                                 </select>
                             </div>
 
@@ -1196,7 +1197,7 @@
 
                             <!-- Sub-bloque: En un tren -->
                             <div id="bloqueTrenObjetos" class="form-grid full-width hidden" style="grid-column: 1 / -1; gap: var(--spacing-md);">
-                                <div class="form-group full-width">
+                                <div class="form-group full-width" id="grupoNumeroTrenObjetos">
                                     <label for="numeroTrenObjetos" class="label">Indique la numeración que conozca del tren en caso de conocerla</label>
                                     <input type="text" id="numeroTrenObjetos" name="numeroTrenObjetos" class="input" placeholder="Ej: 4182, Tren 4..." maxlength="20">
                                 </div>
