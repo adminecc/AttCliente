@@ -299,6 +299,9 @@ document.addEventListener('DOMContentLoaded', () => {
         inputsPan.forEach(input => {
             if (!input.closest('.hidden')) {
                 const val = input.value.trim();
+                if (val === '' && !input.hasAttribute('required')) {
+                    return;
+                }
                 const maxLength = parseInt(input.getAttribute('maxlength'), 10);
                 if (val.length !== maxLength || /\D/.test(val)) {
                     input.classList.add('error');
@@ -713,6 +716,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const bloques = [
             'bloqueTituloViaje',
             'bloqueEMV',
+            'bloqueEMVFisica',
+            'bloqueEMVMovil',
             'bloqueABT',
             'bloqueOnline',
             'bloqueMaquina',
@@ -763,8 +768,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (opcionesTituloViaje.includes(opcion)) {
                 if (bloqueTituloViaje) bloqueTituloViaje.classList.remove('hidden');
-            } else if (opcion === 'pago-tarjeta-ocasional') {
+            } else if (opcion === 'pago-emv-fisica' || opcion === 'pago-emv-movil') {
                 if (bloqueEMV) bloqueEMV.classList.remove('hidden');
+                const bloqueEMVFisica = document.getElementById('bloqueEMVFisica');
+                const bloqueEMVMovil = document.getElementById('bloqueEMVMovil');
+                if (opcion === 'pago-emv-fisica') {
+                    if (bloqueEMVFisica) bloqueEMVFisica.classList.remove('hidden');
+                } else if (opcion === 'pago-emv-movil') {
+                    if (bloqueEMVMovil) bloqueEMVMovil.classList.remove('hidden');
+                }
             } else if (opcion === 'metropay') {
                 if (bloqueABT) bloqueABT.classList.remove('hidden');
             }
