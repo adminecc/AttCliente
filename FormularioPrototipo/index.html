@@ -204,6 +204,8 @@
                                 </select>
                             </div>
                             
+
+
                             <!-- Checkbox Deseo recibir respuesta por correo postal -->
                             <div class="form-group full-width" style="margin-top: var(--spacing-sm);">
                                 <div class="checkbox-group">
@@ -214,18 +216,18 @@
                                 </div>
                             </div>
 
-                            <!-- Contenedor desplegable de dirección de contacto -->
-                            <div id="direccionContactoContainer" class="form-grid full-width hidden" style="grid-column: 1 / -1; margin-top: var(--spacing-md); border-top: 1px dashed var(--color-gray-300); padding-top: var(--spacing-md);">
-                                <div class="form-group full-width">
-                                    <label for="viaContacto" class="label">Calle/plaza/avenida/camino</label>
-                                    <input type="text" id="viaContacto" name="viaContacto" class="input" placeholder="Ej: Avenida de Andalucía">
+                            <!-- Contenedor de dirección de contacto -->
+                            <div id="direccionContactoContainer" class="form-grid full-width hidden" style="grid-column: 1 / -1; margin-top: var(--spacing-md);">
+                                <div class="form-group">
+                                    <label for="viaContacto" class="label required">Calle/plaza/avenida/camino</label>
+                                    <input type="text" id="viaContacto" name="viaContacto" class="input" placeholder="Ej: Avenida de Andalucía" required>
                                 </div>
                                 
                                 <div class="form-group">
                                     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--spacing-sm);">
                                         <div class="form-group">
-                                            <label for="numContacto" class="label">Nº</label>
-                                            <input type="text" id="numContacto" name="numContacto" class="input" placeholder="12">
+                                            <label for="numContacto" class="label required">Nº</label>
+                                            <input type="text" id="numContacto" name="numContacto" class="input" placeholder="12" required>
                                         </div>
                                         <div class="form-group">
                                             <label for="escContacto" class="label">Esc.</label>
@@ -242,19 +244,20 @@
                                     </div>
                                 </div>
                                 
-                                <div class="form-group">
-                                    <label for="cpContacto" class="label">Código postal</label>
-                                    <input type="text" id="cpContacto" name="cpContacto" class="input" placeholder="29001" maxlength="5">
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="municipioContacto" class="label">Municipio</label>
-                                    <input type="text" id="municipioContacto" name="municipioContacto" class="input" placeholder="Málaga">
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="provinciaContacto" class="label">Provincia</label>
-                                    <select id="provinciaContacto" name="provinciaContacto" class="select">
+                                <div class="grid-3-cols" style="grid-column: 1 / -1;">
+                                    <div class="form-group">
+                                        <label for="cpContacto" class="label required">Código postal</label>
+                                        <input type="text" id="cpContacto" name="cpContacto" class="input" placeholder="29001" maxlength="5" required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="municipioContacto" class="label required">Municipio</label>
+                                        <input type="text" id="municipioContacto" name="municipioContacto" class="input" placeholder="Málaga" required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="provinciaContacto" class="label required">Provincia</label>
+                                        <select id="provinciaContacto" name="provinciaContacto" class="select" required>
                                         <option value="">Seleccione...</option>
                                         <option value="NA">N/A</option>
                                         <option value="alava">Álava</option>
@@ -408,29 +411,29 @@
                             </div>
                             <div class="form-group hidden" id="grupoTrenIncidencia">
                                 <label for="trenIncidencia" class="label">Tren</label>
-                                <select id="trenIncidencia" name="trenIncidencia" class="select">
+                                <select id="trenConsulta" name="trenConsulta" class="select">
                                     <option value="">Seleccione tren...</option>
-                                    <option value="1">Tren 1</option>
-                                    <option value="2">Tren 2</option>
-                                    <option value="3">Tren 3</option>
-                                    <option value="4">Tren 4</option>
-                                    <option value="5">Tren 5</option>
-                                    <option value="6">Tren 6</option>
-                                    <option value="7">Tren 7</option>
-                                    <option value="8">Tren 8</option>
-                                    <option value="9">Tren 9</option>
-                                    <option value="10">Tren 10</option>
-                                    <option value="11">Tren 11</option>
-                                    <option value="12">Tren 12</option>
-                                    <option value="13">Tren 13</option>
-                                    <option value="14">Tren 14</option>
-                                    <option value="15">Tren 15</option>
-                                    <option value="16">Tren 16</option>
-                                    <option value="17">Tren 17</option>
-                                    <option value="18">Tren 18</option>
-                                    <option value="19">Tren 19</option>
-                                    <option value="20">Tren 20</option>
-                                    <option value="21">Tren 21</option>
+                                    <option value="1">UT-3010</option>
+                                    <option value="2">UT-3020</option>
+                                    <option value="3">UT-3030</option>
+                                    <option value="4">UT-3040</option>
+                                    <option value="5">UT-3050</option>
+                                    <option value="6">UT-3060</option>
+                                    <option value="7">UT-3070</option>
+                                    <option value="8">UT-3080</option>
+                                    <option value="9">UT-3090</option>
+                                    <option value="10">UT-3100</option>
+                                    <option value="11">UT-3110</option>
+                                    <option value="12">UT-3120</option>
+                                    <option value="13">UT-3130</option>
+                                    <option value="14">UT-3140</option>
+                                    <option value="15">UT-4150</option>
+                                    <option value="16">UT-4160</option>
+                                    <option value="17">UT-4170</option>
+                                    <option value="18">UT-4180</option>
+                                    <option value="19">UT-4190</option>
+                                    <option value="20">UT-4200</option>
+                                    <option value="21">UT-4210</option>
                                 </select>
                             </div>
                             <div class="form-group hidden" id="grupoOtroLugarIncidencia">
@@ -460,7 +463,8 @@
                                     <option value="tarjeta-consorcio">Tarjeta Monedero Consorcio de Transportes de Andalucía</option>
                                     <option value="tarjeta-consorcio-joven">Tarjeta Consorcio de Transportes de Andalucía Joven</option>
                                     <option value="tarjeta-consorcio-familia-numerosa">Tarjeta Consorcio de Transportes de Andalucía Familia Numerosa</option>
-                                    <option value="pago-tarjeta-ocasional">Pago del viaje con sistema EMV (Tarjeta de Crédito/Débito o móvil no registrada)</option>
+                                    <option value="pago-emv-fisica">Pago del viaje con sistema EMV (Tarjeta de Crédito/Débito física no registrada)</option>
+                                    <option value="pago-emv-movil">Pago del viaje con sistema EMV móvil (Tarjeta de Crédito/Débito con NFC móvil no registrada)</option>
                                     <option value="metropay">Pago del viaje con ABT (Tarjeta de Crédito/Débito registrada en MetroPay)</option>
                                 </select>
                             </div>
@@ -566,31 +570,50 @@
                                         <input type="text" id="numeracion_titulo_recarga" name="numeracion_titulo_recarga" class="input" required placeholder="Ej: 1000234567">
                                     </div>
 
-                                    <div class="form-group full-width">
-                                        <label for="modo_pago" class="label required">Modo de pago</label>
-                                        <select id="modo_pago" name="modo_pago" class="select" required>
-                                            <option value="">Seleccione...</option>
-                                            <option value="Efectivo">Efectivo</option>
-                                            <option value="Tarjeta">Tarjeta bancaria</option>
-                                        </select>
-                                    </div>
+                                     <div class="form-group full-width">
+                                         <label for="modo_pago" class="label required">Modo de pago</label>
+                                         <select id="modo_pago" name="modo_pago" class="select" required>
+                                             <option value="">Seleccione...</option>
+                                             <option value="Efectivo">Efectivo</option>
+                                             <option value="Tarjeta-fisica">Tarjeta bancaria física</option>
+                                             <option value="Tarjeta-movil">Tarjeta bancaria en el móvil</option>
+                                         </select>
+                                     </div>
 
-                                    <!-- Sub-sub-bloque: Modo pago = Tarjeta -->
-                                    <div id="bloqueDabTarjeta" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
-                                        <div class="form-group">
-                                            <label for="pan_tarjeta_primeros_6_12" class="label required">PAN tarjeta — primeros seis dígitos</label>
-                                            <input type="text" id="pan_tarjeta_primeros_6_12" name="pan_tarjeta_primeros_6_12" class="input input-pan" required placeholder="123456" maxlength="6">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="pan_tarjeta_ultimos_4_12" class="label required">PAN tarjeta — cuatro últimos dígitos</label>
-                                            <input type="text" id="pan_tarjeta_ultimos_4_12" name="pan_tarjeta_ultimos_4_12" class="input input-pan" required placeholder="1234" maxlength="4">
-                                        </div>
-                                        <div class="form-group full-width" style="margin-top: var(--spacing-xs); color: var(--color-warning); font-size: 0.875rem; font-weight: 500;">
-                                            ⚠️ Recuerde que si realizó la operación con contactless debe indicar el PAN de la tarjeta virtualizada.
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                                     <!-- Sub-sub-bloque: Modo pago = Tarjeta -->
+                                     <div id="bloqueDabTarjeta" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
+                                         <!-- Sub-sub-bloque 2.1: Tarjeta física -->
+                                         <div id="bloqueDabTarjetaFisica" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
+                                             <div class="form-group">
+                                                 <label for="pan_dab_fisica_primeros_6" class="label required">PAN tarjeta física — primeros seis dígitos</label>
+                                                 <input type="text" id="pan_dab_fisica_primeros_6" name="pan_dab_fisica_primeros_6" class="input input-pan" required placeholder="123456" maxlength="6">
+                                             </div>
+                                             <div class="form-group">
+                                                 <label for="pan_dab_fisica_ultimos_4" class="label required">PAN tarjeta física — cuatro últimos dígitos</label>
+                                                 <input type="text" id="pan_dab_fisica_ultimos_4" name="pan_dab_fisica_ultimos_4" class="input input-pan" required placeholder="1234" maxlength="4">
+                                             </div>
+                                         </div>
+
+                                         <!-- Sub-sub-bloque 2.2: Tarjeta en el móvil -->
+                                         <div id="bloqueDabTarjetaMovil" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
+                                             <div class="form-group">
+                                                 <label for="pan_dab_movil_fisica_asoc_primeros_6" class="label required">PAN tarjeta física asociada — primeros seis dígitos</label>
+                                                 <input type="text" id="pan_dab_movil_fisica_asoc_primeros_6" name="pan_dab_movil_fisica_asoc_primeros_6" class="input input-pan" required placeholder="123456" maxlength="6">
+                                             </div>
+                                             <div class="form-group">
+                                                 <label for="pan_dab_movil_fisica_asoc_ultimos_4" class="label required">PAN tarjeta física asociada — últimos cuatro dígitos</label>
+                                                 <input type="text" id="pan_dab_movil_fisica_asoc_ultimos_4" name="pan_dab_movil_fisica_asoc_ultimos_4" class="input input-pan" required placeholder="1234" maxlength="4">
+                                             </div>
+                                             <div class="form-group">
+                                                 <label for="pan_dab_movil_virtual_primeros_6" class="label">PAN tarjeta virtual — primeros seis dígitos</label>
+                                                 <input type="text" id="pan_dab_movil_virtual_primeros_6" name="pan_dab_movil_virtual_primeros_6" class="input input-pan" placeholder="123456" maxlength="6">
+                                             </div>
+                                             <div class="form-group">
+                                                 <label for="pan_dab_movil_virtual_ultimos_4" class="label required">PAN tarjeta virtual — últimos cuatro dígitos</label>
+                                                 <input type="text" id="pan_dab_movil_virtual_ultimos_4" name="pan_dab_movil_virtual_ultimos_4" class="input input-pan" required placeholder="1234" maxlength="4">
+                                             </div>
+                                         </div>
+                                     </div>
 
                             <!-- BLOQUE 2: EMV -->
                             <div id="bloqueEMV" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
@@ -598,13 +621,36 @@
                                     <label for="importe_reclamado_2" class="label required">Importe reclamado (€)</label>
                                     <input type="number" id="importe_reclamado_2" name="importe_reclamado_2" class="input" required min="0" step="0.01" placeholder="0,00">
                                 </div>
-                                <div class="form-group">
-                                    <label for="pan_tarjeta_virtualizada_primeros_6" class="label required">PAN tarjeta virtualizada — primeros seis dígitos</label>
-                                    <input type="text" id="pan_tarjeta_virtualizada_primeros_6" name="pan_tarjeta_virtualizada_primeros_6" class="input input-pan" required placeholder="123456" maxlength="6">
+                                <!-- Sub-bloque 2.1: EMV física -->
+                                <div id="bloqueEMVFisica" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
+                                    <div class="form-group">
+                                        <label for="pan_emv_fisica_primeros_6" class="label required">PAN tarjeta física — primeros seis dígitos</label>
+                                        <input type="text" id="pan_emv_fisica_primeros_6" name="pan_emv_fisica_primeros_6" class="input input-pan" required placeholder="123456" maxlength="6">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pan_emv_fisica_ultimos_4" class="label required">PAN tarjeta física — cuatro últimos dígitos</label>
+                                        <input type="text" id="pan_emv_fisica_ultimos_4" name="pan_emv_fisica_ultimos_4" class="input input-pan" required placeholder="1234" maxlength="4">
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="pan_tarjeta_virtualizada_ultimos_4" class="label required">PAN tarjeta virtualizada — cuatro últimos dígitos</label>
-                                    <input type="text" id="pan_tarjeta_virtualizada_ultimos_4" name="pan_tarjeta_virtualizada_ultimos_4" class="input input-pan" required placeholder="1234" maxlength="4">
+
+                                <!-- Sub-bloque 2.2: EMV móvil -->
+                                <div id="bloqueEMVMovil" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
+                                    <div class="form-group">
+                                        <label for="pan_emv_movil_fisica_asoc_primeros_6" class="label required">PAN tarjeta física asociada — primeros seis dígitos</label>
+                                        <input type="text" id="pan_emv_movil_fisica_asoc_primeros_6" name="pan_emv_movil_fisica_asoc_primeros_6" class="input input-pan" required placeholder="123456" maxlength="6">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pan_emv_movil_fisica_asoc_ultimos_4" class="label required">PAN tarjeta física asociada — últimos cuatro dígitos</label>
+                                        <input type="text" id="pan_emv_movil_fisica_asoc_ultimos_4" name="pan_emv_movil_fisica_asoc_ultimos_4" class="input input-pan" required placeholder="1234" maxlength="4">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pan_emv_movil_virtual_primeros_6" class="label">PAN tarjeta virtual — primeros seis dígitos</label>
+                                        <input type="text" id="pan_emv_movil_virtual_primeros_6" name="pan_emv_movil_virtual_primeros_6" class="input input-pan" placeholder="123456" maxlength="6">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pan_emv_movil_virtual_ultimos_4" class="label required">PAN tarjeta virtual — últimos cuatro dígitos</label>
+                                        <input type="text" id="pan_emv_movil_virtual_ultimos_4" name="pan_emv_movil_virtual_ultimos_4" class="input input-pan" required placeholder="1234" maxlength="4">
+                                    </div>
                                 </div>
                                 <div class="form-group full-width">
                                     <label for="tipo_tarjeta_bancaria_2" class="label required">Tipo de tarjeta bancaria</label>
@@ -619,7 +665,7 @@
                                 </div>
                                 <div id="bloqueTarjetaOtras2" class="form-group full-width hidden">
                                     <label for="tipo_tarjeta_bancaria_otras_2" class="label required">Indique el tipo de tarjeta</label>
-                                    <input type="text" id="tipo_tarjeta_bancaria_otras_2" name="tipo_tarjeta_bancaria_otras_2" class="input" required placeholder="Ej: American Express">
+                                    <input type="text" id="tipo_tarjeta_bancaria_otras_2" name="tipo_tarjeta_bancaria_otras_2" class="input" required placeholder="Ej: Maestro">
                                 </div>
                             </div>
 
@@ -654,7 +700,7 @@
                                 </div>
                                 <div id="bloqueTarjetaOtras3" class="form-group full-width hidden">
                                     <label for="tipo_tarjeta_bancaria_otras_3" class="label required">Indique el tipo de tarjeta</label>
-                                    <input type="text" id="tipo_tarjeta_bancaria_otras_3" name="tipo_tarjeta_bancaria_otras_3" class="input" required placeholder="Ej: American Express">
+                                    <input type="text" id="tipo_tarjeta_bancaria_otras_3" name="tipo_tarjeta_bancaria_otras_3" class="input" required placeholder="Ej: Maestro">
                                 </div>
                             </div>
                             <div class="form-group full-width">
@@ -743,27 +789,27 @@
                                 <label for="trenConsulta" class="label">Tren</label>
                                 <select id="trenConsulta" name="trenConsulta" class="select">
                                     <option value="">Seleccione tren...</option>
-                                    <option value="1">Tren 1</option>
-                                    <option value="2">Tren 2</option>
-                                    <option value="3">Tren 3</option>
-                                    <option value="4">Tren 4</option>
-                                    <option value="5">Tren 5</option>
-                                    <option value="6">Tren 6</option>
-                                    <option value="7">Tren 7</option>
-                                    <option value="8">Tren 8</option>
-                                    <option value="9">Tren 9</option>
-                                    <option value="10">Tren 10</option>
-                                    <option value="11">Tren 11</option>
-                                    <option value="12">Tren 12</option>
-                                    <option value="13">Tren 13</option>
-                                    <option value="14">Tren 14</option>
-                                    <option value="15">Tren 15</option>
-                                    <option value="16">Tren 16</option>
-                                    <option value="17">Tren 17</option>
-                                    <option value="18">Tren 18</option>
-                                    <option value="19">Tren 19</option>
-                                    <option value="20">Tren 20</option>
-                                    <option value="21">Tren 21</option>
+                                    <option value="1">UT-3010</option>
+                                    <option value="2">UT-3020</option>
+                                    <option value="3">UT-3030</option>
+                                    <option value="4">UT-3040</option>
+                                    <option value="5">UT-3050</option>
+                                    <option value="6">UT-3060</option>
+                                    <option value="7">UT-3070</option>
+                                    <option value="8">UT-3080</option>
+                                    <option value="9">UT-3090</option>
+                                    <option value="10">UT-3100</option>
+                                    <option value="11">UT-3110</option>
+                                    <option value="12">UT-3120</option>
+                                    <option value="13">UT-3130</option>
+                                    <option value="14">UT-3140</option>
+                                    <option value="15">UT-4150</option>
+                                    <option value="16">UT-4160</option>
+                                    <option value="17">UT-4170</option>
+                                    <option value="18">UT-4180</option>
+                                    <option value="19">UT-4190</option>
+                                    <option value="20">UT-4200</option>
+                                    <option value="21">UT-4210</option>
                                 </select>
                             </div>
                             <div class="form-group hidden" id="grupoOtroLugarConsulta">
@@ -924,7 +970,7 @@
                                     <option value="">Seleccione estación...</option>
                                     <option value="">General / Ninguna específica</option>
                                     <optgroup label="Línea 1">
-                                        <option value="l1-gral">Línea 1 en general</option>
+                                        <option value="l1-gral">Cualquiera de Línea 1</option>
                                         <option value="guadalmedina-l1">Guadalmedina</option>
                                         <option value="atarazanas">Atarazanas</option>
                                         <option value="andalucia-tech">Andalucía Tech</option>
@@ -940,7 +986,7 @@
                                         <option value="portada-alta">Portada Alta</option>
                                     </optgroup>
                                     <optgroup label="Línea 2">
-                                        <option value="l2-gral">Línea 2 en general</option>
+                                        <option value="l2-gral">Cualquiera de Línea 2</option>
                                         <option value="guadalmedina-l2">Guadalmedina</option>
                                         <option value="la-luz-la-paz">La Luz - La Paz</option>
                                         <option value="la-isla">La Isla</option>
@@ -959,29 +1005,29 @@
                             </div>
                             <div class="form-group hidden" id="grupoTrenSugerencia">
                                 <label for="trenSugerencia" class="label">Tren</label>
-                                <select id="trenSugerencia" name="trenSugerencia" class="select">
+                                <select id="trenConsulta" name="trenConsulta" class="select">
                                     <option value="">Seleccione tren...</option>
-                                    <option value="1">Tren 1</option>
-                                    <option value="2">Tren 2</option>
-                                    <option value="3">Tren 3</option>
-                                    <option value="4">Tren 4</option>
-                                    <option value="5">Tren 5</option>
-                                    <option value="6">Tren 6</option>
-                                    <option value="7">Tren 7</option>
-                                    <option value="8">Tren 8</option>
-                                    <option value="9">Tren 9</option>
-                                    <option value="10">Tren 10</option>
-                                    <option value="11">Tren 11</option>
-                                    <option value="12">Tren 12</option>
-                                    <option value="13">Tren 13</option>
-                                    <option value="14">Tren 14</option>
-                                    <option value="15">Tren 15</option>
-                                    <option value="16">Tren 16</option>
-                                    <option value="17">Tren 17</option>
-                                    <option value="18">Tren 18</option>
-                                    <option value="19">Tren 19</option>
-                                    <option value="20">Tren 20</option>
-                                    <option value="21">Tren 21</option>
+                                    <option value="1">UT-3010</option>
+                                    <option value="2">UT-3020</option>
+                                    <option value="3">UT-3030</option>
+                                    <option value="4">UT-3040</option>
+                                    <option value="5">UT-3050</option>
+                                    <option value="6">UT-3060</option>
+                                    <option value="7">UT-3070</option>
+                                    <option value="8">UT-3080</option>
+                                    <option value="9">UT-3090</option>
+                                    <option value="10">UT-3100</option>
+                                    <option value="11">UT-3110</option>
+                                    <option value="12">UT-3120</option>
+                                    <option value="13">UT-3130</option>
+                                    <option value="14">UT-3140</option>
+                                    <option value="15">UT-4150</option>
+                                    <option value="16">UT-4160</option>
+                                    <option value="17">UT-4170</option>
+                                    <option value="18">UT-4180</option>
+                                    <option value="19">UT-4190</option>
+                                    <option value="20">UT-4200</option>
+                                    <option value="21">UT-4210</option>
                                 </select>
                             </div>
                             <div class="form-group hidden" id="grupoOtroLugarSugerencia">
@@ -1137,6 +1183,7 @@
                                     <option value="">Seleccione...</option>
                                     <option value="estacion">En una estación</option>
                                     <option value="tren">En un tren</option>
+                                    <option value="desconocido">No lo sé</option>
                                 </select>
                             </div>
 
@@ -1150,7 +1197,7 @@
 
                             <!-- Sub-bloque: En un tren -->
                             <div id="bloqueTrenObjetos" class="form-grid full-width hidden" style="grid-column: 1 / -1; gap: var(--spacing-md);">
-                                <div class="form-group full-width">
+                                <div class="form-group full-width" id="grupoNumeroTrenObjetos">
                                     <label for="numeroTrenObjetos" class="label">Indique la numeración que conozca del tren en caso de conocerla</label>
                                     <input type="text" id="numeroTrenObjetos" name="numeroTrenObjetos" class="input" placeholder="Ej: 4182, Tren 4..." maxlength="20">
                                 </div>
@@ -1221,17 +1268,6 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="tipoTarjeta" class="label required">Tipo de tarjeta</label>
-                                <select id="tipoTarjeta" name="tipoTarjeta" class="select" required>
-                                    <option value="">Seleccione...</option>
-                                    <option value="estandar">+Metro Estándar</option>
-                                    <option value="joven">+Metro Joven</option>
-                                    <option value="senior">+Metro Senior</option>
-                                    <option value="familia-numerosa">+Metro Familia Numerosa</option>
-                                    <option value="discapacidad">+Metro Discapacidad</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
                                 <label for="fechaNacimiento" class="label required">Fecha de nacimiento</label>
                                 <input type="date" id="fechaNacimiento" name="fechaNacimiento" class="input" required>
                             </div>
@@ -1244,85 +1280,7 @@
                                     <option value="O">Otro / Prefiero no indicar</option>
                                 </select>
                             </div>
-                            <div class="form-group full-width">
-                                <label for="direccionCompleta" class="label required">Dirección completa</label>
-                                <input type="text" id="direccionCompleta" name="direccionCompleta" class="input" required placeholder="Calle, número, piso, puerta...">
-                            </div>
-                            <div class="form-group">
-                                <label for="codigoPostal" class="label required">Código postal</label>
-                                <input type="text" id="codigoPostal" name="codigoPostal" class="input" required placeholder="28001" maxlength="5">
-                            </div>
-                            <div class="form-group">
-                                <label for="municipio" class="label required">Municipio</label>
-                                <input type="text" id="municipio" name="municipio" class="input" required placeholder="Málaga">
-                            </div>
-                            <div class="form-group">
-                                <label for="provincia" class="label required">Provincia</label>
-                                <select id="provincia" name="provincia" class="select" required>
-                                    <option value="">Seleccione...</option>
-                                    <option value="NA">N/A</option>
-                                    <option value="alava">Álava</option>
-                                    <option value="albacete">Albacete</option>
-                                    <option value="alicante">Alicante</option>
-                                    <option value="almeria">Almería</option>
-                                    <option value="asturias">Asturias</option>
-                                    <option value="avila">Ávila</option>
-                                    <option value="badajoz">Badajoz</option>
-                                    <option value="barcelona">Barcelona</option>
-                                    <option value="burgos">Burgos</option>
-                                    <option value="caceres">Cáceres</option>
-                                    <option value="cadiz">Cádiz</option>
-                                    <option value="cantabria">Cantabria</option>
-                                    <option value="castellon">Castellón</option>
-                                    <option value="ciudad-real">Ciudad Real</option>
-                                    <option value="cordoba">Córdoba</option>
-                                    <option value="a-coruna">A Coruña</option>
-                                    <option value="cuenca">Cuenca</option>
-                                    <option value="girona">Girona</option>
-                                    <option value="granada">Granada</option>
-                                    <option value="guadalajara">Guadalajara</option>
-                                    <option value="gipuzkoa">Gipuzkoa</option>
-                                    <option value="huelva">Huelva</option>
-                                    <option value="huesca">Huesca</option>
-                                    <option value="illes-balears">Illes Balears</option>
-                                    <option value="jaen">Jaén</option>
-                                    <option value="leon">León</option>
-                                    <option value="lleida">Lleida</option>
-                                    <option value="lugo">Lugo</option>
-                                    <option value="madrid">Madrid</option>
-                                    <option value="malaga">Málaga</option>
-                                    <option value="murcia">Murcia</option>
-                                    <option value="navarra">Navarra</option>
-                                    <option value="ourense">Ourense</option>
-                                    <option value="palencia">Palencia</option>
-                                    <option value="las-palmas">Las Palmas</option>
-                                    <option value="pontevedra">Pontevedra</option>
-                                    <option value="la-rioja">La Rioja</option>
-                                    <option value="salamanca">Salamanca</option>
-                                    <option value="santa-cruz-tenerife">Santa Cruz de Tenerife</option>
-                                    <option value="segovia">Segovia</option>
-                                    <option value="sevilla">Sevilla</option>
-                                    <option value="soria">Soria</option>
-                                    <option value="tarragona">Tarragona</option>
-                                    <option value="teruel">Teruel</option>
-                                    <option value="toledo">Toledo</option>
-                                    <option value="valencia">Valencia</option>
-                                    <option value="valladolid">Valladolid</option>
-                                    <option value="bizkaia">Bizkaia</option>
-                                    <option value="zamora">Zamora</option>
-                                    <option value="zaragoza">Zaragoza</option>
-                                    <option value="ceuta">Ceuta</option>
-                                    <option value="melilla">Melilla</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="puntoRecogida" class="label required">Punto de recogida preferido</label>
-                                <select id="puntoRecogida" name="puntoRecogida" class="select" required>
-                                    <option value="">Seleccione...</option>
-                                    <option value="sol">Oficina de Atención al Cliente (El Perchel)</option>
-                                </select>
-                            </div>
-                            <div class="form-group full-width">
+                            <!--<div class="form-group full-width">
                                 <label for="fotoCarnet" class="label">Fotografía tipo carnet</label>
                                 <div class="file-upload">
                                     <input type="file" id="fotoCarnet" name="fotoCarnet" class="file-input" accept=".jpg,.jpeg,.png">
@@ -1333,8 +1291,8 @@
                                     </label>
                                     <div id="fotoPreview" class="foto-preview"></div>
                                 </div>
-                            </div>
-                            <div class="form-group full-width" id="documentacionAdicional">
+                            </div>-->
+                            <!--<div class="form-group full-width" id="documentacionAdicional">
                                 <label for="docAdicional" class="label">Documentación adicional</label>
                                 <div class="file-upload">
                                     <input type="file" id="docAdicional" name="docAdicional" class="file-input" multiple accept=".pdf,.jpg,.jpeg,.png">
@@ -1344,6 +1302,21 @@
                                         <span class="file-hint">Libro de familia, certificado discapacidad, etc.</span>
                                     </label>
                                 </div>
+                            </div>-->
+                            <div class="form-group full-width" id="firmaDigital">
+                                <label for="firmaDigital" class="label">Firma digital</label>
+                                <div class="file-upload">
+                                    <input type="file" id="firmaDigital" name="firmaDigital" class="file-input" accept=".pdf,.jpg,.jpeg,.png">
+                                    <label for="firmaDigital" class="file-label">
+                                        <span class="file-icon">🖊️</span>
+                                        <span class="file-text">Adjuntar firma digital</span>
+                                        <span class="file-hint">Imagen clara de la firma, sin firmas en blanco</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group full-width" style="margin-top: var(--spacing-md); background-color: var(--color-info-light); color: var(--color-info); border: 1.5px solid var(--color-info); padding: var(--spacing-md); border-radius: var(--radius); font-size: 0.9375rem; font-weight: 500; display: flex; align-items: center; gap: var(--spacing-sm);">
+                                <span>ℹ️ Para finalizar la confección de su tarjeta, deberá acudir presencialmente a la Oficina de Atención al Cliente en la estación El Perchel.</span>
                             </div>
                         </div>
                     </section>
@@ -1370,7 +1343,7 @@
                                 <span class="btn-icon">🗑️</span>
                                 Limpiar formulario
                             </button>
-                            <button type="submit" class="btn btn-primary" id="btnEnviar">
+                            <button type="submit" class="btn btn-primary" id="btnEnviar" disabled>
                                 <span class="btn-icon">📤</span>
                                 Enviar solicitud
                             </button>
