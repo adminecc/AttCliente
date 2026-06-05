@@ -1058,18 +1058,31 @@
                                     <option value="instalaciones">Estado de instalaciones</option>
                                     <option value="informacion">Información proporcionada</option>
                                     <option value="seguridad">Actuación de seguridad</option>
+                                    <option value="accesibilidad">Asistencia sobre accesibilidad</option>
+                                    <option value="recuperar-objeto">Ayuda para recuperar un objeto</option>
                                     <option value="otros">Otros</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="fechaAgradecimiento" class="label">Fecha del suceso</label>
+                                <label for="fechaAgradecimiento" class="label">Fecha del episodio (si procede)</label>
                                 <input type="date" id="fechaAgradecimiento" name="fechaAgradecimiento" class="input">
                             </div>
                             <div class="form-group">
-                                <label for="estacionAgradecimiento" class="label">Estación</label>
-                                <select id="estacionAgradecimiento" name="estacionAgradecimiento" class="select">
-                                    <option value="">Seleccione...</option>
+                                <label for="lugarAgradecimiento" class="label">Lugar</label>
+                                <select id="lugarAgradecimiento" name="lugarAgradecimiento" class="select">
+                                    <option value="">Seleccione lugar...</option>
+                                    <option value="estacion">Una estación</option>
+                                    <option value="tren">Un tren</option>
+                                    <option value="oac">Oficina de Atención al Cliente</option>
+                                </select>
+                            </div>
+                            <div class="form-group hidden" id="grupoEstacionAgradecimiento">
+                                <label for="estacionAgradecimientoDetalle" class="label required">Estación</label>
+                                <select id="estacionAgradecimientoDetalle" name="estacionAgradecimientoDetalle" class="select" required>
+                                    <option value="">Seleccione estación...</option>
+                                    <option value="general">General / Ninguna específica</option>
                                     <optgroup label="Línea 1">
+                                        <option value="cualquiera-l1">Cualquiera de Línea 1</option>
                                         <option value="guadalmedina-l1">Guadalmedina</option>
                                         <option value="atarazanas">Atarazanas</option>
                                         <option value="andalucia-tech">Andalucía Tech</option>
@@ -1085,6 +1098,7 @@
                                         <option value="portada-alta">Portada Alta</option>
                                     </optgroup>
                                     <optgroup label="Línea 2">
+                                        <option value="cualquiera-l2">Cualquiera de Línea 2</option>
                                         <option value="guadalmedina-l2">Guadalmedina</option>
                                         <option value="la-luz-la-paz">La Luz - La Paz</option>
                                         <option value="la-isla">La Isla</option>
@@ -1096,13 +1110,55 @@
                                     </optgroup>
                                 </select>
                             </div>
+                            <div class="form-group hidden" id="grupoTrenAgradecimiento">
+                                <label for="trenAgradecimiento" class="label required">Tren</label>
+                                <select id="trenAgradecimiento" name="trenAgradecimiento" class="select" required>
+                                    <option value="">Seleccione tren...</option>
+                                    <option value="desconocido">No sé qué tren es</option>
+                                    <option value="UT-3010">UT-3010</option>
+                                    <option value="UT-3020">UT-3020</option>
+                                    <option value="UT-3030">UT-3030</option>
+                                    <option value="UT-3040">UT-3040</option>
+                                    <option value="UT-3050">UT-3050</option>
+                                    <option value="UT-3060">UT-3060</option>
+                                    <option value="UT-3070">UT-3070</option>
+                                    <option value="UT-3080">UT-3080</option>
+                                    <option value="UT-3090">UT-3090</option>
+                                    <option value="UT-3100">UT-3100</option>
+                                    <option value="UT-3110">UT-3110</option>
+                                    <option value="UT-3120">UT-3120</option>
+                                    <option value="UT-3130">UT-3130</option>
+                                    <option value="UT-3140">UT-3140</option>
+                                    <option value="UT-4150">UT-4150</option>
+                                    <option value="UT-4160">UT-4160</option>
+                                    <option value="UT-4170">UT-4170</option>
+                                    <option value="UT-4180">UT-4180</option>
+                                    <option value="UT-4190">UT-4190</option>
+                                    <option value="UT-4200">UT-4200</option>
+                                </select>
+                            </div>
                             <div class="form-group">
-                                <label for="nombreEmpleado" class="label">Nombre del empleado (si lo conoce)</label>
+                                <label for="dirigidoAgradecimiento" class="label required">Su agradecimiento o felicitación va dirigido a...</label>
+                                <select id="dirigidoAgradecimiento" name="dirigidoAgradecimiento" class="select" required>
+                                    <option value="">Seleccione destinatario...</option>
+                                    <option value="personal-metro">Personal de Metro de Málaga</option>
+                                    <option value="seguridad">Personal de Vigilancia (Seguridad)</option>
+                                    <option value="personal-oac">Personal de la Oficina de Atención al Cliente</option>
+                                    <option value="varios">Quiero agradecer a varios colectivos (indique a cuáles)</option>
+                                    <option value="general">Es un agradecimiento general sobre el servicio</option>
+                                </select>
+                            </div>
+                            <div class="form-group hidden" id="grupoVariosColectivos">
+                                <label for="variosColectivos" class="label required">Indique a qué colectivos</label>
+                                <input type="text" id="variosColectivos" name="variosColectivos" class="input" required placeholder="Ej: Seguridad y limpieza">
+                            </div>
+                            <div class="form-group">
+                                <label for="nombreEmpleado" class="label">Nº de identificación de la persona trabajadora (si lo conoce)</label>
                                 <input type="text" id="nombreEmpleado" name="nombreEmpleado" class="input" placeholder="Nombre o identificación">
                             </div>
                             <div class="form-group full-width">
-                                <label for="descripcionAgradecimiento" class="label required">Descripción</label>
-                                <textarea id="descripcionAgradecimiento" name="descripcionAgradecimiento" class="textarea" required placeholder="Cuéntenos qué sucedió..." rows="5"></textarea>
+                                <label for="descripcionAgradecimiento" class="label required">Descripción de su agradecimiento o felicitación</label>
+                                <textarea id="descripcionAgradecimiento" name="descripcionAgradecimiento" class="textarea" required placeholder="Describa su agradecimiento o felicitación..." rows="5"></textarea>
                             </div>
                         </div>
                     </section>

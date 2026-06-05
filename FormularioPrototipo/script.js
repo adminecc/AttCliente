@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reclamaciones: ['clasificacion', 'canalRecepcion', 'fechaIncidencia', 'tipologia', 'lugarIncidencia', 'descripcionCorta', 'descripcionDetallada'],
             consultas: ['descripcionCortaConsulta', 'descripcionDetalladaConsulta'],
             sugerencias: ['areaSugerencia', 'lugarSugerencia', 'descripcionSugerencia'],
-            agradecimientos: ['motivoAgradecimiento', 'descripcionAgradecimiento'],
+            agradecimientos: ['motivoAgradecimiento', 'dirigidoAgradecimiento', 'descripcionAgradecimiento'],
             objetos: ['fechaPerdida', 'lineaMetroObjetos', 'dondePerdidoObjetos', 'nombreObjetoObjetos', 'descripcionObjeto'],
             tarjetas: ['motivoTarjeta', 'tipoTarjeta', 'fechaNacimiento', 'puntoRecogida']
         };
@@ -802,7 +802,10 @@ document.addEventListener('DOMContentLoaded', () => {
             'bloqueTituloViajeObjetos',
             'bloqueTarjetaBancariaObjetos',
             'bloqueEstacionObjetos',
-            'bloqueTrenObjetos'
+            'bloqueTrenObjetos',
+            'grupoEstacionAgradecimiento',
+            'grupoTrenAgradecimiento',
+            'grupoVariosColectivos'
         ];
         bloques.forEach(id => {
             const bloque = document.getElementById(id);
@@ -1185,6 +1188,57 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (bloqueTrenObjetos) {
                     resetearBloque(bloqueTrenObjetos);
                     bloqueTrenObjetos.classList.add('hidden');
+                }
+            }
+        });
+    }
+
+    // 4. Gestión de Lugar en Agradecimientos (Estación vs Tren vs OAC)
+    const lugarAgradecimiento = document.getElementById('lugarAgradecimiento');
+    const grupoEstacionAgradecimiento = document.getElementById('grupoEstacionAgradecimiento');
+    const grupoTrenAgradecimiento = document.getElementById('grupoTrenAgradecimiento');
+
+    if (lugarAgradecimiento) {
+        lugarAgradecimiento.addEventListener('change', (e) => {
+            const val = e.target.value;
+            if (val === 'estacion') {
+                if (grupoEstacionAgradecimiento) grupoEstacionAgradecimiento.classList.remove('hidden');
+                if (grupoTrenAgradecimiento) {
+                    resetearBloque(grupoTrenAgradecimiento);
+                    grupoTrenAgradecimiento.classList.add('hidden');
+                }
+            } else if (val === 'tren') {
+                if (grupoTrenAgradecimiento) grupoTrenAgradecimiento.classList.remove('hidden');
+                if (grupoEstacionAgradecimiento) {
+                    resetearBloque(grupoEstacionAgradecimiento);
+                    grupoEstacionAgradecimiento.classList.add('hidden');
+                }
+            } else {
+                if (grupoEstacionAgradecimiento) {
+                    resetearBloque(grupoEstacionAgradecimiento);
+                    grupoEstacionAgradecimiento.classList.add('hidden');
+                }
+                if (grupoTrenAgradecimiento) {
+                    resetearBloque(grupoTrenAgradecimiento);
+                    grupoTrenAgradecimiento.classList.add('hidden');
+                }
+            }
+        });
+    }
+
+    // 5. Gestión de Destinatario en Agradecimientos (Colectivos varios)
+    const dirigidoAgradecimiento = document.getElementById('dirigidoAgradecimiento');
+    const grupoVariosColectivos = document.getElementById('grupoVariosColectivos');
+
+    if (dirigidoAgradecimiento) {
+        dirigidoAgradecimiento.addEventListener('change', (e) => {
+            const val = e.target.value;
+            if (val === 'varios') {
+                if (grupoVariosColectivos) grupoVariosColectivos.classList.remove('hidden');
+            } else {
+                if (grupoVariosColectivos) {
+                    resetearBloque(grupoVariosColectivos);
+                    grupoVariosColectivos.classList.add('hidden');
                 }
             }
         });
