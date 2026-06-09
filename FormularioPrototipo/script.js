@@ -212,11 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const bloqueRepresentante = document.getElementById('bloqueRepresentante');
             if (bloqueRepresentante) bloqueRepresentante.classList.add('hidden');
             
-            // Asegurar que la dirección del interesado esté visible y actualizar visibilidad de envío
-            const direccionContactoContainer = document.getElementById('direccionContactoContainer');
-            if (direccionContactoContainer) {
-                direccionContactoContainer.classList.remove('hidden');
-            }
+            // Actualizar visibilidad de envío y de dirección de contacto
             if (typeof actualizarVisibilidadEnvio === 'function') {
                 actualizarVisibilidadEnvio();
             }
@@ -539,8 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {
         actualizarCamposLugarSugerencia('');
         const recibirPostal = document.getElementById('recibirPostal');
         if (recibirPostal) recibirPostal.checked = false;
-        const direccionContactoContainer = document.getElementById('direccionContactoContainer');
-        if (direccionContactoContainer) direccionContactoContainer.classList.remove('hidden');
+        // La visibilidad de la dirección de contacto se actualizará al inicializar el formulario
         
         // Limpiar dirección de envío
         const direccionEnvioSelect = document.getElementById('direccionEnvioSelect');
@@ -896,7 +891,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 subBloque.id.startsWith('bloqueTituloViajeObjetos') ||
                 subBloque.id.startsWith('bloqueTarjetaBancariaObjetos') ||
                 subBloque.id.startsWith('bloqueEstacionObjetos') ||
-                subBloque.id.startsWith('bloqueTrenObjetos')
+                subBloque.id.startsWith('bloqueTrenObjetos') ||
+                subBloque.id.startsWith('bloqueTituloViajeConsulta') ||
+                subBloque.id.startsWith('bloqueTarjetaFisicaConsulta') ||
+                subBloque.id.startsWith('bloqueTarjetaMovilConsulta')
             )) {
                 subBloque.classList.add('hidden');
             }
@@ -922,6 +920,9 @@ document.addEventListener('DOMContentLoaded', () => {
             'bloqueTarjetaBancariaObjetos',
             'bloqueEstacionObjetos',
             'bloqueTrenObjetos',
+            'bloqueTituloViajeConsulta',
+            'bloqueTarjetaFisicaConsulta',
+            'bloqueTarjetaMovilConsulta',
             'grupoEstacionAgradecimiento',
             'grupoTrenAgradecimiento',
             'grupoVariosColectivos',
@@ -1211,6 +1212,56 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // 1c. Desplegables y campos condicionales para Consulta de Información
+    const tipoTituloConsulta = document.getElementById('tipoTituloConsulta');
+    const bloqueTituloViajeConsulta = document.getElementById('bloqueTituloViajeConsulta');
+    const bloqueTarjetaFisicaConsulta = document.getElementById('bloqueTarjetaFisicaConsulta');
+    const bloqueTarjetaMovilConsulta = document.getElementById('bloqueTarjetaMovilConsulta');
+
+    if (tipoTituloConsulta) {
+        tipoTituloConsulta.addEventListener('change', (e) => {
+            const opcion = e.target.value;
+
+            // Ocultar y resetear los bloques de Consulta
+            if (bloqueTituloViajeConsulta) {
+                resetearBloque(bloqueTituloViajeConsulta);
+                bloqueTituloViajeConsulta.classList.add('hidden');
+            }
+            if (bloqueTarjetaFisicaConsulta) {
+                resetearBloque(bloqueTarjetaFisicaConsulta);
+                bloqueTarjetaFisicaConsulta.classList.add('hidden');
+            }
+            if (bloqueTarjetaMovilConsulta) {
+                resetearBloque(bloqueTarjetaMovilConsulta);
+                bloqueTarjetaMovilConsulta.classList.add('hidden');
+            }
+
+            const opcionesFisicas = [
+                'monedero-metro-malaga',
+                'billete-ocasional',
+                'masmetro',
+                'tarjeta-consorcio',
+                'tarjeta-consorcio-joven',
+                'tarjeta-consorcio-familia-numerosa'
+            ];
+            
+            const opcionesFisicaOBancaria = [
+                'pago-emv-fisica',
+                'metropay'
+            ];
+
+            if (opcionesFisicas.includes(opcion)) {
+                if (bloqueTituloViajeConsulta) bloqueTituloViajeConsulta.classList.remove('hidden');
+            } else if (opcionesFisicaOBancaria.includes(opcion)) {
+                if (bloqueTarjetaFisicaConsulta) bloqueTarjetaFisicaConsulta.classList.remove('hidden');
+            } else if (opcion === 'pago-emv-movil') {
+                if (bloqueTarjetaMovilConsulta) bloqueTarjetaMovilConsulta.classList.remove('hidden');
+            }
+            
+            comprobarCamposObligatorios();
+        });
+    }
+
     // 2. Filtrado dinámico de estaciones por línea
     const lineaMetroObjetos = document.getElementById('lineaMetroObjetos');
     const estacionPerdidaObjetos = document.getElementById('estacionPerdidaObjetos');
@@ -1400,9 +1451,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const grupoDireccionEnvioSelect = document.getElementById('grupoDireccionEnvioSelect');
     const direccionEnvioSelect = document.getElementById('direccionEnvioSelect');
     const direccionEnvioContainer = document.getElementById('direccionEnvioContainer');
+    const tituloDireccionContacto = document.getElementById('tituloDireccionContacto');
 
     function sincronizarDireccionEnvio() {
-        if (recibirPostal && recibirPostal.checked && direccionEnvioSelect && direccionEnvioSelect.value === 'misma') {
+        const esTarjetas = (tipoFormulario.value === 'tarjetas');
+        if (esTarjetas && recibirPostal && recibirPostal.checked && direccionEnvioSelect && direccionEnvioSelect.value === 'misma') {
             const fields = [
                 { src: 'viaContacto', dest: 'viaEnvio' },
                 { src: 'numContacto', dest: 'numEnvio' },
@@ -1435,20 +1488,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function actualizarVisibilidadEnvio() {
-        if (!recibirPostal || !grupoDireccionEnvioSelect || !direccionEnvioSelect || !direccionEnvioContainer) return;
+        if (!recibirPostal || !direccionContactoContainer) return;
+        
+        const esTarjetas = (tipoFormulario.value === 'tarjetas');
 
-        if (recibirPostal.checked) {
-            grupoDireccionEnvioSelect.classList.remove('hidden');
-            if (direccionEnvioSelect.value === 'misma') {
-                direccionEnvioContainer.classList.add('hidden');
-                sincronizarDireccionEnvio();
+        if (esTarjetas) {
+            // Para tarjetas: Dirección de contacto y título "Dirección del interesado" siempre visibles
+            direccionContactoContainer.classList.remove('hidden');
+            if (tituloDireccionContacto) tituloDireccionContacto.classList.remove('hidden');
+            
+            if (recibirPostal.checked) {
+                // Mostrar selector de dirección de envío
+                if (grupoDireccionEnvioSelect) grupoDireccionEnvioSelect.classList.remove('hidden');
+                
+                if (direccionEnvioSelect && direccionEnvioSelect.value === 'misma') {
+                    if (direccionEnvioContainer) direccionEnvioContainer.classList.add('hidden');
+                    sincronizarDireccionEnvio();
+                } else {
+                    if (direccionEnvioContainer) direccionEnvioContainer.classList.remove('hidden');
+                }
             } else {
-                direccionEnvioContainer.classList.remove('hidden');
+                // Ocultar selector de dirección de envío y campos alternativos
+                if (grupoDireccionEnvioSelect) grupoDireccionEnvioSelect.classList.add('hidden');
+                if (direccionEnvioContainer) direccionEnvioContainer.classList.add('hidden');
+                limpiarDireccionEnvio();
             }
         } else {
-            grupoDireccionEnvioSelect.classList.add('hidden');
-            direccionEnvioContainer.classList.add('hidden');
+            // Para otros formularios: Ocultar selector de dirección de envío, campos alternativos y título
+            if (grupoDireccionEnvioSelect) grupoDireccionEnvioSelect.classList.add('hidden');
+            if (direccionEnvioContainer) direccionEnvioContainer.classList.add('hidden');
+            if (tituloDireccionContacto) tituloDireccionContacto.classList.add('hidden');
             limpiarDireccionEnvio();
+            
+            // La visibilidad de la dirección de contacto depende del check normal
+            direccionContactoContainer.classList.toggle('hidden', !recibirPostal.checked);
         }
         comprobarCamposObligatorios();
     }
