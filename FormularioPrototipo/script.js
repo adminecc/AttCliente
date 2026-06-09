@@ -891,7 +891,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 subBloque.id.startsWith('bloqueTituloViajeObjetos') ||
                 subBloque.id.startsWith('bloqueTarjetaBancariaObjetos') ||
                 subBloque.id.startsWith('bloqueEstacionObjetos') ||
-                subBloque.id.startsWith('bloqueTrenObjetos')
+                subBloque.id.startsWith('bloqueTrenObjetos') ||
+                subBloque.id.startsWith('bloqueTituloViajeConsulta') ||
+                subBloque.id.startsWith('bloqueTarjetaFisicaConsulta') ||
+                subBloque.id.startsWith('bloqueTarjetaMovilConsulta')
             )) {
                 subBloque.classList.add('hidden');
             }
@@ -917,15 +920,15 @@ document.addEventListener('DOMContentLoaded', () => {
             'bloqueTarjetaBancariaObjetos',
             'bloqueEstacionObjetos',
             'bloqueTrenObjetos',
+            'bloqueTituloViajeConsulta',
+            'bloqueTarjetaFisicaConsulta',
+            'bloqueTarjetaMovilConsulta',
             'grupoEstacionAgradecimiento',
             'grupoTrenAgradecimiento',
             'grupoVariosColectivos',
             'bloqueRepresentante',
             'grupoDatosCorrectosCheck',
-            'containerFirmaTarjetas',
-            'grupoNumeracionTituloConsulta',
-            'bloqueEMVFisicaConsulta',
-            'bloqueEMVMovilConsulta'
+            'containerFirmaTarjetas'
         ];
         bloques.forEach(id => {
             const bloque = document.getElementById(id);
@@ -977,50 +980,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (opcion === 'metropay') {
                 if (bloqueABT) bloqueABT.classList.remove('hidden');
             }
-        });
-    }
-
-    // Listener para tipoTituloConsulta (en formulario de Consultas)
-    const tipoTituloConsulta = document.getElementById('tipoTituloConsulta');
-    const grupoNumeracionTituloConsulta = document.getElementById('grupoNumeracionTituloConsulta');
-    const bloqueEMVFisicaConsulta = document.getElementById('bloqueEMVFisicaConsulta');
-    const bloqueEMVMovilConsulta = document.getElementById('bloqueEMVMovilConsulta');
-
-    if (tipoTituloConsulta) {
-        tipoTituloConsulta.addEventListener('change', (e) => {
-            // Ocultar y resetear los bloques específicos de consultas
-            if (grupoNumeracionTituloConsulta) {
-                resetearBloque(grupoNumeracionTituloConsulta);
-                grupoNumeracionTituloConsulta.classList.add('hidden');
-            }
-            if (bloqueEMVFisicaConsulta) {
-                resetearBloque(bloqueEMVFisicaConsulta);
-                bloqueEMVFisicaConsulta.classList.add('hidden');
-            }
-            if (bloqueEMVMovilConsulta) {
-                resetearBloque(bloqueEMVMovilConsulta);
-                bloqueEMVMovilConsulta.classList.add('hidden');
-            }
-
-            const opcion = e.target.value;
-            const opcionesTituloViaje = [
-                'monedero-metro-malaga',
-                'billete-ocasional',
-                'masmetro',
-                'tarjeta-consorcio',
-                'tarjeta-consorcio-joven',
-                'tarjeta-consorcio-familia-numerosa'
-            ];
-
-            if (opcionesTituloViaje.includes(opcion)) {
-                if (grupoNumeracionTituloConsulta) grupoNumeracionTituloConsulta.classList.remove('hidden');
-            } else if (opcion === 'pago-emv-fisica' || opcion === 'metropay') {
-                if (bloqueEMVFisicaConsulta) bloqueEMVFisicaConsulta.classList.remove('hidden');
-            } else if (opcion === 'pago-emv-movil') {
-                if (bloqueEMVMovilConsulta) bloqueEMVMovilConsulta.classList.remove('hidden');
-            }
-            
-            comprobarCamposObligatorios();
         });
     }
 
@@ -1250,6 +1209,56 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (opcionesBancarias.includes(opcion)) {
                 if (bloqueTarjetaBancariaObjetos) bloqueTarjetaBancariaObjetos.classList.remove('hidden');
             }
+        });
+    }
+
+    // 1c. Desplegables y campos condicionales para Consulta de Información
+    const tipoTituloConsulta = document.getElementById('tipoTituloConsulta');
+    const bloqueTituloViajeConsulta = document.getElementById('bloqueTituloViajeConsulta');
+    const bloqueTarjetaFisicaConsulta = document.getElementById('bloqueTarjetaFisicaConsulta');
+    const bloqueTarjetaMovilConsulta = document.getElementById('bloqueTarjetaMovilConsulta');
+
+    if (tipoTituloConsulta) {
+        tipoTituloConsulta.addEventListener('change', (e) => {
+            const opcion = e.target.value;
+
+            // Ocultar y resetear los bloques de Consulta
+            if (bloqueTituloViajeConsulta) {
+                resetearBloque(bloqueTituloViajeConsulta);
+                bloqueTituloViajeConsulta.classList.add('hidden');
+            }
+            if (bloqueTarjetaFisicaConsulta) {
+                resetearBloque(bloqueTarjetaFisicaConsulta);
+                bloqueTarjetaFisicaConsulta.classList.add('hidden');
+            }
+            if (bloqueTarjetaMovilConsulta) {
+                resetearBloque(bloqueTarjetaMovilConsulta);
+                bloqueTarjetaMovilConsulta.classList.add('hidden');
+            }
+
+            const opcionesFisicas = [
+                'monedero-metro-malaga',
+                'billete-ocasional',
+                'masmetro',
+                'tarjeta-consorcio',
+                'tarjeta-consorcio-joven',
+                'tarjeta-consorcio-familia-numerosa'
+            ];
+            
+            const opcionesFisicaOBancaria = [
+                'pago-emv-fisica',
+                'metropay'
+            ];
+
+            if (opcionesFisicas.includes(opcion)) {
+                if (bloqueTituloViajeConsulta) bloqueTituloViajeConsulta.classList.remove('hidden');
+            } else if (opcionesFisicaOBancaria.includes(opcion)) {
+                if (bloqueTarjetaFisicaConsulta) bloqueTarjetaFisicaConsulta.classList.remove('hidden');
+            } else if (opcion === 'pago-emv-movil') {
+                if (bloqueTarjetaMovilConsulta) bloqueTarjetaMovilConsulta.classList.remove('hidden');
+            }
+            
+            comprobarCamposObligatorios();
         });
     }
 
