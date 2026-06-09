@@ -212,11 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const bloqueRepresentante = document.getElementById('bloqueRepresentante');
             if (bloqueRepresentante) bloqueRepresentante.classList.add('hidden');
             
-            // Asegurar que la dirección del interesado esté visible y actualizar visibilidad de envío
-            const direccionContactoContainer = document.getElementById('direccionContactoContainer');
-            if (direccionContactoContainer) {
-                direccionContactoContainer.classList.remove('hidden');
-            }
+            // Actualizar visibilidad de envío y de dirección de contacto
             if (typeof actualizarVisibilidadEnvio === 'function') {
                 actualizarVisibilidadEnvio();
             }
@@ -539,8 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {
         actualizarCamposLugarSugerencia('');
         const recibirPostal = document.getElementById('recibirPostal');
         if (recibirPostal) recibirPostal.checked = false;
-        const direccionContactoContainer = document.getElementById('direccionContactoContainer');
-        if (direccionContactoContainer) direccionContactoContainer.classList.remove('hidden');
+        // La visibilidad de la dirección de contacto se actualizará al inicializar el formulario
         
         // Limpiar dirección de envío
         const direccionEnvioSelect = document.getElementById('direccionEnvioSelect');
@@ -1402,7 +1397,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const direccionEnvioContainer = document.getElementById('direccionEnvioContainer');
 
     function sincronizarDireccionEnvio() {
-        if (recibirPostal && recibirPostal.checked && direccionEnvioSelect && direccionEnvioSelect.value === 'misma') {
+        const esTarjetas = (tipoFormulario.value === 'tarjetas');
+        if (esTarjetas && recibirPostal && recibirPostal.checked && direccionEnvioSelect && direccionEnvioSelect.value === 'misma') {
             const fields = [
                 { src: 'viaContacto', dest: 'viaEnvio' },
                 { src: 'numContacto', dest: 'numEnvio' },
@@ -1435,20 +1431,38 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function actualizarVisibilidadEnvio() {
-        if (!recibirPostal || !grupoDireccionEnvioSelect || !direccionEnvioSelect || !direccionEnvioContainer) return;
+        if (!recibirPostal || !direccionContactoContainer) return;
+        
+        const esTarjetas = (tipoFormulario.value === 'tarjetas');
 
-        if (recibirPostal.checked) {
-            grupoDireccionEnvioSelect.classList.remove('hidden');
-            if (direccionEnvioSelect.value === 'misma') {
-                direccionEnvioContainer.classList.add('hidden');
-                sincronizarDireccionEnvio();
+        if (esTarjetas) {
+            // Para tarjetas: Dirección de contacto siempre visible
+            direccionContactoContainer.classList.remove('hidden');
+            
+            if (recibirPostal.checked) {
+                // Mostrar selector de dirección de envío
+                if (grupoDireccionEnvioSelect) grupoDireccionEnvioSelect.classList.remove('hidden');
+                
+                if (direccionEnvioSelect && direccionEnvioSelect.value === 'misma') {
+                    if (direccionEnvioContainer) direccionEnvioContainer.classList.add('hidden');
+                    sincronizarDireccionEnvio();
+                } else {
+                    if (direccionEnvioContainer) direccionEnvioContainer.classList.remove('hidden');
+                }
             } else {
-                direccionEnvioContainer.classList.remove('hidden');
+                // Ocultar selector de dirección de envío y campos alternativos
+                if (grupoDireccionEnvioSelect) grupoDireccionEnvioSelect.classList.add('hidden');
+                if (direccionEnvioContainer) direccionEnvioContainer.classList.add('hidden');
+                limpiarDireccionEnvio();
             }
         } else {
-            grupoDireccionEnvioSelect.classList.add('hidden');
-            direccionEnvioContainer.classList.add('hidden');
+            // Para otros formularios: Ocultar selector de dirección de envío y campos alternativos
+            if (grupoDireccionEnvioSelect) grupoDireccionEnvioSelect.classList.add('hidden');
+            if (direccionEnvioContainer) direccionEnvioContainer.classList.add('hidden');
             limpiarDireccionEnvio();
+            
+            // La visibilidad de la dirección de contacto depende del check normal
+            direccionContactoContainer.classList.toggle('hidden', !recibirPostal.checked);
         }
         comprobarCamposObligatorios();
     }
