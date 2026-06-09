@@ -1395,6 +1395,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const grupoDireccionEnvioSelect = document.getElementById('grupoDireccionEnvioSelect');
     const direccionEnvioSelect = document.getElementById('direccionEnvioSelect');
     const direccionEnvioContainer = document.getElementById('direccionEnvioContainer');
+    const tituloDireccionContacto = document.getElementById('tituloDireccionContacto');
 
     function sincronizarDireccionEnvio() {
         const esTarjetas = (tipoFormulario.value === 'tarjetas');
@@ -1436,8 +1437,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const esTarjetas = (tipoFormulario.value === 'tarjetas');
 
         if (esTarjetas) {
-            // Para tarjetas: Dirección de contacto siempre visible
+            // Para tarjetas: Dirección de contacto y título "Dirección del interesado" siempre visibles
             direccionContactoContainer.classList.remove('hidden');
+            if (tituloDireccionContacto) tituloDireccionContacto.classList.remove('hidden');
             
             if (recibirPostal.checked) {
                 // Mostrar selector de dirección de envío
@@ -1456,9 +1458,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 limpiarDireccionEnvio();
             }
         } else {
-            // Para otros formularios: Ocultar selector de dirección de envío y campos alternativos
+            // Para otros formularios: Ocultar selector de dirección de envío, campos alternativos y título
             if (grupoDireccionEnvioSelect) grupoDireccionEnvioSelect.classList.add('hidden');
             if (direccionEnvioContainer) direccionEnvioContainer.classList.add('hidden');
+            if (tituloDireccionContacto) tituloDireccionContacto.classList.add('hidden');
             limpiarDireccionEnvio();
             
             // La visibilidad de la dirección de contacto depende del check normal
