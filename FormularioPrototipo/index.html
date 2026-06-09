@@ -932,85 +932,6 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="lugarConsulta" class="label">Estación / Lugar</label>
-                                <select id="lugarConsulta" name="lugarConsulta" class="select">
-                                    <option value="">Seleccione estación...</option>
-                                    <optgroup label="Línea 1">
-                                        <option value="guadalmedina-l1">Guadalmedina</option>
-                                        <option value="atarazanas">Atarazanas</option>
-                                        <option value="andalucia-tech">Andalucía Tech</option>
-                                        <option value="carranque">Carranque</option>
-                                        <option value="barbarela">Barbarela</option>
-                                        <option value="el-clinico">El Clínico</option>
-                                        <option value="la-union">La Unión</option>
-                                        <option value="universidad">Universidad</option>
-                                        <option value="ciudad-justicia">Ciudad de la Justicia</option>
-                                        <option value="el-consul">El Cónsul</option>
-                                        <option value="el-perchel-l1">El Perchel</option>
-                                        <option value="paraninfo">Paraninfo</option>
-                                        <option value="portada-alta">Portada Alta</option>
-                                    </optgroup>
-                                    <optgroup label="Línea 2">
-                                        <option value="guadalmedina-l2">Guadalmedina</option>
-                                        <option value="la-luz-la-paz">La Luz - La Paz</option>
-                                        <option value="la-isla">La Isla</option>
-                                        <option value="el-perchel-l2">El Perchel</option>
-                                        <option value="puerta-blanca">Puerta Blanca</option>
-                                        <option value="princesa-huelin">Princesa - Huelin</option>
-                                        <option value="el-torcal">El Torcal</option>
-                                        <option value="palacio-deportes">Palacio de los Deportes</option>
-                                    </optgroup>
-                                    <optgroup label="Otras ubicaciones">
-                                        <option value="tren">Interior del tren</option>
-                                        <option value="otro">Otra ubicación</option>
-                                    </optgroup>
-                                </select>
-                            </div>
-                            <div class="form-group hidden" id="grupoTrenConsulta">
-                                <label for="trenConsulta" class="label">Tren</label>
-                                <select id="trenConsulta" name="trenConsulta" class="select">
-                                    <option value="">Seleccione tren...</option>
-                                    <option value="1">UT-3010</option>
-                                    <option value="2">UT-3020</option>
-                                    <option value="3">UT-3030</option>
-                                    <option value="4">UT-3040</option>
-                                    <option value="5">UT-3050</option>
-                                    <option value="6">UT-3060</option>
-                                    <option value="7">UT-3070</option>
-                                    <option value="8">UT-3080</option>
-                                    <option value="9">UT-3090</option>
-                                    <option value="10">UT-3100</option>
-                                    <option value="11">UT-3110</option>
-                                    <option value="12">UT-3120</option>
-                                    <option value="13">UT-3130</option>
-                                    <option value="14">UT-3140</option>
-                                    <option value="15">UT-4150</option>
-                                    <option value="16">UT-4160</option>
-                                    <option value="17">UT-4170</option>
-                                    <option value="18">UT-4180</option>
-                                    <option value="19">UT-4190</option>
-                                    <option value="20">UT-4200</option>
-                                    <option value="21">UT-4210</option>
-                                </select>
-                            </div>
-                            <div class="form-group hidden" id="grupoOtroLugarConsulta">
-                                <label for="otroLugarConsulta" class="label">Otro lugar</label>
-                                <input type="text" id="otroLugarConsulta" name="otroLugarConsulta" class="input" placeholder="Indique el lugar...">
-                            </div>
-                            <div class="form-group">
-                                <label for="tipoInstalacionConsulta" class="label">Tipo de instalación</label>
-                                <select id="tipoInstalacionConsulta" name="tipoInstalacionConsulta" class="select">
-                                    <option value="">Seleccione...</option>
-                                    <option value="dab">DAB (Dispensador Automático de Billetes)</option>
-                                    <option value="torno">Torno de acceso</option>
-                                    <option value="tren">Tren</option>
-                                    <option value="escalera">Escalera mecánica</option>
-                                    <option value="ascensor">Ascensor</option>
-                                    <option value="anden">Andén</option>
-                                    <option value="vestibulo">Vestíbulo</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
                                 <label for="tipoTituloConsulta" class="label">Tipo de título de viaje</label>
                                 <select id="tipoTituloConsulta" name="tipoTituloConsulta" class="select">
                                     <option value="">Seleccione si procede</option>
@@ -1063,27 +984,12 @@
                                     <input type="text" id="panMovilVirtualUltimos4Consulta" name="panMovilVirtualUltimos4Consulta" class="input input-pan" placeholder="1234" maxlength="4">
                                 </div>
                             </div>
-                            <div class="form-group full-width">
-                                <label for="descripcionCortaConsulta" class="label required">Descripción breve</label>
-                                <input type="text" id="descripcionCortaConsulta" name="descripcionCortaConsulta" class="input" required placeholder="Resumen en una línea..." maxlength="150">
-                                <span class="char-counter"><span id="charCountConsulta">0</span>/150</span>
-                            </div>
+                            
                             <div class="form-group full-width">
                                 <label for="descripcionDetalladaConsulta" class="label required">Descripción detallada</label>
                                 <textarea id="descripcionDetalladaConsulta" name="descripcionDetalladaConsulta" class="textarea" required placeholder="Describa su consulta con el mayor detalle posible..." rows="5"></textarea>
                             </div>
-                            <div class="form-group full-width">
-                                <label for="adjuntosConsultas" class="label">Documentación adjunta</label>
-                                <div class="file-upload">
-                                    <input type="file" id="adjuntosConsultas" name="adjuntosConsultas" class="file-input" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
-                                    <label for="adjuntosConsultas" class="file-label">
-                                        <span class="file-icon">📎</span>
-                                        <span class="file-text">Arrastra archivos aquí o haz clic para seleccionar</span>
-                                        <span class="file-hint">PDF, imágenes o documentos (máx. 10MB)</span>
-                                    </label>
-                                    <div id="fileListConsultas" class="file-list"></div>
-                                </div>
-                            </div>
+                            
                         </div>
                     </section>
 
