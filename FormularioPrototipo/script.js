@@ -212,11 +212,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const bloqueRepresentante = document.getElementById('bloqueRepresentante');
             if (bloqueRepresentante) bloqueRepresentante.classList.add('hidden');
             
-            // La visibilidad de la dirección se rige únicamente por el check normal
-            const recibirPostal = document.getElementById('recibirPostal');
+            // Asegurar que la dirección del interesado esté visible y actualizar visibilidad de envío
             const direccionContactoContainer = document.getElementById('direccionContactoContainer');
-            if (recibirPostal && direccionContactoContainer) {
-                direccionContactoContainer.classList.toggle('hidden', !recibirPostal.checked);
+            if (direccionContactoContainer) {
+                direccionContactoContainer.classList.remove('hidden');
+            }
+            if (typeof actualizarVisibilidadEnvio === 'function') {
+                actualizarVisibilidadEnvio();
             }
         }
         
@@ -538,7 +540,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const recibirPostal = document.getElementById('recibirPostal');
         if (recibirPostal) recibirPostal.checked = false;
         const direccionContactoContainer = document.getElementById('direccionContactoContainer');
-        if (direccionContactoContainer) direccionContactoContainer.classList.add('hidden');
+        if (direccionContactoContainer) direccionContactoContainer.classList.remove('hidden');
+        
+        // Limpiar dirección de envío
+        const direccionEnvioSelect = document.getElementById('direccionEnvioSelect');
+        if (direccionEnvioSelect) direccionEnvioSelect.value = 'misma';
+        if (typeof actualizarVisibilidadEnvio === 'function') {
+            actualizarVisibilidadEnvio();
+        }
         const grupoTrenConsulta = document.getElementById('grupoTrenConsulta');
         if (grupoTrenConsulta) grupoTrenConsulta.classList.add('hidden');
         const grupoOtroLugarConsulta = document.getElementById('grupoOtroLugarConsulta');
@@ -671,6 +680,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Envío del formulario
     form.addEventListener('submit', (e) => {
         e.preventDefault();
+        
+        // Asegurar sincronización de dirección si procede
+        if (typeof sincronizarDireccionEnvio === 'function') {
+            sincronizarDireccionEnvio();
+        }
         
         if (validarFormulario()) {
             // Aquí iría la lógica de envío real (fetch/AJAX)
@@ -1382,13 +1396,85 @@ document.addEventListener('DOMContentLoaded', () => {
         solicitudRepresentante.addEventListener('change', actualizarVisibilidadRepresentante);
     }
 
-    // Listener para recibirPostal normal
-    if (recibirPostal && direccionContactoContainer) {
-        recibirPostal.addEventListener('change', (e) => {
-            direccionContactoContainer.classList.toggle('hidden', !e.target.checked);
-            comprobarCamposObligatorios();
+    // 1b. Visibilidad y sincronización de la dirección de envío postal
+    const grupoDireccionEnvioSelect = document.getElementById('grupoDireccionEnvioSelect');
+    const direccionEnvioSelect = document.getElementById('direccionEnvioSelect');
+    const direccionEnvioContainer = document.getElementById('direccionEnvioContainer');
+
+    function sincronizarDireccionEnvio() {
+        if (recibirPostal && recibirPostal.checked && direccionEnvioSelect && direccionEnvioSelect.value === 'misma') {
+            const fields = [
+                { src: 'viaContacto', dest: 'viaEnvio' },
+                { src: 'numContacto', dest: 'numEnvio' },
+                { src: 'escContacto', dest: 'escEnvio' },
+                { src: 'pisoContacto', dest: 'pisoEnvio' },
+                { src: 'puerContacto', dest: 'puerEnvio' },
+                { src: 'cpContacto', dest: 'cpEnvio' },
+                { src: 'municipioContacto', dest: 'municipioEnvio' },
+                { src: 'provinciaContacto', dest: 'provinciaEnvio' }
+            ];
+            fields.forEach(pair => {
+                const srcEl = document.getElementById(pair.src);
+                const destEl = document.getElementById(pair.dest);
+                if (srcEl && destEl) {
+                    destEl.value = srcEl.value;
+                }
+            });
+        }
+    }
+
+    function limpiarDireccionEnvio() {
+        const fields = ['viaEnvio', 'numEnvio', 'escEnvio', 'pisoEnvio', 'puerEnvio', 'cpEnvio', 'municipioEnvio', 'provinciaEnvio'];
+        fields.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.value = '';
+                el.classList.remove('error');
+            }
         });
     }
+
+    function actualizarVisibilidadEnvio() {
+        if (!recibirPostal || !grupoDireccionEnvioSelect || !direccionEnvioSelect || !direccionEnvioContainer) return;
+
+        if (recibirPostal.checked) {
+            grupoDireccionEnvioSelect.classList.remove('hidden');
+            if (direccionEnvioSelect.value === 'misma') {
+                direccionEnvioContainer.classList.add('hidden');
+                sincronizarDireccionEnvio();
+            } else {
+                direccionEnvioContainer.classList.remove('hidden');
+            }
+        } else {
+            grupoDireccionEnvioSelect.classList.add('hidden');
+            direccionEnvioContainer.classList.add('hidden');
+            limpiarDireccionEnvio();
+        }
+        comprobarCamposObligatorios();
+    }
+
+    if (recibirPostal) {
+        recibirPostal.addEventListener('change', actualizarVisibilidadEnvio);
+    }
+
+    if (direccionEnvioSelect) {
+        direccionEnvioSelect.addEventListener('change', (e) => {
+            if (e.target.value === 'diferente') {
+                limpiarDireccionEnvio();
+            }
+            actualizarVisibilidadEnvio();
+        });
+    }
+
+    // Escuchar cambios en la dirección del interesado para mantener sincronizada la de envío si corresponde
+    const contactFields = ['viaContacto', 'numContacto', 'escContacto', 'pisoContacto', 'puerContacto', 'cpContacto', 'municipioContacto', 'provinciaContacto'];
+    contactFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', sincronizarDireccionEnvio);
+            el.addEventListener('change', sincronizarDireccionEnvio);
+        }
+    });
 
     // 2. Control del estado de la Firma y Checkboxes de Consentimiento
     const datosCorrectos = document.getElementById('datosCorrectos');
