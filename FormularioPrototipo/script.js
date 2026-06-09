@@ -168,11 +168,61 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
+        // Ajustar elementos específicos para tarjeta +Metro
+        const txtTituloDatosPersonales = document.getElementById('txtTituloDatosPersonales');
+        const disclaimerTarjetas = document.getElementById('disclaimerTarjetas');
+        const grupoRepresentanteCheck = document.getElementById('grupoRepresentanteCheck');
+        const grupoDatosCorrectosCheck = document.getElementById('grupoDatosCorrectosCheck');
+        const containerFirmaTarjetas = document.getElementById('containerFirmaTarjetas');
+        const lopdTextoTarjetas = document.getElementById('lopdTextoTarjetas');
+        
+        if (tipo === 'tarjetas') {
+            if (txtTituloDatosPersonales) txtTituloDatosPersonales.textContent = 'Datos personales del interesado';
+            if (disclaimerTarjetas) disclaimerTarjetas.classList.remove('hidden');
+            if (grupoRepresentanteCheck) grupoRepresentanteCheck.classList.remove('hidden');
+            if (grupoDatosCorrectosCheck) grupoDatosCorrectosCheck.classList.remove('hidden');
+            if (containerFirmaTarjetas) containerFirmaTarjetas.classList.remove('hidden');
+            if (lopdTextoTarjetas) lopdTextoTarjetas.classList.remove('hidden');
+            
+            // Actualizar visibilidad de representante/dirección según el checkbox
+            if (typeof actualizarVisibilidadRepresentante === 'function') {
+                actualizarVisibilidadRepresentante();
+            }
+            // Actualizar estado de la firma (habilitar/deshabilitar)
+            if (typeof actualizarEstadoFirma === 'function') {
+                actualizarEstadoFirma();
+            }
+        } else {
+            if (txtTituloDatosPersonales) txtTituloDatosPersonales.textContent = 'Datos personales';
+            if (disclaimerTarjetas) disclaimerTarjetas.classList.add('hidden');
+            if (grupoRepresentanteCheck) {
+                grupoRepresentanteCheck.classList.add('hidden');
+                const checkboxRep = grupoRepresentanteCheck.querySelector('input[type="checkbox"]');
+                if (checkboxRep) checkboxRep.checked = false;
+            }
+            if (grupoDatosCorrectosCheck) {
+                grupoDatosCorrectosCheck.classList.add('hidden');
+                const checkboxCorrectos = grupoDatosCorrectosCheck.querySelector('input[type="checkbox"]');
+                if (checkboxCorrectos) checkboxCorrectos.checked = false;
+            }
+            if (containerFirmaTarjetas) containerFirmaTarjetas.classList.add('hidden');
+            if (lopdTextoTarjetas) lopdTextoTarjetas.classList.add('hidden');
+            
+            // Si no es tarjetas, restauramos comportamiento normal para representante
+            const bloqueRepresentante = document.getElementById('bloqueRepresentante');
+            if (bloqueRepresentante) bloqueRepresentante.classList.add('hidden');
+            
+            // La visibilidad de la dirección se rige únicamente por el check normal
+            const recibirPostal = document.getElementById('recibirPostal');
+            const direccionContactoContainer = document.getElementById('direccionContactoContainer');
+            if (recibirPostal && direccionContactoContainer) {
+                direccionContactoContainer.classList.toggle('hidden', !recibirPostal.checked);
+            }
+        }
+        
         // Resetear campos required según la sección
         actualizarCamposRequired(tipo);
         comprobarCamposObligatorios();
-        
-
         
         // Scroll suave al inicio del formulario
         formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -200,9 +250,9 @@ document.addEventListener('DOMContentLoaded', () => {
             reclamaciones: ['clasificacion', 'canalRecepcion', 'fechaIncidencia', 'tipologia', 'lugarIncidencia', 'descripcionCorta', 'descripcionDetallada'],
             consultas: ['descripcionCortaConsulta', 'descripcionDetalladaConsulta'],
             sugerencias: ['areaSugerencia', 'lugarSugerencia', 'descripcionSugerencia'],
-            agradecimientos: ['motivoAgradecimiento', 'descripcionAgradecimiento'],
+            agradecimientos: ['motivoAgradecimiento', 'dirigidoAgradecimiento', 'descripcionAgradecimiento'],
             objetos: ['fechaPerdida', 'lineaMetroObjetos', 'dondePerdidoObjetos', 'nombreObjetoObjetos', 'descripcionObjeto'],
-            tarjetas: ['motivoTarjeta', 'tipoTarjeta', 'fechaNacimiento', 'puntoRecogida']
+            tarjetas: ['motivoTarjeta', 'fechaNacimiento', 'fechaCitaTarjeta', 'horaCitaTarjeta', 'medioNotificacionTarjeta']
         };
         
         if (camposEspecificos[tipo]) {
@@ -375,6 +425,48 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
+
+        // Validar email del representante (si está visible)
+        const emailRep = document.getElementById('emailRep');
+        const confirmEmailRep = document.getElementById('confirmEmailRep');
+        if (emailRep && !emailRep.closest('.hidden')) {
+            if (emailRep.value && !validarEmail(emailRep.value)) {
+                emailRep.classList.add('error');
+                esValido = false;
+                if (!primerError) primerError = emailRep;
+            }
+            if (confirmEmailRep && confirmEmailRep.value && (confirmEmailRep.value !== emailRep.value || !validarEmail(confirmEmailRep.value))) {
+                confirmEmailRep.classList.add('error');
+                esValido = false;
+                if (!primerError) primerError = confirmEmailRep;
+            }
+        }
+        
+        // Validar teléfono del representante (si está visible)
+        const telefonoRep = document.getElementById('telefonoRep');
+        if (telefonoRep && !telefonoRep.closest('.hidden') && telefonoRep.value) {
+            const normalizedPhone = telefonoRep.value.replace(/[\s-]/g, '');
+            const phoneRegex = /^(?:\+34|34|0034)?[6789]\d{8}$/;
+            if (!phoneRegex.test(normalizedPhone)) {
+                telefonoRep.classList.add('error');
+                esValido = false;
+                if (!primerError) primerError = telefonoRep;
+            }
+        }
+
+        // Validar DNI/NIE del representante (si está visible)
+        const tipoDocumentoRep = document.getElementById('tipoDocumentoRep');
+        const numeroDocumentoRep = document.getElementById('numeroDocumentoRep');
+        if (tipoDocumentoRep && numeroDocumentoRep && !numeroDocumentoRep.closest('.hidden') && numeroDocumentoRep.value) {
+            const tipo = tipoDocumentoRep.value;
+            if (tipo === 'NIF' || tipo === 'NIE') {
+                if (!validarDNI_NIE(numeroDocumentoRep.value)) {
+                    numeroDocumentoRep.classList.add('error');
+                    esValido = false;
+                    if (!primerError) primerError = numeroDocumentoRep;
+                }
+            }
+        }
         
         if (primerError) {
             primerError.focus();
@@ -451,6 +543,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (grupoTrenConsulta) grupoTrenConsulta.classList.add('hidden');
         const grupoOtroLugarConsulta = document.getElementById('grupoOtroLugarConsulta');
         if (grupoOtroLugarConsulta) grupoOtroLugarConsulta.classList.add('hidden');
+        
+        // Resetear elementos del representante y firma de +Metro
+        const solicitudRepresentante = document.getElementById('solicitudRepresentante');
+        if (solicitudRepresentante) solicitudRepresentante.checked = false;
+        
+        if (typeof limpiarFirma === 'function') {
+            limpiarFirma();
+        }
+        if (typeof actualizarEstadoFirma === 'function') {
+            actualizarEstadoFirma();
+        }
         
         // Limpiar y ocultar bloques condicionales de títulos de viaje
         if (typeof ocultarYResetearTodosLosBloques === 'function') {
@@ -671,7 +774,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Establecer fecha máxima en campos de fecha (hoy)
     const today = new Date().toISOString().split('T')[0];
     document.querySelectorAll('input[type="date"]').forEach(input => {
-        if (!input.id.includes('Nacimiento')) {
+        if (input.id.includes('Cita')) {
+            input.setAttribute('min', today);
+        } else if (!input.id.includes('Nacimiento')) {
             input.setAttribute('max', today);
         }
     });
@@ -734,27 +839,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // GESTIÓN CONDICIONAL POR TIPO DE TÍTULO (RECLAMACIONES)
     // ============================================
     const dabsPorEstacion = {
-        'guadalmedina-l1': ['DAB-G1-01', 'DAB-G1-02'],
-        'guadalmedina-l2': ['DAB-G2-01', 'DAB-G2-02'],
-        'atarazanas': ['DAB-AT-01', 'DAB-AT-02', 'DAB-AT-03'],
-        'andalucia-tech': ['DAB-AT-04', 'DAB-AT-05'],
-        'carranque': ['DAB-CA-01', 'DAB-CA-02'],
-        'barbarela': ['DAB-BA-01', 'DAB-BA-02'],
-        'el-clinico': ['DAB-EC-01', 'DAB-EC-02'],
-        'la-union': ['DAB-LU-01', 'DAB-LU-02'],
-        'universidad': ['DAB-UN-01', 'DAB-UN-02'],
-        'ciudad-justicia': ['DAB-CJ-01', 'DAB-CJ-02'],
-        'el-consul': ['DAB-CO-01', 'DAB-CO-02'],
-        'el-perchel-l1': ['DAB-P1-01', 'DAB-P1-02', 'DAB-P1-03'],
-        'el-perchel-l2': ['DAB-P2-01', 'DAB-P2-02'],
-        'paraninfo': ['DAB-PA-01', 'DAB-PA-02'],
-        'portada-alta': ['DAB-PO-01', 'DAB-PO-02'],
-        'la-luz-la-paz': ['DAB-LL-01', 'DAB-LL-02'],
-        'la-isla': ['DAB-LI-01', 'DAB-LI-02'],
-        'puerta-blanca': ['DAB-PB-01', 'DAB-PB-02'],
-        'princesa-huelin': ['DAB-PH-01', 'DAB-PH-02'],
-        'el-torcal': ['DAB-TO-01', 'DAB-TO-02'],
-        'palacio-deportes': ['DAB-PD-01', 'DAB-PD-02']
+        'guadalmedina-l1': ['GDL-DAB-101', 'GDL-DAB-102', 'GDL-DAB-103', 'GDL-DAB-104'],
+        'guadalmedina-l2': ['GDL-DAB-101', 'GDL-DAB-102', 'GDL-DAB-103', 'GDL-DAB-104'],
+        'atarazanas': ['ATZ-DAB-101', 'ATZ-DAB-102', 'ATZ-DAB-103'],
+        'andalucia-tech': ['TCH-DAB-101', 'TCH-DAB-102'],
+        'carranque': ['CRR-DAB-101', 'CRR-DAB-102'],
+        'barbarela': ['BBL-DAB-101', 'BBL-DAB-102'],
+        'el-clinico': ['CLI-DAB-101', 'CLI-DAB-102'],
+        'la-union': ['LUN-DAB-101', 'LUN-DAB-102'],
+        'universidad': ['UNI-DAB-101', 'UNI-DAB-102'],
+        'ciudad-justicia': ['CDJ-DAB-101', 'CDJ-DAB-102', 'CDJ-DAB-201'],
+        'el-consul': ['CNS-DAB-101', 'CNS-DAB-102'],
+        'el-perchel-l1': ['PCH-DAB-101', 'PCH-DAB-102', 'PCH-DAB-103', 'PCH-DAB-104', 'PCH-DAB-105'],
+        'el-perchel-l2': ['PCH-DAB-101', 'PCH-DAB-102', 'PCH-DAB-103', 'PCH-DAB-104', 'PCH-DAB-105'],
+        'paraninfo': ['PRF-DAB-101'],
+        'portada-alta': ['PTD-DAB-101', 'PTD-DAB-102'],
+        'la-luz-la-paz': ['LZP-DAB-101', 'LZP-DAB-102', 'LZP-DAB-201'],
+        'la-isla': ['ISL-DAB-101', 'ISL-DAB-102'],
+        'puerta-blanca': ['PBL-DAB-101', 'PBL-DAB-102', 'PBL-DAB-201'],
+        'princesa-huelin': ['PRI-DAB-101', 'PRI-DAB-102'],
+        'el-torcal': ['TOR-DAB-101', 'TOR-DAB-102'],
+        'palacio-deportes': ['PDD-DAB-101', 'PDD-DAB-102', 'PDD-DAB-103']
     };
 
     function resetearBloque(bloque) {
@@ -802,7 +907,13 @@ document.addEventListener('DOMContentLoaded', () => {
             'bloqueTituloViajeObjetos',
             'bloqueTarjetaBancariaObjetos',
             'bloqueEstacionObjetos',
-            'bloqueTrenObjetos'
+            'bloqueTrenObjetos',
+            'grupoEstacionAgradecimiento',
+            'grupoTrenAgradecimiento',
+            'grupoVariosColectivos',
+            'bloqueRepresentante',
+            'grupoDatosCorrectosCheck',
+            'containerFirmaTarjetas'
         ];
         bloques.forEach(id => {
             const bloque = document.getElementById(id);
@@ -1190,13 +1301,207 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Listener para desplegar Dirección de Contacto al marcar "Deseo recibir respuesta por correo postal"
+    // 4. Gestión de Lugar en Agradecimientos (Estación vs Tren vs OAC)
+    const lugarAgradecimiento = document.getElementById('lugarAgradecimiento');
+    const grupoEstacionAgradecimiento = document.getElementById('grupoEstacionAgradecimiento');
+    const grupoTrenAgradecimiento = document.getElementById('grupoTrenAgradecimiento');
+
+    if (lugarAgradecimiento) {
+        lugarAgradecimiento.addEventListener('change', (e) => {
+            const val = e.target.value;
+            if (val === 'estacion') {
+                if (grupoEstacionAgradecimiento) grupoEstacionAgradecimiento.classList.remove('hidden');
+                if (grupoTrenAgradecimiento) {
+                    resetearBloque(grupoTrenAgradecimiento);
+                    grupoTrenAgradecimiento.classList.add('hidden');
+                }
+            } else if (val === 'tren') {
+                if (grupoTrenAgradecimiento) grupoTrenAgradecimiento.classList.remove('hidden');
+                if (grupoEstacionAgradecimiento) {
+                    resetearBloque(grupoEstacionAgradecimiento);
+                    grupoEstacionAgradecimiento.classList.add('hidden');
+                }
+            } else {
+                if (grupoEstacionAgradecimiento) {
+                    resetearBloque(grupoEstacionAgradecimiento);
+                    grupoEstacionAgradecimiento.classList.add('hidden');
+                }
+                if (grupoTrenAgradecimiento) {
+                    resetearBloque(grupoTrenAgradecimiento);
+                    grupoTrenAgradecimiento.classList.add('hidden');
+                }
+            }
+        });
+    }
+
+    // 5. Gestión de Destinatario en Agradecimientos (Colectivos varios)
+    const dirigidoAgradecimiento = document.getElementById('dirigidoAgradecimiento');
+    const grupoVariosColectivos = document.getElementById('grupoVariosColectivos');
+
+    if (dirigidoAgradecimiento) {
+        dirigidoAgradecimiento.addEventListener('change', (e) => {
+            const val = e.target.value;
+            if (val === 'varios') {
+                if (grupoVariosColectivos) grupoVariosColectivos.classList.remove('hidden');
+            } else {
+                if (grupoVariosColectivos) {
+                    resetearBloque(grupoVariosColectivos);
+                    grupoVariosColectivos.classList.add('hidden');
+                }
+            }
+        });
+    }
+
+    // ============================================
+    // GESTIÓN DE TARJETAS +METRO Y FIRMA
+    // ============================================
+
+    // 1. Visibilidad del representante y la dirección postal
+    const solicitudRepresentante = document.getElementById('solicitudRepresentante');
+    const bloqueRepresentante = document.getElementById('bloqueRepresentante');
+    const recibirPostalNormalContainer = document.getElementById('recibirPostalNormalContainer');
     const recibirPostal = document.getElementById('recibirPostal');
     const direccionContactoContainer = document.getElementById('direccionContactoContainer');
+
+    function actualizarVisibilidadRepresentante() {
+        if (!solicitudRepresentante || !bloqueRepresentante) return;
+
+        const esTarjetas = (tipoFormulario.value === 'tarjetas');
+
+        if (esTarjetas && solicitudRepresentante.checked) {
+            // Mostrar representante
+            bloqueRepresentante.classList.remove('hidden');
+        } else {
+            // Ocultar representante
+            bloqueRepresentante.classList.add('hidden');
+        }
+        comprobarCamposObligatorios();
+    }
+
+    if (solicitudRepresentante) {
+        solicitudRepresentante.addEventListener('change', actualizarVisibilidadRepresentante);
+    }
+
+    // Listener para recibirPostal normal
     if (recibirPostal && direccionContactoContainer) {
         recibirPostal.addEventListener('change', (e) => {
             direccionContactoContainer.classList.toggle('hidden', !e.target.checked);
+            comprobarCamposObligatorios();
         });
+    }
+
+    // 2. Control del estado de la Firma y Checkboxes de Consentimiento
+    const datosCorrectos = document.getElementById('datosCorrectos');
+    const consentimiento = document.getElementById('consentimiento');
+    const containerFirmaTarjetas = document.getElementById('containerFirmaTarjetas');
+
+    function actualizarEstadoFirma() {
+        if (!datosCorrectos || !consentimiento || !containerFirmaTarjetas) return;
+
+        const esTarjetas = (tipoFormulario.value === 'tarjetas');
+
+        if (esTarjetas && datosCorrectos.checked && consentimiento.checked) {
+            containerFirmaTarjetas.style.opacity = '1';
+            containerFirmaTarjetas.style.pointerEvents = 'auto';
+        } else {
+            // Atenuar y bloquear interacción
+            containerFirmaTarjetas.style.opacity = '0.4';
+            containerFirmaTarjetas.style.pointerEvents = 'none';
+            // Limpiar la firma
+            limpiarFirma();
+        }
+        comprobarCamposObligatorios();
+    }
+
+    if (datosCorrectos) {
+        datosCorrectos.addEventListener('change', actualizarEstadoFirma);
+    }
+    if (consentimiento) {
+        consentimiento.addEventListener('change', actualizarEstadoFirma);
+    }
+
+    // 3. Lógica del Signature Pad (HTML5 Canvas)
+    const canvas = document.getElementById('signature-canvas');
+    const signatureData = document.getElementById('signature-data');
+    const clearSignatureBtn = document.getElementById('clear-signature-btn');
+
+    let drawing = false;
+
+    function limpiarFirma() {
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        if (signatureData) {
+            signatureData.value = '';
+        }
+        comprobarCamposObligatorios();
+    }
+
+    if (clearSignatureBtn) {
+        clearSignatureBtn.addEventListener('click', limpiarFirma);
+    }
+
+    if (canvas && signatureData) {
+        const ctx = canvas.getContext('2d');
+        ctx.strokeStyle = '#1e293b'; // Slate 800 (sleek dark gray/black)
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        function getMousePos(canvasDom, e) {
+            const rect = canvasDom.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: (clientX - rect.left) * (canvasDom.width / rect.width),
+                y: (clientY - rect.top) * (canvasDom.height / rect.height)
+            };
+        }
+
+        function startDrawing(e) {
+            // Solo permitir firmar si está activado
+            if (containerFirmaTarjetas.style.pointerEvents === 'none') return;
+            drawing = true;
+            const pos = getMousePos(canvas, e);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+        }
+
+        function draw(e) {
+            if (!drawing) return;
+            const pos = getMousePos(canvas, e);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+        }
+
+        function stopDrawing() {
+            if (!drawing) return;
+            drawing = false;
+            // Guardar firma en hidden input
+            signatureData.value = canvas.toDataURL();
+            comprobarCamposObligatorios();
+        }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseleave', stopDrawing);
+
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.target === canvas) e.preventDefault();
+            startDrawing(e);
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (e.target === canvas) e.preventDefault();
+            draw(e);
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            if (e.target === canvas) e.preventDefault();
+            stopDrawing();
+        }, { passive: false });
     }
 
     // Contador de caracteres dinámico para campos de descripción (textarea)
