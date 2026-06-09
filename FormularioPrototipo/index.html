@@ -34,7 +34,7 @@
                             <option value="sugerencias">Sugerencias</option>
                             <option value="agradecimientos">Agradecimientos y felicitaciones</option>
                             <option value="objetos">Objetos perdidos</option>
-                            <option value="tarjetas">Datos personales para confección tarjetas +Metro</option>
+                            <option value="tarjetas">Solicitud de tarjeta +Metro</option>
                             <option value="consultas">Consulta de Información</option>
                         </select>
                     </div>
@@ -43,11 +43,18 @@
                 <!-- Contenedor dinámico de formularios -->
                 <div id="formContainer" class="form-container hidden">
                     
+                    <!-- Disclaimer para Tarjeta +Metro (visible solo en este tipo de formulario) -->
+                    <div id="disclaimerTarjetas" class="disclaimer-box hidden" style="margin-bottom: var(--spacing-lg); padding: var(--spacing-md); background-color: rgba(227, 24, 55, 0.05); border-left: 4px solid var(--color-primary); border-radius: var(--radius-sm);">
+                        <p style="margin: 0; font-size: 0.95rem; color: var(--color-gray-800); line-height: 1.5; font-weight: 500;">
+                            ℹ️ Este formulario tiene como finalidad registrar los datos personales necesarios para la confección de su tarjeta +Metro, que será emitida en el momento de su cita concertada en nuestra oficina de atención al cliente. Si aún no tiene cita previa, le rogamos que contacte a través del teléfono 952061642.
+                        </p>
+                    </div>
+
                     <!-- Sección común: Datos personales -->
                     <section class="form-section" id="datosPersonales">
                         <h2 class="section-title">
                             <span class="section-icon">👤</span>
-                            Datos personales
+                            <span id="txtTituloDatosPersonales">Datos personales</span>
                         </h2>
                         <div class="form-grid">
                             <div class="form-group">
@@ -204,17 +211,67 @@
                                 </select>
                             </div>
                             
-
-
-                            <!-- Checkbox Deseo recibir respuesta por correo postal -->
-                            <div class="form-group full-width" style="margin-top: var(--spacing-sm);">
+                            <!-- Checkbox solicitudRepresentante (solo para Solicitud de tarjeta +Metro) -->
+                            <div class="form-group full-width hidden" id="grupoRepresentanteCheck" style="margin-top: var(--spacing-sm);">
                                 <div class="checkbox-group">
-                                    <input type="checkbox" id="recibirPostal" name="recibirPostal" class="checkbox">
-                                    <label for="recibirPostal" class="checkbox-label">
-                                        Deseo recibir respuesta por correo postal
-                                    </label>
-                                </div>
-                            </div>
+                                    <input type="checkbox" id="solicitudRepresentante" name="solicitudRepresentante" class="checkbox">
+                                    <label for="solicitudRepresentante" class="checkbox-label">
+                                        La solicitud se realiza mediante un representante (obligatorio para menores de edad o cuando la persona que solicita la tarjeta no sea la beneficiaria final)
+                                     </label>
+                                 </div>
+                             </div>
+
+                             <!-- Bloque condicional: Datos de la persona representante -->
+                             <div id="bloqueRepresentante" class="form-grid full-width hidden" style="grid-column: 1 / -1; margin-top: var(--spacing-md); border-top: 1px solid var(--color-gray-200); padding-top: var(--spacing-md);">
+                                 <h3 class="subsection-title" style="grid-column: 1 / -1; font-size: 1.1rem; color: var(--color-primary); margin-bottom: var(--spacing-sm);">
+                                     Datos de la persona representante
+                                 </h3>
+                                 <div class="form-grid" style="grid-column: 1 / -1;">
+                                     <div class="form-group">
+                                         <label for="nombreRep" class="label required">Nombre del representante</label>
+                                         <input type="text" id="nombreRep" name="nombreRep" class="input" placeholder="Nombre" required>
+                                     </div>
+                                     <div class="form-group">
+                                         <label for="apellidosRep" class="label required">Apellidos del representante</label>
+                                         <input type="text" id="apellidosRep" name="apellidosRep" class="input" placeholder="Apellidos" required>
+                                     </div>
+                                     <div class="form-group">
+                                         <label for="tipoDocumentoRep" class="label required">Tipo de documento del representante</label>
+                                         <select id="tipoDocumentoRep" name="tipoDocumentoRep" class="select" required>
+                                             <option value="">Seleccione...</option>
+                                             <option value="NIF">NIF</option>
+                                             <option value="PAS">Pasaporte</option>
+                                             <option value="NIE">NIE</option>
+                                         </select>
+                                     </div>
+                                     <div class="form-group">
+                                         <label for="numeroDocumentoRep" class="label required">Número de documento del representante</label>
+                                         <input type="text" id="numeroDocumentoRep" name="numeroDocumentoRep" class="input" placeholder="Ej: 12345678A" required>
+                                     </div>
+                                     <div class="form-group">
+                                         <label for="emailRep" class="label required">Correo electrónico del representante</label>
+                                         <input type="email" id="emailRep" name="emailRep" class="input" placeholder="ejemplo@correo.com" onpaste="return false;" required>
+                                     </div>
+                                     <div class="form-group">
+                                         <label for="confirmEmailRep" class="label required">Confirmar correo electrónico del representante</label>
+                                         <input type="email" id="confirmEmailRep" name="confirmEmailRep" class="input" placeholder="Repita el correo electrónico" onpaste="return false;" required>
+                                     </div>
+                                     <div class="form-group">
+                                         <label for="telefonoRep" class="label required">Teléfono del representante</label>
+                                         <input type="tel" id="telefonoRep" name="telefonoRep" class="input" placeholder="612 345 678" required>
+                                     </div>
+                                 </div>
+                             </div>
+
+                             <!-- Checkbox Deseo recibir respuesta por correo postal (Normal) -->
+                             <div class="form-group full-width" id="recibirPostalNormalContainer" style="margin-top: var(--spacing-sm);">
+                                 <div class="checkbox-group">
+                                     <input type="checkbox" id="recibirPostal" name="recibirPostal" class="checkbox">
+                                     <label for="recibirPostal" class="checkbox-label">
+                                         Deseo recibir respuesta por correo postal
+                                     </label>
+                                 </div>
+                             </div>
 
                             <!-- Contenedor de dirección de contacto -->
                             <div id="direccionContactoContainer" class="form-grid full-width hidden" style="grid-column: 1 / -1; margin-top: var(--spacing-md);">
@@ -315,7 +372,6 @@
                                     </select>
                                 </div>
                             </div>
-
                         </div>
                     </section>
 
@@ -1135,6 +1191,7 @@
                                     <option value="UT-4180">UT-4180</option>
                                     <option value="UT-4190">UT-4190</option>
                                     <option value="UT-4200">UT-4200</option>
+                                    <option value="UT-4210">UT-4210</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -1312,67 +1369,60 @@
                             Datos para tarjeta +Metro
                         </h2>
                         <div class="form-grid">
-                            <div class="form-group">
-                                <label for="motivoTarjeta" class="label required">Motivo de la solicitud</label>
-                                <select id="motivoTarjeta" name="motivoTarjeta" class="select" required>
-                                    <option value="">Seleccione...</option>
-                                    <option value="nueva">Nueva tarjeta</option>
-                                    <option value="renovacion">Renovación</option>
-                                    <option value="duplicado">Duplicado por pérdida/robo</option>
-                                    <option value="deterioro">Duplicado por deterioro</option>
-                                    <option value="modificacion">Modificación de datos</option>
-                                </select>
+                            <!-- Prominent solicita message -->
+                            <div class="form-group full-width" style="margin-bottom: var(--spacing-md); text-align: center; grid-column: 1 / -1;">
+                                <p style="font-size: 1.1rem; font-weight: 700; color: var(--color-secondary); margin: 0; padding: var(--spacing-md); background-color: var(--color-gray-100); border-radius: var(--radius); border-left: 5px solid var(--color-primary); line-height: 1.4; text-align: left;">
+                                    SOLICITA: Que le sea expedida la tarjeta personalizada <span style="color: var(--color-primary);">+MásMetro</span> de <span style="color: var(--color-success); font-weight: 800;">Metro de Málaga</span> para su uso personal y particular.
+                                </p>
                             </div>
-                            <div class="form-group">
-                                <label for="fechaNacimiento" class="label required">Fecha de nacimiento</label>
-                                <input type="date" id="fechaNacimiento" name="fechaNacimiento" class="input" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="genero" class="label">Género</label>
-                                <select id="genero" name="genero" class="select">
-                                    <option value="">Seleccione...</option>
-                                    <option value="H">Hombre</option>
-                                    <option value="M">Mujer</option>
-                                    <option value="O">Otro / Prefiero no indicar</option>
-                                </select>
-                            </div>
-                            <!--<div class="form-group full-width">
-                                <label for="fotoCarnet" class="label">Fotografía tipo carnet</label>
-                                <div class="file-upload">
-                                    <input type="file" id="fotoCarnet" name="fotoCarnet" class="file-input" accept=".jpg,.jpeg,.png">
-                                    <label for="fotoCarnet" class="file-label">
-                                        <span class="file-icon">📷</span>
-                                        <span class="file-text">Adjuntar fotografía</span>
-                                        <span class="file-hint">Fondo blanco, cara visible, sin gafas de sol</span>
-                                    </label>
-                                    <div id="fotoPreview" class="foto-preview"></div>
+
+                            <div class="grid-3-cols" style="grid-column: 1 / -1;">
+                                <div class="form-group">
+                                    <label for="motivoTarjeta" class="label required">Motivo de la solicitud</label>
+                                    <select id="motivoTarjeta" name="motivoTarjeta" class="select" required>
+                                        <option value="">Seleccione...</option>
+                                        <option value="nueva">Nueva tarjeta</option>
+                                        <option value="renovacion">Renovación</option>
+                                        <option value="duplicado">Duplicado por pérdida/robo</option>
+                                        <option value="deterioro">Duplicado por deterioro</option>
+                                        <option value="modificacion">Modificación de datos</option>
+                                    </select>
                                 </div>
-                            </div>-->
-                            <!--<div class="form-group full-width" id="documentacionAdicional">
-                                <label for="docAdicional" class="label">Documentación adicional</label>
-                                <div class="file-upload">
-                                    <input type="file" id="docAdicional" name="docAdicional" class="file-input" multiple accept=".pdf,.jpg,.jpeg,.png">
-                                    <label for="docAdicional" class="file-label">
-                                        <span class="file-icon">📄</span>
-                                        <span class="file-text">Adjuntar documentación</span>
-                                        <span class="file-hint">Libro de familia, certificado discapacidad, etc.</span>
-                                    </label>
+                                <div class="form-group">
+                                    <label for="fechaNacimiento" class="label required">Fecha de nacimiento</label>
+                                    <input type="date" id="fechaNacimiento" name="fechaNacimiento" class="input" required>
                                 </div>
-                            </div>-->
-                            <div class="form-group full-width" id="firmaDigital">
-                                <label for="firmaDigital" class="label">Firma digital</label>
-                                <div class="file-upload">
-                                    <input type="file" id="firmaDigital" name="firmaDigital" class="file-input" accept=".pdf,.jpg,.jpeg,.png">
-                                    <label for="firmaDigital" class="file-label">
-                                        <span class="file-icon">🖊️</span>
-                                        <span class="file-text">Adjuntar firma digital</span>
-                                        <span class="file-hint">Imagen clara de la firma, sin firmas en blanco</span>
-                                    </label>
+                                <div class="form-group">
+                                    <label for="genero" class="label">Género</label>
+                                    <select id="genero" name="genero" class="select">
+                                        <option value="">Seleccione...</option>
+                                        <option value="H">Hombre</option>
+                                        <option value="M">Mujer</option>
+                                        <option value="O">Otro / Prefiero no indicar</option>
+                                    </select>
                                 </div>
                             </div>
 
-                            <div class="form-group full-width" style="margin-top: var(--spacing-md); background-color: var(--color-info-light); color: var(--color-info); border: 1.5px solid var(--color-info); padding: var(--spacing-md); border-radius: var(--radius); font-size: 0.9375rem; font-weight: 500; display: flex; align-items: center; gap: var(--spacing-sm);">
-                                <span>ℹ️ Para finalizar la confección de su tarjeta, deberá acudir presencialmente a la Oficina de Atención al Cliente en la estación El Perchel.</span>
+                            <div class="grid-3-cols" style="grid-column: 1 / -1;">
+                                <div class="form-group">
+                                    <label for="fechaCitaTarjeta" class="label required">Fecha de su cita para la confección de la tarjeta +Metro</label>
+                                    <input type="date" id="fechaCitaTarjeta" name="fechaCitaTarjeta" class="input" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="horaCitaTarjeta" class="label required">Hora de su cita para la confección de la tarjeta +Metro</label>
+                                    <input type="time" id="horaCitaTarjeta" name="horaCitaTarjeta" class="input" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="medioNotificacionTarjeta" class="label required">Medio de notificación para la entrega del documento de datos personales</label>
+                                    <select id="medioNotificacionTarjeta" name="medioNotificacionTarjeta" class="select" required>
+                                        <option value="">Seleccione...</option>
+                                        <option value="email">Mediante email</option>
+                                        <option value="impreso">Mediante informe impreso</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group full-width" style="margin-top: var(--spacing-md); background-color: var(--color-info-light); color: var(--color-info); border: 1.5px solid var(--color-info); padding: var(--spacing-md); border-radius: var(--radius); font-size: 0.9375rem; font-weight: 500; display: flex; align-items: center; gap: var(--spacing-sm); grid-column: 1 / -1;">
+                                <span>ℹ️ Para terminar de confeccionar la tarjeta tendrán que pasarse por la Oficina de Atención al Cliente (El Perchel).</span>
                             </div>
                         </div>
                     </section>
@@ -1380,18 +1430,41 @@
                     <!-- Consentimiento y envío -->
                     <section class="form-section" id="seccionConsentimiento">
                         <div class="consent-box">
+                            <!-- Checkbox Confirmo datos correctos (visible only in Tarjeta +Metro) -->
+                            <div class="checkbox-group hidden" id="grupoDatosCorrectosCheck" style="margin-bottom: var(--spacing-sm);">
+                                <input type="checkbox" id="datosCorrectos" name="datosCorrectos" class="checkbox" required>
+                                <label for="datosCorrectos" class="checkbox-label" style="font-weight: 600;">
+                                    Confirmo que los datos aportados en esta solicitud son correctos. <span class="required">*</span>
+                                </label>
+                            </div>
+
+                            <!-- Checkbox He leído y acepto... (always visible) -->
                             <div class="checkbox-group">
                                 <input type="checkbox" id="consentimiento" name="consentimiento" class="checkbox" required>
                                 <label for="consentimiento" class="checkbox-label">
-                                    He leído y acepto la <a href="#" class="link" target="_blank">política de privacidad</a> y el tratamiento de mis datos personales para la gestión de esta solicitud. <span class="required">*</span>
+                                    He leído y acepto la política de privacidad y el tratamiento de mis datos personales para la gestión de esta solicitud. <span class="required">*</span>
                                 </label>
                             </div>
-                            <!--<div class="checkbox-group">
-                                <input type="checkbox" id="comunicaciones" name="comunicaciones" class="checkbox">
-                                <label for="comunicaciones" class="checkbox-label">
-                                    Deseo recibir comunicaciones sobre mejoras y novedades del servicio de Metro.
-                                </label>
-                            </div>-->
+
+                            <!-- Firma digital (visible only in Tarjeta +Metro) -->
+                            <div id="containerFirmaTarjetas" class="hidden" style="margin-top: var(--spacing-md); border-top: 1px dashed var(--color-gray-300); padding-top: var(--spacing-md); width: 100%;">
+                                <label class="label required" style="font-weight: 600; margin-bottom: var(--spacing-xs); display: block;">Firma digital del solicitante (o representante)</label>
+                                <div style="background-color: var(--color-gray-50); border: 1px solid var(--color-gray-300); border-radius: var(--radius); padding: var(--spacing-md); display: flex; flex-direction: column; align-items: center; gap: var(--spacing-sm);">
+                                    <canvas id="signature-canvas" width="400" height="150" style="background-color: #ffffff; border: 1.5px dashed var(--color-gray-400); border-radius: var(--radius-sm); cursor: crosshair; touch-action: none; max-width: 100%;"></canvas>
+                                    <div style="display: flex; gap: var(--spacing-sm);">
+                                        <button type="button" class="btn btn-secondary btn-sm" id="clear-signature-btn" style="padding: 0.35rem 0.75rem; font-size: 0.85rem; height: auto;">
+                                            <span>🧹</span> Limpiar firma
+                                        </button>
+                                    </div>
+                                    <input type="hidden" id="signature-data" name="signature-data" required>
+                                </div>
+                            </div>
+
+                            <!-- LOPD Text Block for Tarjeta +Metro (visible only in Tarjeta +Metro) -->
+                            <div id="lopdTextoTarjetas" class="hidden" style="margin-top: var(--spacing-md); padding: var(--spacing-md); background-color: var(--color-gray-50); border: 1px solid var(--color-gray-200); border-radius: var(--radius-sm); font-size: 0.825rem; line-height: 1.4; color: var(--color-gray-600); text-align: justify; width: 100%;">
+                                <strong style="display: block; margin-bottom: var(--spacing-xs); color: var(--color-secondary);">INFORMACIÓN SOBRE TRATAMIENTO DE DATOS PERSONALES, POLÍTICA DE PRIVACIDAD</strong>
+                                Responsable del tratamiento: METRO DE MALAGA, S.A., con domicilio en Camino de Santa Ines, s/n, 29590- Malaga, NIF A-92592856 ("MM"). Delegado de Proteccion de Datos: dpd@metromalaga.es. Finalidad del tratamiento: tramitar y gestionar adecuadamente su solicitud de emision de título de transporte personalizado. Base de legitimación: consentimiento. El consentimiento podrá ser retirado en cualquier momento, si bien, en caso de ser retirado, MM no podrá seguir tramitando su solicitud. Plazo de conservación: plazo necesario para gestionar el uso del título emitido y el necesario para el cumplimiento de obligaciones legales. Comunicación: MM podrá comunicar los datos personales a encargados del tratamiento y/o a organismos públicos competentes. No se prevén transferencias internacionales de datos. Derechos: podrá ejercer sus derechos (acceso, rectificación o supresión, limitación, oposición, portabilidad y a no ser objeto de decisiones individuales automatizadas) a través del correo electrónico dpd@metromalaga.es o mediante correo postal a la atención del Dpto. de Asesoría Jurídica, a Camino de Santa Inés, s/n, 29590, Málaga. Puede consultar información adicional sobre protección de datos en nuestra página web www.metromalaga.es o directamente al personal de MM presente en nuestras instalaciones.
+                            </div>
                         </div>
 
                         <div class="form-actions">
