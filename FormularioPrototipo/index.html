@@ -901,6 +901,14 @@
                             <span class="section-icon">ℹ️</span>
                             Consulta de Información
                         </h2>
+
+                        <!-- Mensaje de inicio para consultas de información -->
+                        <div class="disclaimer-box" style="margin-bottom: var(--spacing-lg); padding: var(--spacing-md); background-color: rgba(227, 24, 55, 0.05); border-left: 4px solid var(--color-primary); border-radius: var(--radius-sm);">
+                            <p style="font-size: 0.95rem; line-height: 1.5; color: var(--color-secondary); font-weight: 500; text-align: justify; margin: 0;">
+                                Este formulario está destinado a la gestión de consultas de información relacionadas con el servicio prestado por Metro de Málaga. Para otros fines, tales como realización de ofertas comerciales o solicitudes de información sobre temas ajenos al servicio que presta el metro, le rogamos que formule su petición a través del correo electrónico <a href="mailto:info@metromalaga.es" class="link" style="color: var(--color-primary); font-weight: 600;">info@metromalaga.es</a>
+                            </p>
+                        </div>
+
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="tipologiaConsulta" class="label">Tipología</label>
@@ -1003,18 +1011,57 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="tipoTituloConsulta" class="label">Tipo de título afectado</label>
+                                <label for="tipoTituloConsulta" class="label">Tipo de título de viaje</label>
                                 <select id="tipoTituloConsulta" name="tipoTituloConsulta" class="select">
                                     <option value="">Seleccione si procede</option>
-                                    <option value="billete-ocasional">Billete ocasional</option>
                                     <option value="monedero-metro-malaga">Monedero Metro Málaga</option>
-                                    <option value="tarjeta-consorcio">Tarjeta Consorcio</option>
-                                    <option value="tarjeta-consorcio-familia-numerosa">Tarjeta Consorcio Familia Numerosa</option>
-                                    <option value="tarjeta-consorcio-joven">Tarjeta Consorcio Joven</option>
-                                    <option value="pago-tarjeta-ocasional">Pago con tarjeta (ocasional)</option>
-                                    <option value="metropay">MetroPay (Pago con tarjeta registrado)</option>
-                                    <option value="masmetro">MásMetro</option>
+                                    <option value="billete-ocasional">Ocasional Metro de Málaga</option>
+                                    <option value="masmetro">Tarjeta MásMetro</option>
+                                    <option value="tarjeta-consorcio">Tarjeta Monedero Consorcio de Transportes de Andalucía</option>
+                                    <option value="tarjeta-consorcio-joven">Tarjeta Consorcio de Transportes de Andalucía Joven</option>
+                                    <option value="tarjeta-consorcio-familia-numerosa">Tarjeta Consorcio de Transportes de Andalucía Familia Numerosa</option>
+                                    <option value="pago-emv-fisica">Pago del viaje con sistema EMV (Tarjeta de Crédito/Débito física no registrada)</option>
+                                    <option value="pago-emv-movil">Pago del viaje con sistema EMV móvil (Tarjeta de Crédito/Débito con NFC móvil no registrada)</option>
+                                    <option value="metropay">Pago del viaje con ABT (Tarjeta de Crédito/Débito registrada en MetroPay)</option>
                                 </select>
+                            </div>
+
+                            <!-- Bloque 1: Numeración de título (no obligatorio) -->
+                            <div id="grupoNumeracionTituloConsulta" class="form-group full-width hidden">
+                                <label for="numeracionTituloConsulta" class="label">Numeración del título de viaje</label>
+                                <input type="text" id="numeracionTituloConsulta" name="numeracionTituloConsulta" class="input" placeholder="Ej: 1234567890">
+                            </div>
+
+                            <!-- Bloque 2: EMV física o MetroPay (no obligatorio) -->
+                            <div id="bloqueEMVFisicaConsulta" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
+                                <div class="form-group">
+                                    <label for="panFisicaPrimeros6Consulta" class="label">PAN tarjeta física — primeros seis dígitos</label>
+                                    <input type="text" id="panFisicaPrimeros6Consulta" name="panFisicaPrimeros6Consulta" class="input input-pan" placeholder="123456" maxlength="6">
+                                </div>
+                                <div class="form-group">
+                                    <label for="panFisicaUltimos4Consulta" class="label">PAN tarjeta física — cuatro últimos dígitos</label>
+                                    <input type="text" id="panFisicaUltimos4Consulta" name="panFisicaUltimos4Consulta" class="input input-pan" placeholder="1234" maxlength="4">
+                                </div>
+                            </div>
+
+                            <!-- Bloque 3: EMV móvil (no obligatorio) -->
+                            <div id="bloqueEMVMovilConsulta" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
+                                <div class="form-group">
+                                    <label for="panMovilFisicaAsocPrimeros6Consulta" class="label">PAN tarjeta física asociada — primeros seis dígitos</label>
+                                    <input type="text" id="panMovilFisicaAsocPrimeros6Consulta" name="panMovilFisicaAsocPrimeros6Consulta" class="input input-pan" placeholder="123456" maxlength="6">
+                                </div>
+                                <div class="form-group">
+                                    <label for="panMovilFisicaAsocUltimos4Consulta" class="label">PAN tarjeta física asociada — últimos cuatro dígitos</label>
+                                    <input type="text" id="panMovilFisicaAsocUltimos4Consulta" name="panMovilFisicaAsocUltimos4Consulta" class="input input-pan" placeholder="1234" maxlength="4">
+                                </div>
+                                <div class="form-group">
+                                    <label for="panMovilVirtualPrimeros6Consulta" class="label">PAN tarjeta virtual — primeros seis dígitos (si los conoce)</label>
+                                    <input type="text" id="panMovilVirtualPrimeros6Consulta" name="panMovilVirtualPrimeros6Consulta" class="input input-pan" placeholder="123456" maxlength="6">
+                                </div>
+                                <div class="form-group">
+                                    <label for="panMovilVirtualUltimos4Consulta" class="label">PAN tarjeta virtual — últimos cuatro dígitos</label>
+                                    <input type="text" id="panMovilVirtualUltimos4Consulta" name="panMovilVirtualUltimos4Consulta" class="input input-pan" placeholder="1234" maxlength="4">
+                                </div>
                             </div>
                             <div class="form-group full-width">
                                 <label for="descripcionCortaConsulta" class="label required">Descripción breve</label>

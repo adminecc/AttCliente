@@ -922,7 +922,10 @@ document.addEventListener('DOMContentLoaded', () => {
             'grupoVariosColectivos',
             'bloqueRepresentante',
             'grupoDatosCorrectosCheck',
-            'containerFirmaTarjetas'
+            'containerFirmaTarjetas',
+            'grupoNumeracionTituloConsulta',
+            'bloqueEMVFisicaConsulta',
+            'bloqueEMVMovilConsulta'
         ];
         bloques.forEach(id => {
             const bloque = document.getElementById(id);
@@ -974,6 +977,50 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (opcion === 'metropay') {
                 if (bloqueABT) bloqueABT.classList.remove('hidden');
             }
+        });
+    }
+
+    // Listener para tipoTituloConsulta (en formulario de Consultas)
+    const tipoTituloConsulta = document.getElementById('tipoTituloConsulta');
+    const grupoNumeracionTituloConsulta = document.getElementById('grupoNumeracionTituloConsulta');
+    const bloqueEMVFisicaConsulta = document.getElementById('bloqueEMVFisicaConsulta');
+    const bloqueEMVMovilConsulta = document.getElementById('bloqueEMVMovilConsulta');
+
+    if (tipoTituloConsulta) {
+        tipoTituloConsulta.addEventListener('change', (e) => {
+            // Ocultar y resetear los bloques específicos de consultas
+            if (grupoNumeracionTituloConsulta) {
+                resetearBloque(grupoNumeracionTituloConsulta);
+                grupoNumeracionTituloConsulta.classList.add('hidden');
+            }
+            if (bloqueEMVFisicaConsulta) {
+                resetearBloque(bloqueEMVFisicaConsulta);
+                bloqueEMVFisicaConsulta.classList.add('hidden');
+            }
+            if (bloqueEMVMovilConsulta) {
+                resetearBloque(bloqueEMVMovilConsulta);
+                bloqueEMVMovilConsulta.classList.add('hidden');
+            }
+
+            const opcion = e.target.value;
+            const opcionesTituloViaje = [
+                'monedero-metro-malaga',
+                'billete-ocasional',
+                'masmetro',
+                'tarjeta-consorcio',
+                'tarjeta-consorcio-joven',
+                'tarjeta-consorcio-familia-numerosa'
+            ];
+
+            if (opcionesTituloViaje.includes(opcion)) {
+                if (grupoNumeracionTituloConsulta) grupoNumeracionTituloConsulta.classList.remove('hidden');
+            } else if (opcion === 'pago-emv-fisica' || opcion === 'metropay') {
+                if (bloqueEMVFisicaConsulta) bloqueEMVFisicaConsulta.classList.remove('hidden');
+            } else if (opcion === 'pago-emv-movil') {
+                if (bloqueEMVMovilConsulta) bloqueEMVMovilConsulta.classList.remove('hidden');
+            }
+            
+            comprobarCamposObligatorios();
         });
     }
 
