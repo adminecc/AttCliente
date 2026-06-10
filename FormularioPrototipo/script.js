@@ -672,6 +672,208 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
+    /**
+     * Comprueba si un elemento está oculto en el DOM o dentro de un contenedor oculto.
+     * Sirve para implementar la opción A (enviar campos condicionales ocultos como null).
+     */
+    function esElementoOculto(el) {
+        return el.closest('.hidden') !== null || el.offsetParent === null;
+    }
+
+    /**
+     * Genera el payload estructurado completo listo para su envío (o descarga de prueba)
+     * unificando las secciones de datos comunes, representante, envío y values por tipo.
+     */
+    function generarPayloadFormulario() {
+        const tipoHtml = tipoFormulario.value;
+        const typeCode = {
+            reclamaciones: 'REC',
+            consultas: 'CON',
+            sugerencias: 'SUG',
+            agradecimientos: 'AGR',
+            objetos: 'OBJ',
+            tarjetas: 'TAR'
+        }[tipoHtml] || 'GEN';
+
+        const refCliente = modalReference.textContent || generarReferencia();
+
+        // 1. Obtener datos del solicitante
+        const direccionContactoContainer = document.getElementById('direccionContactoContainer');
+        const direccionContacto = (direccionContactoContainer && !esElementoOculto(direccionContactoContainer)) ? {
+            via: document.getElementById('viaContacto').value || null,
+            numero: document.getElementById('numContacto').value || null,
+            escalera: document.getElementById('escContacto').value || null,
+            piso: document.getElementById('pisoContacto').value || null,
+            puerta: document.getElementById('puerContacto').value || null,
+            codigoPostal: document.getElementById('cpContacto').value || null,
+            municipio: document.getElementById('municipioContacto').value || null,
+            provincia: document.getElementById('provinciaContacto').value || null
+        } : null;
+
+        // 2. Obtener datos del representante (si aplica y está visible)
+        const bloqueRepresentante = document.getElementById('bloqueRepresentante');
+        const representative = (bloqueRepresentante && !esElementoOculto(bloqueRepresentante)) ? {
+            nombre: document.getElementById('nombreRep').value || null,
+            apellidos: document.getElementById('apellidosRep').value || null,
+            tipoDocumento: document.getElementById('tipoDocumentoRep').value || null,
+            numeroDocumento: document.getElementById('numeroDocumentoRep').value || null,
+            email: document.getElementById('emailRep').value || null,
+            telefono: document.getElementById('telefonoRep').value || null
+        } : null;
+
+        // 3. Obtener respuesta postal
+        const recibirPostal = document.getElementById('recibirPostal');
+        const postalReplyEnabled = recibirPostal ? recibirPostal.checked : false;
+        
+        const direccionEnvioSelect = document.getElementById('direccionEnvioSelect');
+        const addressMode = (direccionEnvioSelect && !esElementoOculto(direccionEnvioSelect)) ? direccionEnvioSelect.value : 'misma';
+
+        const direccionEnvioContainer = document.getElementById('direccionEnvioContainer');
+        const direccionEnvio = (direccionEnvioContainer && !esElementoOculto(direccionEnvioContainer)) ? {
+            via: document.getElementById('viaEnvio').value || null,
+            numero: document.getElementById('numEnvio').value || null,
+            escalera: document.getElementById('escEnvio').value || null,
+            piso: document.getElementById('pisoEnvio').value || null,
+            puerta: document.getElementById('puerEnvio').value || null,
+            codigoPostal: document.getElementById('cpEnvio').value || null,
+            municipio: document.getElementById('municipioEnvio').value || null,
+            provincia: document.getElementById('provinciaEnvio').value || null
+        } : null;
+
+        // 4. Obtener campos específicos del formulario activo (valores dinámicos en 'values')
+        const values = {};
+        const seccionActiva = secciones[tipoHtml];
+        if (seccionActiva) {
+            // Obtener inputs, selects y textareas dentro de la sección activa
+            const camposEspecificos = seccionActiva.querySelectorAll('input, select, textarea');
+            camposEspecificos.forEach(campo => {
+                // Ignorar inputs de tipo file (están en attachments) o botones
+                if (campo.type === 'file' || campo.type === 'submit' || campo.type === 'button') {
+                    return;
+                }
+                
+                // Mapear nombre de campo usando su name o id
+                let nombreCampo = campo.name || campo.id;
+                
+                // Opción A: Si el campo está oculto (su contenedor está oculto), se envía como null
+                if (esElementoOculto(campo)) {
+                    values[nombreCampo] = null;
+                } else {
+                    if (campo.type === 'checkbox') {
+                        values[nombreCampo] = campo.checked;
+                    } else if (campo.type === 'radio') {
+                        if (campo.checked) {
+                            values[nombreCampo] = campo.value;
+                        }
+                    } else {
+                        values[nombreCampo] = campo.value !== '' ? campo.value : null;
+                    }
+                }
+            });
+        }
+
+        // 5. Adjuntos y Firmas en formato estructurado (referenciando el multipart)
+        const attachments = [];
+        const signatures = [];
+
+        // Archivos adjuntos
+        const fileInputs = form.querySelectorAll('.file-input');
+        fileInputs.forEach(input => {
+            if (esElementoOculto(input)) return;
+            const files = input.files;
+            if (files && files.length > 0) {
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    attachments.push({
+                        fieldId: input.id,
+                        fileName: file.name,
+                        contentType: file.type || 'application/octet-stream',
+                        sizeBytes: file.size,
+                        storageMode: 'multipart',
+                        multipartFieldName: `file_${input.id}_${i}`,
+                        sha256: "" // Reservado para checksum opcional
+                    });
+                }
+            }
+        });
+
+        // Firma (solo para tarjetas si está visible)
+        const signatureCanvas = document.getElementById('signature-canvas');
+        const signatureData = document.getElementById('signature-data');
+        if (signatureData && signatureData.value && !esElementoOculto(signatureCanvas)) {
+            signatures.push({
+                fieldId: "signature-data",
+                contentType: "image/png",
+                storageMode: "multipart",
+                multipartFieldName: "signature_interesado_0"
+            });
+        }
+
+        // 6. Consentimientos
+        const consents = [];
+        const consentimientoCheckbox = document.getElementById('consentimiento');
+        if (consentimientoCheckbox && consentimientoCheckbox.checked) {
+            consents.push({
+                id: "consentimiento",
+                accepted: true,
+                acceptedAt: new Date().toISOString(),
+                textVersion: "lopd-general-2026-06"
+            });
+        }
+        
+        const datosCorrectosCheckbox = document.getElementById('datosCorrectos');
+        if (datosCorrectosCheckbox && !esElementoOculto(datosCorrectosCheckbox) && datosCorrectosCheckbox.checked) {
+            consents.push({
+                id: "datosCorrectos",
+                accepted: true,
+                acceptedAt: new Date().toISOString(),
+                textVersion: "declaracion-veracidad-2026-06"
+            });
+        }
+
+        // Devolver el payload estructurado
+        return {
+            tipoFormulario: typeCode,
+            form: {
+                id: "metro-atencion-cliente-unificado",
+                version: "1.0.0",
+                typeCode: typeCode,
+                legacyType: tipoHtml
+            },
+            submission: {
+                id: crypto.randomUUID ? crypto.randomUUID() : 'f' + (Math.random() * 1e16).toString(16),
+                submittedAt: new Date().toISOString(),
+                source: "wordpress",
+                sourceSite: window.location.origin,
+                language: "es-ES"
+            },
+            applicant: {
+                nombre: document.getElementById('nombre').value || null,
+                apellidos: document.getElementById('apellidos').value || null,
+                tipoDocumento: document.getElementById('tipoDocumento').value || null,
+                numeroDocumento: document.getElementById('numeroDocumento').value || null,
+                email: document.getElementById('email').value || null,
+                telefono: document.getElementById('telefono').value || null,
+                nacionalidad: document.getElementById('nacionalidad').value || null,
+                direccionContacto: direccionContacto
+            },
+            representative: representative,
+            postalReply: {
+                enabled: postalReplyEnabled,
+                addressMode: addressMode,
+                direccionEnvio: direccionEnvio
+            },
+            values: values,
+            signatures: signatures,
+            attachments: attachments,
+            consents: consents,
+            metadata: {
+                referenceClientSide: refCliente,
+                notes: `Envío automático de prueba - tipo ${typeCode}`
+            }
+        };
+    }
+
     // Envío del formulario
     form.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -682,10 +884,48 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         if (validarFormulario()) {
-            // Aquí iría la lógica de envío real (fetch/AJAX)
-            console.log('Formulario válido, enviando...');
+            console.log('Formulario válido, procesando envío...');
             
-            // Simular envío
+            // Establecer referencia visible en el modal
+            const referenciaFinal = generarReferencia();
+            modalReference.textContent = referenciaFinal;
+
+            // =========================================================================
+            // SOLO PARA PRUEBAS Y PROTOTIPADO (NO USAR EN PRODUCCIÓN)
+            // =========================================================================
+            // Las siguientes líneas de código generan y fuerzan la descarga local
+            // de un archivo JSON que contiene el payload completo estructurado. 
+            // Esto sirve exclusivamente para validar la coherencia y calidad de los datos.
+            // 
+            // EN ENTORNO DE PRODUCCIÓN:
+            // Este bloque debe eliminarse por completo. En su lugar, el payload unificado
+            // junto con los adjuntos y la firma (si existen) se enviará de forma robusta
+            // y estandarizada mediante un objeto FormData multipart/form-data haciendo
+            // una petición HTTP POST (fetch/AJAX) al endpoint definitivo de la API (Azure Function).
+            // =========================================================================
+            try {
+                const payload = generarPayloadFormulario();
+                const jsonString = JSON.stringify(payload, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const linkDescarga = document.createElement('a');
+                linkDescarga.href = url;
+                linkDescarga.download = `solicitud-${referenciaFinal}.json`;
+                document.body.appendChild(linkDescarga);
+                linkDescarga.click();
+                
+                // Limpieza de recursos del DOM
+                document.body.removeChild(linkDescarga);
+                URL.revokeObjectURL(url);
+                
+                console.log('JSON de prueba descargado correctamente:', payload);
+            } catch (errorDescarga) {
+                console.error('Error generando/descargando el JSON de prueba:', errorDescarga);
+            }
+            // =========================================================================
+
+            // Simular animación de envío antes de abrir el modal de confirmación
             const btnEnviar = document.getElementById('btnEnviar');
             btnEnviar.disabled = true;
             btnEnviar.innerHTML = '<span class="btn-icon">⏳</span> Enviando...';
