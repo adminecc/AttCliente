@@ -684,6 +684,13 @@ document.addEventListener('DOMContentLoaded', () => {
      * Genera el payload estructurado completo listo para su envío (o descarga de prueba)
      * unificando las secciones de datos comunes, representante, envío y values por tipo.
      */
+    /**
+     * Genera el payload estructurado completo listo para su envío (o descarga de prueba)
+     * unificando las secciones de datos comunes, representante, envío y values por tipo.
+     * 
+     * NOTA: 'referenceClientSide' se envía como null porque la generación del identificador 
+     * de referencia único (ej. ATT-2026-XXXXX) ha sido delegada al backend para mayor robustez.
+     */
     function generarPayloadFormulario() {
         const tipoHtml = tipoFormulario.value;
         const typeCode = {
@@ -694,8 +701,6 @@ document.addEventListener('DOMContentLoaded', () => {
             objetos: 'OBJ',
             tarjetas: 'TAR'
         }[tipoHtml] || 'GEN';
-
-        const refCliente = modalReference.textContent || generarReferencia();
 
         // 1. Obtener datos del solicitante
         const direccionContactoContainer = document.getElementById('direccionContactoContainer');
@@ -868,7 +873,7 @@ document.addEventListener('DOMContentLoaded', () => {
             attachments: attachments,
             consents: consents,
             metadata: {
-                referenceClientSide: refCliente,
+                referenceClientSide: null, // Asignado como null por delegar la creación al backend
                 notes: `Envío automático de prueba - tipo ${typeCode}`
             }
         };

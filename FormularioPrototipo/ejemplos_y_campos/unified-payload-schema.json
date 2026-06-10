@@ -132,7 +132,7 @@
       "type": "object",
       "required": ["referenceClientSide"],
       "properties": {
-        "referenceClientSide": { "type": ["string", "null"], "pattern": "^(ATT-[0-9]{4}-[0-9]{5})?$" },
+        "referenceClientSide": { "type": "null" },
         "notes": { "type": ["string", "null"] }
       }
     }

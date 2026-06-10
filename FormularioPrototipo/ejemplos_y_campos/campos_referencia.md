@@ -52,7 +52,7 @@ El envío consiste en un único objeto JSON estructurado:
     }
   ],
   "metadata": {
-    "referenceClientSide": "ATT-YYYY-XXXXX (Generado por el frontend)",
+    "referenceClientSide": null,
     "notes": "Notas del cliente"
   }
 }
