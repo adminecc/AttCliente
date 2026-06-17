@@ -31,11 +31,11 @@
                         <select id="tipoFormulario" name="tipoFormulario" class="select select-primary" required>
                             <option value="">Seleccione el tipo de gestión...</option>
                             <option value="reclamaciones">Reclamaciones y quejas</option>
+                            <option value="consultas">Consulta de Información</option>
                             <option value="sugerencias">Sugerencias</option>
                             <option value="agradecimientos">Agradecimientos y felicitaciones</option>
                             <option value="objetos">Objetos perdidos</option>
                             <option value="tarjetas">Solicitud de tarjeta +Metro</option>
-                            <option value="consultas">Consulta de Información</option>
                         </select>
                     </div>
                 </section>
@@ -515,27 +515,6 @@
                                 <label for="horaIncidencia" class="label">Hora aproximada</label>
                                 <input type="time" id="horaIncidencia" name="horaIncidencia" class="input">
                             </div>
-                            <!--<div class="form-group">
-                                <label for="tipologia" class="label required">Tipología</label>
-                                <select id="tipologia" name="tipologia" class="select" required>
-                                    <option value="">Seleccione...</option>
-                                    <option value="titulo">Títulos de transporte</option>
-                                    <option value="accesibilidad">Accesibilidad</option>
-                                    <option value="informacion">Información</option>
-                                    <option value="instalaciones">Instalaciones</option>
-                                    <option value="personal">Personal</option>
-                                    <option value="seguridad">Seguridad</option>
-                                    <option value="servicio">Servicio de trenes</option>
-                                    <option value="limpieza">Limpieza</option>
-                                    <option value="otros">Otros</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="subtipologia" class="label">Subtipología</label>
-                                <select id="subtipologia" name="subtipologia" class="select">
-                                    <option value="">Seleccione primero una tipología...</option>
-                                </select>
-                            </div>-->
                             <div class="form-group">
                                 <label for="lugarIncidencia" class="label required">Estación / Lugar</label>
                                 <select id="lugarIncidencia" name="lugarIncidencia" class="select" required>
@@ -888,7 +867,7 @@
                         </div>
 
                         <div class="form-grid">
-                            <div class="form-group">
+                            <div class="form-group full-width">
                                 <label for="tipoTituloConsulta" class="label">Tipo de título de viaje</label>
                                 <select id="tipoTituloConsulta" name="tipoTituloConsulta" class="select">
                                     <option value="">Seleccione si procede</option>
@@ -1282,7 +1261,7 @@
                                     <option value="">Seleccione...</option>
                                     <option value="1">Línea 1</option>
                                     <option value="2">Línea 2</option>
-                                    <option value="ambas">Ambas</option>
+                                    <option value="ambas">Ambas / No lo sé</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -1364,50 +1343,13 @@
                             Datos para tarjeta +Metro
                         </h2>
                         <div class="form-grid">
-                            <!-- Prominent solicita message -->
                             <div class="form-group full-width" style="margin-bottom: var(--spacing-md); text-align: center; grid-column: 1 / -1;">
                                 <p style="font-size: 1.1rem; font-weight: 700; color: var(--color-secondary); margin: 0; padding: var(--spacing-md); background-color: var(--color-gray-100); border-radius: var(--radius); border-left: 5px solid var(--color-primary); line-height: 1.4; text-align: left;">
-                                    SOLICITA: Que le sea expedida la tarjeta personalizada <span style="color: var(--color-primary);">+MásMetro</span> de <span style="color: var(--color-success); font-weight: 800;">Metro de Málaga</span> para su uso personal y particular.
+                                    Cumplimentando este formulario solicita que le sea expedida la tarjeta personalizada <span style="color: var(--color-primary);">+MásMetro</span> de <span style="color: var(--color-success); font-weight: 800;">Metro de Málaga</span> para su uso personal y particular.
                                 </p>
                             </div>
-
                             <div class="grid-3-cols" style="grid-column: 1 / -1;">
-                                <div class="form-group">
-                                    <label for="motivoTarjeta" class="label required">Motivo de la solicitud</label>
-                                    <select id="motivoTarjeta" name="motivoTarjeta" class="select" required>
-                                        <option value="">Seleccione...</option>
-                                        <option value="nueva">Nueva tarjeta</option>
-                                        <option value="renovacion">Renovación</option>
-                                        <option value="duplicado">Duplicado por pérdida/robo</option>
-                                        <option value="deterioro">Duplicado por deterioro</option>
-                                        <option value="modificacion">Modificación de datos</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="fechaNacimiento" class="label required">Fecha de nacimiento</label>
-                                    <input type="date" id="fechaNacimiento" name="fechaNacimiento" class="input" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="genero" class="label">Género</label>
-                                    <select id="genero" name="genero" class="select">
-                                        <option value="">Seleccione...</option>
-                                        <option value="H">Hombre</option>
-                                        <option value="M">Mujer</option>
-                                        <option value="O">Otro / Prefiero no indicar</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="grid-3-cols" style="grid-column: 1 / -1;">
-                                <div class="form-group">
-                                    <label for="fechaCitaTarjeta" class="label required">Fecha de su cita para la confección de la tarjeta +Metro</label>
-                                    <input type="date" id="fechaCitaTarjeta" name="fechaCitaTarjeta" class="input" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="horaCitaTarjeta" class="label required">Hora de su cita para la confección de la tarjeta +Metro</label>
-                                    <input type="time" id="horaCitaTarjeta" name="horaCitaTarjeta" class="input" required>
-                                </div>
-                                <div class="form-group">
+                                <div class="form-group full-width">
                                     <label for="medioNotificacionTarjeta" class="label required">Medio de notificación para la entrega del documento de datos personales</label>
                                     <select id="medioNotificacionTarjeta" name="medioNotificacionTarjeta" class="select" required>
                                         <option value="">Seleccione...</option>
@@ -1417,7 +1359,7 @@
                                 </div>
                             </div>
                             <div class="form-group full-width" style="margin-top: var(--spacing-md); background-color: var(--color-info-light); color: var(--color-info); border: 1.5px solid var(--color-info); padding: var(--spacing-md); border-radius: var(--radius); font-size: 0.9375rem; font-weight: 500; display: flex; align-items: center; gap: var(--spacing-sm); grid-column: 1 / -1;">
-                                <span>ℹ️ Para terminar de confeccionar la tarjeta tendrán que pasarse por la Oficina de Atención al Cliente (El Perchel).</span>
+                                <span>ℹ️ Para terminar de confeccionar la tarjeta será necesario ir a la Oficina de Atención al Cliente (El Perchel) con la correspondiente cita previa solicitada a través deñ teléfono 952061642.</span>
                             </div>
                         </div>
                     </section>
