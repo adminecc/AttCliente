@@ -573,7 +573,7 @@
                             </div>
                             <div class="form-group hidden" id="grupoTrenIncidencia">
                                 <label for="trenIncidencia" class="label">Tren</label>
-                                <select id="trenConsulta" name="trenConsulta" class="select">
+                                <select id="trenIncidencia" name="trenIncidencia" class="select">
                                     <option value="">Seleccione tren...</option>
                                     <option value="1">UT-3010</option>
                                     <option value="2">UT-3020</option>
@@ -776,6 +776,8 @@
                                              </div>
                                          </div>
                                      </div>
+                                 </div>
+                             </div>
 
                             <!-- BLOQUE 2: EMV -->
                             <div id="bloqueEMV" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
@@ -988,44 +990,6 @@
                             <span class="section-icon">💡</span>
                             Su sugerencia
                         </h2>
-                        <!-- Subsección 1: Datos del Usuario -->
-                        <h3 class="subsection-title" style="grid-column: 1 / -1; margin-top: 0; font-size: 1.125rem; font-weight: 600; color: var(--color-primary); border-bottom: 1px solid var(--color-gray-200); padding-bottom: var(--spacing-xs); margin-bottom: var(--spacing-md);">
-                            Datos del Usuario
-                        </h3>
-                        <div class="form-grid" style="margin-bottom: var(--spacing-lg); grid-column: 1 / -1;">
-                            <div class="form-group full-width">
-                                <label for="tipoTituloObjetos" class="label">Tipo de título de viaje</label>
-                                <select id="tipoTituloObjetos" name="tipoTituloObjetos" class="select">
-                                    <option value="">Seleccione si procede...</option>
-                                    <option value="monedero-metro-malaga">Monedero Metro Málaga</option>
-                                    <option value="billete-ocasional">Ocasional Metro de Málaga</option>
-                                    <option value="masmetro">Tarjeta +Metro</option>
-                                    <option value="tarjeta-consorcio">Tarjeta Monedero Consorcio de Transportes</option>
-                                    <option value="tarjeta-consorcio-joven">Tarjeta Joven Consorcio de Transportes</option>
-                                    <option value="tarjeta-consorcio-familia-numerosa">Tarjeta Familia Numerosa Consorcio de Transportes</option>
-                                    <option value="validacion-tarjeta-ocasional">Validación con sistema EMV (teléfono móvil o tarjeta de crédito no registrada)</option>
-                                    <option value="metropay">Validación con ABT (tarjeta de crédito registrada en Metro Pay)</option>
-                                </select>
-                            </div>
-
-                            <!-- Condicional Bloque 1 (Tarjetas físicas) -->
-                            <div id="bloqueTituloViajeObjetos" class="form-group full-width hidden">
-                                <label for="numeracion_titulo_viaje_objetos" class="label required">Numeración del título de viaje</label>
-                                <input type="text" id="numeracion_titulo_viaje_objetos" name="numeracion_titulo_viaje_objetos" class="input" required placeholder="Ej: 1000234567">
-                            </div>
-
-                            <!-- Condicional Bloque 2 (Tarjetas bancarias EMV/ABT) -->
-                            <div id="bloqueTarjetaBancariaObjetos" class="form-grid full-width hidden" style="grid-column: 1 / -1; gap: var(--spacing-md);">
-                                <div class="form-group">
-                                    <label for="pan_tarjeta_primeros_6_objetos" class="label required">PAN tarjeta — primeros seis dígitos</label>
-                                    <input type="text" id="pan_tarjeta_primeros_6_objetos" name="pan_tarjeta_primeros_6_objetos" class="input input-pan" required placeholder="123456" maxlength="6">
-                                </div>
-                                <div class="form-group">
-                                    <label for="pan_tarjeta_ultimos_4_objetos" class="label required">PAN tarjeta — cuatro últimos dígitos</label>
-                                    <input type="text" id="pan_tarjeta_ultimos_4_objetos" name="pan_tarjeta_ultimos_4_objetos" class="input input-pan" required placeholder="1234" maxlength="4">
-                                </div>
-                            </div>
-                        </div>
 
                         <!-- Subsección 2: Sugerencia -->
                         <h3 class="subsection-title" style="grid-column: 1 / -1; margin-top: var(--spacing-md); font-size: 1.125rem; font-weight: 600; color: var(--color-primary); border-bottom: 1px solid var(--color-gray-200); padding-bottom: var(--spacing-xs); margin-bottom: var(--spacing-md);">
@@ -1120,7 +1084,7 @@
                             </div>
                             <div class="form-group hidden" id="grupoTrenSugerencia">
                                 <label for="trenSugerencia" class="label">Tren</label>
-                                <select id="trenConsulta" name="trenConsulta" class="select">
+                                <select id="trenSugerencia" name="trenSugerencia" class="select">
                                     <option value="">Seleccione tren...</option>
                                     <option value="1">UT-3010</option>
                                     <option value="2">UT-3020</option>
