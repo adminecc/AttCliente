@@ -52,7 +52,7 @@ El envío consiste en un único objeto JSON estructurado:
     }
   ],
   "metadata": {
-    "referenceClientSide": "ATT-YYYY-XXXXX (Generado por el frontend)",
+    "referenceClientSide": null,
     "notes": "Notas del cliente"
   }
 }
@@ -120,7 +120,7 @@ Esta sección varía en función de la clave `tipoFormulario` enviada.
 *   **`fechaIncidencia`**: Fecha (YYYY-MM-DD)
 *   **`tipologia`**: Área de la queja (`"titulo"`, `"accesibilidad"`, `"informacion"`, `"instalaciones"`, `"personal"`, `"seguridad"`, `"servicio"`, `"limpieza"`, `"otros"`)
 *   **`subtipologia`**: Subcategoría correspondiente a la tipología (Ej: `"recarga"`, `"cobro"`, `"ascensor"`, etc.)
-*   **`tipoTitulo`**: Tipo de billete si aplica (Ej: `"monedero-metro-malaga"`, `"pago-emv-fisica"`, `"metropay"`, etc.)
+*   **`tipoTitulo`**: Tipo de billete si aplica (Ej: `"monedero-metro-malaga"`, `"validacion-emv-fisica"`, `"metropay"`, etc.)
 *   **`numeroDab`**: Número de validadora/máquina si procede.
 *   **`importeReclamado`**: Número decimal o `null` (Ej: `2.70`)
 *   **`descripcionCorta`**: Resumen (Máx 100 caracteres)
@@ -129,7 +129,7 @@ Esta sección varía en función de la clave `tipoFormulario` enviada.
 ### B. Consulta de Información (`tipoFormulario: "CON"`)
 *   **`tipologiaConsulta`**: Tipología de consulta (`"titulo"`, `"accesibilidad"`, `"informacion"`, etc.)
 *   **`subtipologiaConsulta`**: Subcategoría (Ej: `"horarios"`, `"app"`)
-*   **`tipoTituloConsulta`**: Tipo de título si aplica (Ej: `"monedero-metro-malaga"`, `"pago-emv-movil"`, `"metropay"`)
+*   **`tipoTituloConsulta`**: Tipo de título si aplica (Ej: `"monedero-metro-malaga"`, `"validacion-emv-movil"`, `"metropay"`)
 *   **`numeracionTituloConsulta`**: Número de tarjeta física si aplica o `null`.
 *   **`panFisicaPrimeros6Consulta`**: Primeros 6 dígitos de tarjeta de crédito física o `null`.
 *   **`panFisicaUltimos4Consulta`**: Últimos 4 dígitos de tarjeta de crédito física o `null`.

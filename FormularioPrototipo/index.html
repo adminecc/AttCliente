@@ -31,11 +31,11 @@
                         <select id="tipoFormulario" name="tipoFormulario" class="select select-primary" required>
                             <option value="">Seleccione el tipo de gestión...</option>
                             <option value="reclamaciones">Reclamaciones y quejas</option>
+                            <option value="consultas">Consulta de Información</option>
                             <option value="sugerencias">Sugerencias</option>
                             <option value="agradecimientos">Agradecimientos y felicitaciones</option>
                             <option value="objetos">Objetos perdidos</option>
                             <option value="tarjetas">Solicitud de tarjeta +Metro</option>
-                            <option value="consultas">Consulta de Información</option>
                         </select>
                     </div>
                 </section>
@@ -507,17 +507,6 @@
                                     <option value="queja">Queja</option>
                                 </select>
                             </div>
-                            <!--<div class="form-group">
-                                <label for="canalRecepcion" class="label required">Canal de recepción</label>
-                                <select id="canalRecepcion" name="canalRecepcion" class="select" required>
-                                    <option value="">Seleccione...</option>
-                                    <option value="presencial">Presencial</option>
-                                    <option value="linea902">Línea 902</option>
-                                    <option value="email">Correo Electrónico</option>
-                                    <option value="web">Formulario web</option>
-                                    <option value="postal">Escrito postal / fax</option>
-                                </select>
-                            </div>-->
                             <div class="form-group">
                                 <label for="fechaIncidencia" class="label required">Fecha de los hechos reclamados</label>
                                 <input type="date" id="fechaIncidencia" name="fechaIncidencia" class="input" required>
@@ -526,27 +515,6 @@
                                 <label for="horaIncidencia" class="label">Hora aproximada</label>
                                 <input type="time" id="horaIncidencia" name="horaIncidencia" class="input">
                             </div>
-                            <!--<div class="form-group">
-                                <label for="tipologia" class="label required">Tipología</label>
-                                <select id="tipologia" name="tipologia" class="select" required>
-                                    <option value="">Seleccione...</option>
-                                    <option value="titulo">Títulos de transporte</option>
-                                    <option value="accesibilidad">Accesibilidad</option>
-                                    <option value="informacion">Información</option>
-                                    <option value="instalaciones">Instalaciones</option>
-                                    <option value="personal">Personal</option>
-                                    <option value="seguridad">Seguridad</option>
-                                    <option value="servicio">Servicio de trenes</option>
-                                    <option value="limpieza">Limpieza</option>
-                                    <option value="otros">Otros</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="subtipologia" class="label">Subtipología</label>
-                                <select id="subtipologia" name="subtipologia" class="select">
-                                    <option value="">Seleccione primero una tipología...</option>
-                                </select>
-                            </div>-->
                             <div class="form-group">
                                 <label for="lugarIncidencia" class="label required">Estación / Lugar</label>
                                 <select id="lugarIncidencia" name="lugarIncidencia" class="select" required>
@@ -584,7 +552,7 @@
                             </div>
                             <div class="form-group hidden" id="grupoTrenIncidencia">
                                 <label for="trenIncidencia" class="label">Tren</label>
-                                <select id="trenConsulta" name="trenConsulta" class="select">
+                                <select id="trenIncidencia" name="trenIncidencia" class="select">
                                     <option value="">Seleccione tren...</option>
                                     <option value="1">UT-3010</option>
                                     <option value="2">UT-3020</option>
@@ -613,20 +581,7 @@
                                 <label for="otroLugarIncidencia" class="label">Otro lugar</label>
                                 <input type="text" id="otroLugarIncidencia" name="otroLugarIncidencia" class="input" placeholder="Indique el lugar...">
                             </div>
-                            <!--<div class="form-group">
-                                <label for="tipoInstalacion" class="label">Tipo de instalación</label>
-                                <select id="tipoInstalacion" name="tipoInstalacion" class="select">
-                                    <option value="">Seleccione...</option>
-                                    <option value="dab">DAB (Dispensador Automático de Billetes)</option>
-                                    <option value="torno">Torno de acceso</option>
-                                    <option value="tren">Tren</option>
-                                    <option value="escalera">Escalera mecánica</option>
-                                    <option value="ascensor">Ascensor</option>
-                                    <option value="anden">Andén</option>
-                                    <option value="vestibulo">Vestíbulo</option>
-                                </select>
-                            </div>-->
-                            <div class="form-group">
+                            <div class="form-group full-width">
                                 <label for="tipoTitulo" class="label">Tipo de título de viaje</label>
                                 <select id="tipoTitulo" name="tipoTitulo" class="select">
                                     <option value="">Seleccione si procede</option>
@@ -636,8 +591,8 @@
                                     <option value="tarjeta-consorcio">Tarjeta Monedero Consorcio de Transportes de Andalucía</option>
                                     <option value="tarjeta-consorcio-joven">Tarjeta Consorcio de Transportes de Andalucía Joven</option>
                                     <option value="tarjeta-consorcio-familia-numerosa">Tarjeta Consorcio de Transportes de Andalucía Familia Numerosa</option>
-                                    <option value="pago-emv-fisica">Validación con sistema EMV (Tarjeta de Crédito/Débito física no registrada)</option>
-                                    <option value="pago-emv-movil">Validación con sistema EMV móvil (Tarjeta de Crédito/Débito con NFC móvil no registrada)</option>
+                                    <option value="validacion-emv-fisica">Validación con sistema EMV (Tarjeta de Crédito/Débito física no registrada)</option>
+                                    <option value="validacion-emv-movil">Validación con sistema EMV móvil (Tarjeta de Crédito/Débito con NFC móvil no registrada)</option>
                                     <option value="metropay">Validación con ABT (Tarjeta de Crédito/Débito registrada en MetroPay)</option>
                                 </select>
                             </div>
@@ -652,7 +607,7 @@
                                     <input type="text" id="numeracion_titulo_viaje" name="numeracion_titulo_viaje" class="input" required placeholder="Ej: 1000234567">
                                 </div>
                                 <div class="form-group">
-                                    <label for="importe_reclamado_1" class="label required">Importe reclamado (€)</label>
+                                    <label for="importe_reclamado_1" class="label">Importe reclamado (€)</label>
                                     <input type="number" id="importe_reclamado_1" name="importe_reclamado_1" class="input" required min="0" step="0.01" placeholder="0,00">
                                 </div>
                                 
@@ -787,11 +742,13 @@
                                              </div>
                                          </div>
                                      </div>
+                                 </div>
+                             </div>
 
                             <!-- BLOQUE 2: EMV -->
                             <div id="bloqueEMV" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
                                 <div class="form-group full-width">
-                                    <label for="importe_reclamado_2" class="label required">Importe reclamado (€)</label>
+                                    <label for="importe_reclamado_2" class="label">Importe reclamado (€)</label>
                                     <input type="number" id="importe_reclamado_2" name="importe_reclamado_2" class="input" required min="0" step="0.01" placeholder="0,00">
                                 </div>
                                 <!-- Sub-bloque 2.1: EMV física -->
@@ -845,7 +802,7 @@
                             <!-- BLOQUE 3: ABT / MetroPay -->
                             <div id="bloqueABT" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
                                 <div class="form-group">
-                                    <label for="importe_reclamado_3" class="label required">Importe reclamado (€)</label>
+                                    <label for="importe_reclamado_3" class="label">Importe reclamado (€)</label>
                                     <input type="number" id="importe_reclamado_3" name="importe_reclamado_3" class="input" required min="0" step="0.01" placeholder="0,00">
                                 </div>
                                 <div class="form-group">
@@ -910,28 +867,7 @@
                         </div>
 
                         <div class="form-grid">
-                            <div class="form-group">
-                                <label for="tipologiaConsulta" class="label">Tipología</label>
-                                <select id="tipologiaConsulta" name="tipologiaConsulta" class="select">
-                                    <option value="">Seleccione...</option>
-                                    <option value="titulo">Títulos de transporte</option>
-                                    <option value="accesibilidad">Accesibilidad</option>
-                                    <option value="informacion">Información</option>
-                                    <option value="instalaciones">Instalaciones</option>
-                                    <option value="personal">Personal</option>
-                                    <option value="seguridad">Seguridad</option>
-                                    <option value="servicio">Servicio de trenes</option>
-                                    <option value="limpieza">Limpieza</option>
-                                    <option value="otros">Otros</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="subtipologiaConsulta" class="label">Subtipología</label>
-                                <select id="subtipologiaConsulta" name="subtipologiaConsulta" class="select">
-                                    <option value="">Seleccione primero una tipología...</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
+                            <div class="form-group full-width">
                                 <label for="tipoTituloConsulta" class="label">Tipo de título de viaje</label>
                                 <select id="tipoTituloConsulta" name="tipoTituloConsulta" class="select">
                                     <option value="">Seleccione si procede</option>
@@ -941,8 +877,8 @@
                                     <option value="tarjeta-consorcio">Tarjeta Monedero Consorcio de Transportes de Andalucía</option>
                                     <option value="tarjeta-consorcio-joven">Tarjeta Consorcio de Transportes de Andalucía Joven</option>
                                     <option value="tarjeta-consorcio-familia-numerosa">Tarjeta Consorcio de Transportes de Andalucía Familia Numerosa</option>
-                                    <option value="pago-emv-fisica">Validación con sistema EMV (Tarjeta de Crédito/Débito física no registrada)</option>
-                                    <option value="pago-emv-movil">Validación con sistema EMV móvil (Tarjeta de Crédito/Débito con NFC móvil no registrada)</option>
+                                    <option value="validacion-emv-fisica">Validación con sistema EMV (Tarjeta de Crédito/Débito física no registrada)</option>
+                                    <option value="validacion-emv-movil">Validación con sistema EMV móvil (Tarjeta de Crédito/Débito con NFC móvil no registrada)</option>
                                     <option value="metropay">Validación con ABT (Tarjeta de Crédito/Débito registrada en MetroPay)</option>
                                 </select>
                             </div>
@@ -999,97 +935,9 @@
                             <span class="section-icon">💡</span>
                             Su sugerencia
                         </h2>
-                        <!-- Subsección 1: Datos del Usuario -->
-                        <h3 class="subsection-title" style="grid-column: 1 / -1; margin-top: 0; font-size: 1.125rem; font-weight: 600; color: var(--color-primary); border-bottom: 1px solid var(--color-gray-200); padding-bottom: var(--spacing-xs); margin-bottom: var(--spacing-md);">
-                            Datos del Usuario
-                        </h3>
-                        <div class="form-grid" style="margin-bottom: var(--spacing-lg); grid-column: 1 / -1;">
-                            <div class="form-group full-width">
-                                <label for="tipoTituloObjetos" class="label">Tipo de título de viaje</label>
-                                <select id="tipoTituloObjetos" name="tipoTituloObjetos" class="select">
-                                    <option value="">Seleccione si procede...</option>
-                                    <option value="monedero-metro-malaga">Monedero Metro Málaga</option>
-                                    <option value="billete-ocasional">Ocasional Metro de Málaga</option>
-                                    <option value="masmetro">Tarjeta +Metro</option>
-                                    <option value="tarjeta-consorcio">Tarjeta Monedero Consorcio de Transportes</option>
-                                    <option value="tarjeta-consorcio-joven">Tarjeta Joven Consorcio de Transportes</option>
-                                    <option value="tarjeta-consorcio-familia-numerosa">Tarjeta Familia Numerosa Consorcio de Transportes</option>
-                                    <option value="pago-tarjeta-ocasional">Validación con sistema EMV (teléfono móvil o tarjeta de crédito no registrada)</option>
-                                    <option value="metropay">Validación con ABT (tarjeta de crédito registrada en Metro Pay)</option>
-                                </select>
-                            </div>
 
-                            <!-- Condicional Bloque 1 (Tarjetas físicas) -->
-                            <div id="bloqueTituloViajeObjetos" class="form-group full-width hidden">
-                                <label for="numeracion_titulo_viaje_objetos" class="label required">Numeración del título de viaje</label>
-                                <input type="text" id="numeracion_titulo_viaje_objetos" name="numeracion_titulo_viaje_objetos" class="input" required placeholder="Ej: 1000234567">
-                            </div>
-
-                            <!-- Condicional Bloque 2 (Tarjetas bancarias EMV/ABT) -->
-                            <div id="bloqueTarjetaBancariaObjetos" class="form-grid full-width hidden" style="grid-column: 1 / -1; gap: var(--spacing-md);">
-                                <div class="form-group">
-                                    <label for="pan_tarjeta_primeros_6_objetos" class="label required">PAN tarjeta — primeros seis dígitos</label>
-                                    <input type="text" id="pan_tarjeta_primeros_6_objetos" name="pan_tarjeta_primeros_6_objetos" class="input input-pan" required placeholder="123456" maxlength="6">
-                                </div>
-                                <div class="form-group">
-                                    <label for="pan_tarjeta_ultimos_4_objetos" class="label required">PAN tarjeta — cuatro últimos dígitos</label>
-                                    <input type="text" id="pan_tarjeta_ultimos_4_objetos" name="pan_tarjeta_ultimos_4_objetos" class="input input-pan" required placeholder="1234" maxlength="4">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Subsección 2: Sugerencia -->
-                        <h3 class="subsection-title" style="grid-column: 1 / -1; margin-top: var(--spacing-md); font-size: 1.125rem; font-weight: 600; color: var(--color-primary); border-bottom: 1px solid var(--color-gray-200); padding-bottom: var(--spacing-xs); margin-bottom: var(--spacing-md);">
-                            Sugerencia
-                        </h3>
                         <div class="form-grid">
-                            <!--<div class="form-group">
-                                <label for="areaSugerencia" class="label required">Área de mejora</label>
-                                <select id="areaSugerencia" name="areaSugerencia" class="select" required>
-                                    <option value="">Seleccione...</option>
-                                    <option value="accesibilidad">Accesibilidad</option>
-                                    <option value="frecuencia">Frecuencia de servicio</option>
-                                    <option value="horarios">Horarios</option>
-                                    <option value="informacion">Información al viajero</option>
-                                    <option value="instalaciones">Instalaciones</option>
-                                    <option value="limpieza">Limpieza</option>
-                                    <option value="seguridad">Seguridad</option>
-                                    <option value="tecnologia">Tecnología y apps</option>
-                                    <option value="titulos">Títulos de transporte</option>
-                                    <option value="otros">Otros</option>
-                                </select>
-                            </div>-->
-                            <!--<div class="form-group">
-                                <label for="estacionSugerencia" class="label">Estación relacionada</label>
-                                <select id="estacionSugerencia" name="estacionSugerencia" class="select">
-                                    <option value="">General / Ninguna específica</option>
-                                    <optgroup label="Línea 1">
-                                        <option value="guadalmedina-l1">Guadalmedina</option>
-                                        <option value="atarazanas">Atarazanas</option>
-                                        <option value="andalucia-tech">Andalucía Tech</option>
-                                        <option value="carranque">Carranque</option>
-                                        <option value="barbarela">Barbarela</option>
-                                        <option value="el-clinico">El Clínico</option>
-                                        <option value="la-union">La Unión</option>
-                                        <option value="universidad">Universidad</option>
-                                        <option value="ciudad-justicia">Ciudad de la Justicia</option>
-                                        <option value="el-consul">El Cónsul</option>
-                                        <option value="el-perchel-l1">El Perchel</option>
-                                        <option value="paraninfo">Paraninfo</option>
-                                        <option value="portada-alta">Portada Alta</option>
-                                    </optgroup>
-                                    <optgroup label="Línea 2">
-                                        <option value="guadalmedina-l2">Guadalmedina</option>
-                                        <option value="la-luz-la-paz">La Luz - La Paz</option>
-                                        <option value="la-isla">La Isla</option>
-                                        <option value="el-perchel-l2">El Perchel</option>
-                                        <option value="puerta-blanca">Puerta Blanca</option>
-                                        <option value="princesa-huelin">Princesa - Huelin</option>
-                                        <option value="el-torcal">El Torcal</option>
-                                        <option value="palacio-deportes">Palacio de los Deportes</option>
-                                    </optgroup>
-                                </select>
-                            </div>-->
+                            
                             <div class="form-group">
                                 <label for="lugarSugerencia" class="label required">Estación / Lugar</label>
                                 <select id="lugarSugerencia" name="lugarSugerencia" class="select" required>
@@ -1131,7 +979,7 @@
                             </div>
                             <div class="form-group hidden" id="grupoTrenSugerencia">
                                 <label for="trenSugerencia" class="label">Tren</label>
-                                <select id="trenConsulta" name="trenConsulta" class="select">
+                                <select id="trenSugerencia" name="trenSugerencia" class="select">
                                     <option value="">Seleccione tren...</option>
                                     <option value="1">UT-3010</option>
                                     <option value="2">UT-3020</option>
@@ -1160,6 +1008,62 @@
                                 <label for="otroLugarSugerencia" class="label">Otro lugar</label>
                                 <input type="text" id="otroLugarSugerencia" name="otroLugarSugerencia" class="input" placeholder="Indique el lugar...">
                             </div>
+
+
+                            <div class="form-group">
+                                <label for="tipoTituloSugerencia" class="label">Tipo de título de viaje</label>
+                                <select id="tipoTituloSugerencia" name="tipoTituloSugerencia" class="select">
+                                    <option value="">Seleccione si procede</option>
+                                    <option value="monedero-metro-malaga">Monedero Metro Málaga</option>
+                                    <option value="billete-ocasional">Ocasional Metro de Málaga</option>
+                                    <option value="masmetro">Tarjeta MásMetro</option>
+                                    <option value="tarjeta-consorcio">Tarjeta Monedero Consorcio de Transportes de Andalucía</option>
+                                    <option value="tarjeta-consorcio-joven">Tarjeta Consorcio de Transportes de Andalucía Joven</option>
+                                    <option value="tarjeta-consorcio-familia-numerosa">Tarjeta Consorcio de Transportes de Andalucía Familia Numerosa</option>
+                                    <option value="validacion-emv-fisica">Validación con sistema EMV (Tarjeta de Crédito/Débito física no registrada)</option>
+                                    <option value="validacion-emv-movil">Validación con sistema EMV móvil (Tarjeta de Crédito/Débito con NFC móvil no registrada)</option>
+                                    <option value="metropay">Validación con ABT (Tarjeta de Crédito/Débito registrada en MetroPay)</option>
+                                </select>
+                            </div>
+
+                            <!-- Bloque 1: Numeración de título (no obligatorio) -->
+                            <div id="bloqueTituloViajeSugerencia" class="form-group full-width hidden">
+                                <label for="numeracionTituloSugerencia" class="label">Numeración del título de viaje</label>
+                                <input type="text" id="numeracionTituloSugerencia" name="numeracionTituloSugerencia" class="input" placeholder="Ej: 1234567890">
+                            </div>
+
+                            <!-- Bloque 2: EMV física o MetroPay (no obligatorio) -->
+                            <div id="bloqueTarjetaFisicaSugerencia" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
+                                <div class="form-group">
+                                    <label for="panFisicaPrimeros6Sugerencia" class="label">PAN tarjeta física — primeros seis dígitos</label>
+                                    <input type="text" id="panFisicaPrimeros6Sugerencia" name="panFisicaPrimeros6Sugerencia" class="input input-pan" placeholder="123456" maxlength="6">
+                                </div>
+                                <div class="form-group">
+                                    <label for="panFisicaUltimos4Sugerencia" class="label">PAN tarjeta física — cuatro últimos dígitos</label>
+                                    <input type="text" id="panFisicaUltimos4Sugerencia" name="panFisicaUltimos4Sugerencia" class="input input-pan" placeholder="1234" maxlength="4">
+                                </div>
+                            </div>
+
+                            <!-- Bloque 3: EMV móvil (no obligatorio) -->
+                            <div id="bloqueTarjetaMovilSugerencia" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
+                                <div class="form-group">
+                                    <label for="panMovilFisicaAsocPrimeros6Sugerencia" class="label">PAN tarjeta física asociada — primeros seis dígitos</label>
+                                    <input type="text" id="panMovilFisicaAsocPrimeros6Sugerencia" name="panMovilFisicaAsocPrimeros6Sugerencia" class="input input-pan" placeholder="123456" maxlength="6">
+                                </div>
+                                <div class="form-group">
+                                    <label for="panMovilFisicaAsocUltimos4Sugerencia" class="label">PAN tarjeta física asociada — últimos cuatro dígitos</label>
+                                    <input type="text" id="panMovilFisicaAsocUltimos4Sugerencia" name="panMovilFisicaAsocUltimos4Sugerencia" class="input input-pan" placeholder="1234" maxlength="4">
+                                </div>
+                                <div class="form-group">
+                                    <label for="panMovilVirtualPrimeros6Sugerencia" class="label">PAN tarjeta virtual — primeros seis dígitos (si los conoce)</label>
+                                    <input type="text" id="panMovilVirtualPrimeros6Sugerencia" name="panMovilVirtualPrimeros6Sugerencia" class="input input-pan" placeholder="123456" maxlength="6">
+                                </div>
+                                <div class="form-group">
+                                    <label for="panMovilVirtualUltimos4Sugerencia" class="label">PAN tarjeta virtual — últimos cuatro dígitos</label>
+                                    <input type="text" id="panMovilVirtualUltimos4Sugerencia" name="panMovilVirtualUltimos4Sugerencia" class="input input-pan" placeholder="1234" maxlength="4">
+                                </div>
+                            </div>
+
                             <div class="form-group full-width">
                                 <label for="descripcionSugerencia" class="label required">Descripción de la sugerencia</label>
                                 <textarea id="descripcionSugerencia" name="descripcionSugerencia" class="textarea" required placeholder="Explique su propuesta de mejora con detalle..." rows="5"></textarea>
@@ -1312,7 +1216,7 @@
                                     <option value="tarjeta-consorcio">Tarjeta Monedero Consorcio de Transportes</option>
                                     <option value="tarjeta-consorcio-joven">Tarjeta Joven Consorcio de Transportes</option>
                                     <option value="tarjeta-consorcio-familia-numerosa">Tarjeta Familia Numerosa Consorcio de Transportes</option>
-                                    <option value="pago-tarjeta-ocasional">Validación con sistema EMV (teléfono móvil o tarjeta de crédito no registrada)</option>
+                                    <option value="validacion-tarjeta-ocasional">Validación con sistema EMV (teléfono móvil o tarjeta de crédito no registrada)</option>
                                     <option value="metropay">Validación con ABT (tarjeta de crédito registrada en Metro Pay)</option>
                                 </select>
                             </div>
@@ -1357,7 +1261,7 @@
                                     <option value="">Seleccione...</option>
                                     <option value="1">Línea 1</option>
                                     <option value="2">Línea 2</option>
-                                    <option value="ambas">Ambas</option>
+                                    <option value="ambas">Ambas / No lo sé</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -1439,50 +1343,13 @@
                             Datos para tarjeta +Metro
                         </h2>
                         <div class="form-grid">
-                            <!-- Prominent solicita message -->
                             <div class="form-group full-width" style="margin-bottom: var(--spacing-md); text-align: center; grid-column: 1 / -1;">
                                 <p style="font-size: 1.1rem; font-weight: 700; color: var(--color-secondary); margin: 0; padding: var(--spacing-md); background-color: var(--color-gray-100); border-radius: var(--radius); border-left: 5px solid var(--color-primary); line-height: 1.4; text-align: left;">
-                                    SOLICITA: Que le sea expedida la tarjeta personalizada <span style="color: var(--color-primary);">+MásMetro</span> de <span style="color: var(--color-success); font-weight: 800;">Metro de Málaga</span> para su uso personal y particular.
+                                    Cumplimentando este formulario solicita que le sea expedida la tarjeta personalizada <span style="color: var(--color-primary);">+MásMetro</span> de <span style="color: var(--color-success); font-weight: 800;">Metro de Málaga</span> para su uso personal y particular.
                                 </p>
                             </div>
-
                             <div class="grid-3-cols" style="grid-column: 1 / -1;">
-                                <div class="form-group">
-                                    <label for="motivoTarjeta" class="label required">Motivo de la solicitud</label>
-                                    <select id="motivoTarjeta" name="motivoTarjeta" class="select" required>
-                                        <option value="">Seleccione...</option>
-                                        <option value="nueva">Nueva tarjeta</option>
-                                        <option value="renovacion">Renovación</option>
-                                        <option value="duplicado">Duplicado por pérdida/robo</option>
-                                        <option value="deterioro">Duplicado por deterioro</option>
-                                        <option value="modificacion">Modificación de datos</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="fechaNacimiento" class="label required">Fecha de nacimiento</label>
-                                    <input type="date" id="fechaNacimiento" name="fechaNacimiento" class="input" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="genero" class="label">Género</label>
-                                    <select id="genero" name="genero" class="select">
-                                        <option value="">Seleccione...</option>
-                                        <option value="H">Hombre</option>
-                                        <option value="M">Mujer</option>
-                                        <option value="O">Otro / Prefiero no indicar</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="grid-3-cols" style="grid-column: 1 / -1;">
-                                <div class="form-group">
-                                    <label for="fechaCitaTarjeta" class="label required">Fecha de su cita para la confección de la tarjeta +Metro</label>
-                                    <input type="date" id="fechaCitaTarjeta" name="fechaCitaTarjeta" class="input" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="horaCitaTarjeta" class="label required">Hora de su cita para la confección de la tarjeta +Metro</label>
-                                    <input type="time" id="horaCitaTarjeta" name="horaCitaTarjeta" class="input" required>
-                                </div>
-                                <div class="form-group">
+                                <div class="form-group full-width">
                                     <label for="medioNotificacionTarjeta" class="label required">Medio de notificación para la entrega del documento de datos personales</label>
                                     <select id="medioNotificacionTarjeta" name="medioNotificacionTarjeta" class="select" required>
                                         <option value="">Seleccione...</option>
@@ -1492,7 +1359,7 @@
                                 </div>
                             </div>
                             <div class="form-group full-width" style="margin-top: var(--spacing-md); background-color: var(--color-info-light); color: var(--color-info); border: 1.5px solid var(--color-info); padding: var(--spacing-md); border-radius: var(--radius); font-size: 0.9375rem; font-weight: 500; display: flex; align-items: center; gap: var(--spacing-sm); grid-column: 1 / -1;">
-                                <span>ℹ️ Para terminar de confeccionar la tarjeta tendrán que pasarse por la Oficina de Atención al Cliente (El Perchel).</span>
+                                <span>ℹ️ Para terminar de confeccionar la tarjeta será necesario ir a la Oficina de Atención al Cliente (El Perchel) con la correspondiente cita previa solicitada a través deñ teléfono 952061642.</span>
                             </div>
                         </div>
                     </section>

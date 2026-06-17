@@ -684,6 +684,13 @@ document.addEventListener('DOMContentLoaded', () => {
      * Genera el payload estructurado completo listo para su envío (o descarga de prueba)
      * unificando las secciones de datos comunes, representante, envío y values por tipo.
      */
+    /**
+     * Genera el payload estructurado completo listo para su envío (o descarga de prueba)
+     * unificando las secciones de datos comunes, representante, envío y values por tipo.
+     * 
+     * NOTA: 'referenceClientSide' se envía como null porque la generación del identificador 
+     * de referencia único (ej. ATT-2026-XXXXX) ha sido delegada al backend para mayor robustez.
+     */
     function generarPayloadFormulario() {
         const tipoHtml = tipoFormulario.value;
         const typeCode = {
@@ -694,8 +701,6 @@ document.addEventListener('DOMContentLoaded', () => {
             objetos: 'OBJ',
             tarjetas: 'TAR'
         }[tipoHtml] || 'GEN';
-
-        const refCliente = modalReference.textContent || generarReferencia();
 
         // 1. Obtener datos del solicitante
         const direccionContactoContainer = document.getElementById('direccionContactoContainer');
@@ -868,7 +873,7 @@ document.addEventListener('DOMContentLoaded', () => {
             attachments: attachments,
             consents: consents,
             metadata: {
-                referenceClientSide: refCliente,
+                referenceClientSide: null, // Asignado como null por delegar la creación al backend
                 notes: `Envío automático de prueba - tipo ${typeCode}`
             }
         };
@@ -1134,7 +1139,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 subBloque.id.startsWith('bloqueTrenObjetos') ||
                 subBloque.id.startsWith('bloqueTituloViajeConsulta') ||
                 subBloque.id.startsWith('bloqueTarjetaFisicaConsulta') ||
-                subBloque.id.startsWith('bloqueTarjetaMovilConsulta')
+                subBloque.id.startsWith('bloqueTarjetaMovilConsulta') ||
+                subBloque.id.startsWith('bloqueTituloViajeSugerencia') ||
+                subBloque.id.startsWith('bloqueTarjetaFisicaSugerencia') ||
+                subBloque.id.startsWith('bloqueTarjetaMovilSugerencia')
             )) {
                 subBloque.classList.add('hidden');
             }
@@ -1163,6 +1171,9 @@ document.addEventListener('DOMContentLoaded', () => {
             'bloqueTituloViajeConsulta',
             'bloqueTarjetaFisicaConsulta',
             'bloqueTarjetaMovilConsulta',
+            'bloqueTituloViajeSugerencia',
+            'bloqueTarjetaFisicaSugerencia',
+            'bloqueTarjetaMovilSugerencia',
             'grupoEstacionAgradecimiento',
             'grupoTrenAgradecimiento',
             'grupoVariosColectivos',
@@ -1208,13 +1219,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (opcionesTituloViaje.includes(opcion)) {
                 if (bloqueTituloViaje) bloqueTituloViaje.classList.remove('hidden');
-            } else if (opcion === 'pago-emv-fisica' || opcion === 'pago-emv-movil') {
+            } else if (opcion === 'validacion-emv-fisica' || opcion === 'validacion-emv-movil') {
                 if (bloqueEMV) bloqueEMV.classList.remove('hidden');
                 const bloqueEMVFisica = document.getElementById('bloqueEMVFisica');
                 const bloqueEMVMovil = document.getElementById('bloqueEMVMovil');
-                if (opcion === 'pago-emv-fisica') {
+                if (opcion === 'validacion-emv-fisica') {
                     if (bloqueEMVFisica) bloqueEMVFisica.classList.remove('hidden');
-                } else if (opcion === 'pago-emv-movil') {
+                } else if (opcion === 'validacion-emv-movil') {
                     if (bloqueEMVMovil) bloqueEMVMovil.classList.remove('hidden');
                 }
             } else if (opcion === 'metropay') {
@@ -1440,7 +1451,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 'tarjeta-consorcio-familia-numerosa'
             ];
             const opcionesBancarias = [
-                'pago-tarjeta-ocasional',
+                'validacion-tarjeta-ocasional',
                 'metropay'
             ];
 
@@ -1486,7 +1497,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ];
             
             const opcionesFisicaOBancaria = [
-                'pago-emv-fisica',
+                'validacion-emv-fisica',
                 'metropay'
             ];
 
@@ -1494,8 +1505,58 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (bloqueTituloViajeConsulta) bloqueTituloViajeConsulta.classList.remove('hidden');
             } else if (opcionesFisicaOBancaria.includes(opcion)) {
                 if (bloqueTarjetaFisicaConsulta) bloqueTarjetaFisicaConsulta.classList.remove('hidden');
-            } else if (opcion === 'pago-emv-movil') {
+            } else if (opcion === 'validacion-emv-movil') {
                 if (bloqueTarjetaMovilConsulta) bloqueTarjetaMovilConsulta.classList.remove('hidden');
+            }
+            
+            comprobarCamposObligatorios();
+        });
+    }
+
+    // 1d. Desplegables y campos condicionales para Sugerencias
+    const tipoTituloSugerencia = document.getElementById('tipoTituloSugerencia');
+    const bloqueTituloViajeSugerencia = document.getElementById('bloqueTituloViajeSugerencia');
+    const bloqueTarjetaFisicaSugerencia = document.getElementById('bloqueTarjetaFisicaSugerencia');
+    const bloqueTarjetaMovilSugerencia = document.getElementById('bloqueTarjetaMovilSugerencia');
+
+    if (tipoTituloSugerencia) {
+        tipoTituloSugerencia.addEventListener('change', (e) => {
+            const opcion = e.target.value;
+
+            // Ocultar y resetear los bloques de Sugerencia
+            if (bloqueTituloViajeSugerencia) {
+                resetearBloque(bloqueTituloViajeSugerencia);
+                bloqueTituloViajeSugerencia.classList.add('hidden');
+            }
+            if (bloqueTarjetaFisicaSugerencia) {
+                resetearBloque(bloqueTarjetaFisicaSugerencia);
+                bloqueTarjetaFisicaSugerencia.classList.add('hidden');
+            }
+            if (bloqueTarjetaMovilSugerencia) {
+                resetearBloque(bloqueTarjetaMovilSugerencia);
+                bloqueTarjetaMovilSugerencia.classList.add('hidden');
+            }
+
+            const opcionesFisicas = [
+                'monedero-metro-malaga',
+                'billete-ocasional',
+                'masmetro',
+                'tarjeta-consorcio',
+                'tarjeta-consorcio-joven',
+                'tarjeta-consorcio-familia-numerosa'
+            ];
+            
+            const opcionesFisicaOBancaria = [
+                'validacion-emv-fisica',
+                'metropay'
+            ];
+
+            if (opcionesFisicas.includes(opcion)) {
+                if (bloqueTituloViajeSugerencia) bloqueTituloViajeSugerencia.classList.remove('hidden');
+            } else if (opcionesFisicaOBancaria.includes(opcion)) {
+                if (bloqueTarjetaFisicaSugerencia) bloqueTarjetaFisicaSugerencia.classList.remove('hidden');
+            } else if (opcion === 'validacion-emv-movil') {
+                if (bloqueTarjetaMovilSugerencia) bloqueTarjetaMovilSugerencia.classList.remove('hidden');
             }
             
             comprobarCamposObligatorios();
