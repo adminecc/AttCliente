@@ -1213,13 +1213,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (opcionesTituloViaje.includes(opcion)) {
                 if (bloqueTituloViaje) bloqueTituloViaje.classList.remove('hidden');
-            } else if (opcion === 'pago-emv-fisica' || opcion === 'pago-emv-movil') {
+            } else if (opcion === 'validacion-emv-fisica' || opcion === 'validacion-emv-movil') {
                 if (bloqueEMV) bloqueEMV.classList.remove('hidden');
                 const bloqueEMVFisica = document.getElementById('bloqueEMVFisica');
                 const bloqueEMVMovil = document.getElementById('bloqueEMVMovil');
-                if (opcion === 'pago-emv-fisica') {
+                if (opcion === 'validacion-emv-fisica') {
                     if (bloqueEMVFisica) bloqueEMVFisica.classList.remove('hidden');
-                } else if (opcion === 'pago-emv-movil') {
+                } else if (opcion === 'validacion-emv-movil') {
                     if (bloqueEMVMovil) bloqueEMVMovil.classList.remove('hidden');
                 }
             } else if (opcion === 'metropay') {
@@ -1445,7 +1445,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 'tarjeta-consorcio-familia-numerosa'
             ];
             const opcionesBancarias = [
-                'pago-tarjeta-ocasional',
+                'validacion-tarjeta-ocasional',
                 'metropay'
             ];
 
@@ -1491,7 +1491,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ];
             
             const opcionesFisicaOBancaria = [
-                'pago-emv-fisica',
+                'validacion-emv-fisica',
                 'metropay'
             ];
 
@@ -1499,7 +1499,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (bloqueTituloViajeConsulta) bloqueTituloViajeConsulta.classList.remove('hidden');
             } else if (opcionesFisicaOBancaria.includes(opcion)) {
                 if (bloqueTarjetaFisicaConsulta) bloqueTarjetaFisicaConsulta.classList.remove('hidden');
-            } else if (opcion === 'pago-emv-movil') {
+            } else if (opcion === 'validacion-emv-movil') {
                 if (bloqueTarjetaMovilConsulta) bloqueTarjetaMovilConsulta.classList.remove('hidden');
             }
             

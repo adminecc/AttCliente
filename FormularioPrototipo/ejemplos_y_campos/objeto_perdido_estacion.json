@@ -39,7 +39,7 @@
     "direccionEnvio": null
   },
   "values": {
-    "tipoTituloObjetos": "pago-tarjeta-ocasional",
+    "tipoTituloObjetos": "validacion-tarjeta-ocasional",
     "numeracionTituloViajeObjetos": null,
     "panTarjetaPrimeros6Objetos": "453095",
     "panTarjetaUltimos4Objetos": "8824",
