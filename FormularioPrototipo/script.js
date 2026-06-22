@@ -1144,15 +1144,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 subBloque.id.startsWith('bloqueDabTarjeta') || 
                 subBloque.id.startsWith('bloqueTarjetaOtras') ||
                 subBloque.id.startsWith('bloqueTituloViajeObjetos') ||
-                subBloque.id.startsWith('bloqueTarjetaBancariaObjetos') ||
                 subBloque.id.startsWith('bloqueEstacionObjetos') ||
                 subBloque.id.startsWith('bloqueTrenObjetos') ||
                 subBloque.id.startsWith('bloqueTituloViajeConsulta') ||
-                subBloque.id.startsWith('bloqueTarjetaFisicaConsulta') ||
-                subBloque.id.startsWith('bloqueTarjetaMovilConsulta') ||
-                subBloque.id.startsWith('bloqueTituloViajeSugerencia') ||
-                subBloque.id.startsWith('bloqueTarjetaFisicaSugerencia') ||
-                subBloque.id.startsWith('bloqueTarjetaMovilSugerencia')
+                subBloque.id.startsWith('bloqueTituloViajeSugerencia')
             )) {
                 subBloque.classList.add('hidden');
             }
@@ -1180,15 +1175,10 @@ document.addEventListener('DOMContentLoaded', () => {
             'bloqueTarjetaOtras2',
             'bloqueTarjetaOtras3',
             'bloqueTituloViajeObjetos',
-            'bloqueTarjetaBancariaObjetos',
             'bloqueEstacionObjetos',
             'bloqueTrenObjetos',
             'bloqueTituloViajeConsulta',
-            'bloqueTarjetaFisicaConsulta',
-            'bloqueTarjetaMovilConsulta',
             'bloqueTituloViajeSugerencia',
-            'bloqueTarjetaFisicaSugerencia',
-            'bloqueTarjetaMovilSugerencia',
             'grupoEstacionAgradecimiento',
             'grupoTrenAgradecimiento',
             'grupoVariosColectivos',
@@ -1470,7 +1460,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Desplegable tipo de título para Objetos
     const tipoTituloObjetos = document.getElementById('tipoTituloObjetos');
     const bloqueTituloViajeObjetos = document.getElementById('bloqueTituloViajeObjetos');
-    const bloqueTarjetaBancariaObjetos = document.getElementById('bloqueTarjetaBancariaObjetos');
 
     if (tipoTituloObjetos) {
         tipoTituloObjetos.addEventListener('change', (e) => {
@@ -1481,10 +1470,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 resetearBloque(bloqueTituloViajeObjetos);
                 bloqueTituloViajeObjetos.classList.add('hidden');
             }
-            if (bloqueTarjetaBancariaObjetos) {
-                resetearBloque(bloqueTarjetaBancariaObjetos);
-                bloqueTarjetaBancariaObjetos.classList.add('hidden');
-            }
 
             const opcionesFisicas = [
                 'monedero-metro-malaga',
@@ -1494,15 +1479,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 'tarjeta-consorcio-joven',
                 'tarjeta-consorcio-familia-numerosa'
             ];
-            const opcionesBancarias = [
-                'validacion-tarjeta-ocasional',
-                'metropay'
-            ];
 
             if (opcionesFisicas.includes(opcion)) {
                 if (bloqueTituloViajeObjetos) bloqueTituloViajeObjetos.classList.remove('hidden');
-            } else if (opcionesBancarias.includes(opcion)) {
-                if (bloqueTarjetaBancariaObjetos) bloqueTarjetaBancariaObjetos.classList.remove('hidden');
             }
         });
     }
@@ -1510,8 +1489,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1c. Desplegables y campos condicionales para Consulta de Información
     const tipoTituloConsulta = document.getElementById('tipoTituloConsulta');
     const bloqueTituloViajeConsulta = document.getElementById('bloqueTituloViajeConsulta');
-    const bloqueTarjetaFisicaConsulta = document.getElementById('bloqueTarjetaFisicaConsulta');
-    const bloqueTarjetaMovilConsulta = document.getElementById('bloqueTarjetaMovilConsulta');
 
     if (tipoTituloConsulta) {
         tipoTituloConsulta.addEventListener('change', (e) => {
@@ -1522,14 +1499,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 resetearBloque(bloqueTituloViajeConsulta);
                 bloqueTituloViajeConsulta.classList.add('hidden');
             }
-            if (bloqueTarjetaFisicaConsulta) {
-                resetearBloque(bloqueTarjetaFisicaConsulta);
-                bloqueTarjetaFisicaConsulta.classList.add('hidden');
-            }
-            if (bloqueTarjetaMovilConsulta) {
-                resetearBloque(bloqueTarjetaMovilConsulta);
-                bloqueTarjetaMovilConsulta.classList.add('hidden');
-            }
 
             const opcionesFisicas = [
                 'monedero-metro-malaga',
@@ -1539,18 +1508,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 'tarjeta-consorcio-joven',
                 'tarjeta-consorcio-familia-numerosa'
             ];
-            
-            const opcionesFisicaOBancaria = [
-                'validacion-emv-fisica',
-                'metropay'
-            ];
 
             if (opcionesFisicas.includes(opcion)) {
                 if (bloqueTituloViajeConsulta) bloqueTituloViajeConsulta.classList.remove('hidden');
-            } else if (opcionesFisicaOBancaria.includes(opcion)) {
-                if (bloqueTarjetaFisicaConsulta) bloqueTarjetaFisicaConsulta.classList.remove('hidden');
-            } else if (opcion === 'validacion-emv-movil') {
-                if (bloqueTarjetaMovilConsulta) bloqueTarjetaMovilConsulta.classList.remove('hidden');
             }
             
             comprobarCamposObligatorios();
@@ -1560,8 +1520,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1d. Desplegables y campos condicionales para Sugerencias
     const tipoTituloSugerencia = document.getElementById('tipoTituloSugerencia');
     const bloqueTituloViajeSugerencia = document.getElementById('bloqueTituloViajeSugerencia');
-    const bloqueTarjetaFisicaSugerencia = document.getElementById('bloqueTarjetaFisicaSugerencia');
-    const bloqueTarjetaMovilSugerencia = document.getElementById('bloqueTarjetaMovilSugerencia');
 
     if (tipoTituloSugerencia) {
         tipoTituloSugerencia.addEventListener('change', (e) => {
@@ -1572,14 +1530,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 resetearBloque(bloqueTituloViajeSugerencia);
                 bloqueTituloViajeSugerencia.classList.add('hidden');
             }
-            if (bloqueTarjetaFisicaSugerencia) {
-                resetearBloque(bloqueTarjetaFisicaSugerencia);
-                bloqueTarjetaFisicaSugerencia.classList.add('hidden');
-            }
-            if (bloqueTarjetaMovilSugerencia) {
-                resetearBloque(bloqueTarjetaMovilSugerencia);
-                bloqueTarjetaMovilSugerencia.classList.add('hidden');
-            }
 
             const opcionesFisicas = [
                 'monedero-metro-malaga',
@@ -1589,18 +1539,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 'tarjeta-consorcio-joven',
                 'tarjeta-consorcio-familia-numerosa'
             ];
-            
-            const opcionesFisicaOBancaria = [
-                'validacion-emv-fisica',
-                'metropay'
-            ];
 
             if (opcionesFisicas.includes(opcion)) {
                 if (bloqueTituloViajeSugerencia) bloqueTituloViajeSugerencia.classList.remove('hidden');
-            } else if (opcionesFisicaOBancaria.includes(opcion)) {
-                if (bloqueTarjetaFisicaSugerencia) bloqueTarjetaFisicaSugerencia.classList.remove('hidden');
-            } else if (opcion === 'validacion-emv-movil') {
-                if (bloqueTarjetaMovilSugerencia) bloqueTarjetaMovilSugerencia.classList.remove('hidden');
             }
             
             comprobarCamposObligatorios();
