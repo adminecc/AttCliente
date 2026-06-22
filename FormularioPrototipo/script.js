@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Secciones del formulario
     const secciones = {
         datosPersonales: document.getElementById('datosPersonales'),
+        avisoConsultas: document.getElementById('avisoConsultas'),
         reclamaciones: document.getElementById('seccionReclamaciones'),
         consultas: document.getElementById('seccionConsultas'),
         sugerencias: document.getElementById('seccionSugerencias'),
@@ -120,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         consultas: {
             titulo: 'Consulta de Información',
-            secciones: ['datosPersonales', 'consultas', 'consentimiento']
+            secciones: ['avisoConsultas', 'datosPersonales', 'consultas', 'consentimiento']
         },
         sugerencias: {
             titulo: 'Sugerencias',
@@ -175,6 +176,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const grupoDatosCorrectosCheck = document.getElementById('grupoDatosCorrectosCheck');
         const containerFirmaTarjetas = document.getElementById('containerFirmaTarjetas');
         const lopdTextoTarjetas = document.getElementById('lopdTextoTarjetas');
+        const recibirPostalNormalContainer = document.getElementById('recibirPostalNormalContainer');
+        const recibirPostal = document.getElementById('recibirPostal');
         
         if (tipo === 'tarjetas') {
             if (txtTituloDatosPersonales) txtTituloDatosPersonales.textContent = 'Datos personales del interesado';
@@ -183,6 +186,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (grupoDatosCorrectosCheck) grupoDatosCorrectosCheck.classList.remove('hidden');
             if (containerFirmaTarjetas) containerFirmaTarjetas.classList.remove('hidden');
             if (lopdTextoTarjetas) lopdTextoTarjetas.classList.remove('hidden');
+            if (recibirPostalNormalContainer) recibirPostalNormalContainer.classList.add('hidden');
+            if (recibirPostal) recibirPostal.checked = false;
+            if (typeof actualizarVisibilidadEnvio === 'function') {
+                actualizarVisibilidadEnvio();
+            }
             
             // Actualizar visibilidad de representante/dirección según el checkbox
             if (typeof actualizarVisibilidadRepresentante === 'function') {
@@ -207,6 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (containerFirmaTarjetas) containerFirmaTarjetas.classList.add('hidden');
             if (lopdTextoTarjetas) lopdTextoTarjetas.classList.add('hidden');
+            if (recibirPostalNormalContainer) recibirPostalNormalContainer.classList.remove('hidden');
             
             // Si no es tarjetas, restauramos comportamiento normal para representante
             const bloqueRepresentante = document.getElementById('bloqueRepresentante');
