@@ -1210,6 +1210,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const bloqueIncidenciaRecargaCompra = document.getElementById('bloqueIncidenciaRecargaCompra');
     const bloqueEMV = document.getElementById('bloqueEMV');
     const bloqueABT = document.getElementById('bloqueABT');
+    const gruposImporteReclamado = [
+        document.getElementById('grupoImporteReclamado1'),
+        document.getElementById('grupoImporteReclamado2'),
+        document.getElementById('grupoImporteReclamado3')
+    ];
+
+    function actualizarVisibilidadImportesReclamados() {
+        const esReclamacion = clasificacion && clasificacion.value === 'reclamacion';
+
+        gruposImporteReclamado.forEach(grupo => {
+            if (!grupo) return;
+            grupo.classList.toggle('hidden', !esReclamacion);
+            if (!esReclamacion) {
+                resetearBloque(grupo);
+            }
+        });
+    }
 
     function actualizarVisibilidadIncidenciaRecargaCompra() {
         const esReclamacion = clasificacion && clasificacion.value === 'reclamacion';
@@ -1221,6 +1238,7 @@ document.addEventListener('DOMContentLoaded', () => {
             resetearBloque(bloqueIncidenciaRecargaCompra);
             bloqueIncidenciaRecargaCompra.classList.add('hidden');
         }
+        actualizarVisibilidadImportesReclamados();
         comprobarCamposObligatorios();
     }
 
@@ -1256,6 +1274,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (opcion === 'metropay') {
                 if (bloqueABT) bloqueABT.classList.remove('hidden');
             }
+            actualizarVisibilidadImportesReclamados();
         });
     }
 
