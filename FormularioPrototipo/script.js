@@ -1138,6 +1138,7 @@ document.addEventListener('DOMContentLoaded', () => {
         bloque.querySelectorAll('.form-grid, .form-group').forEach(subBloque => {
             if (subBloque.id && (
                 subBloque.id.startsWith('bloqueOnline') || 
+                subBloque.id.startsWith('bloqueIncidenciaRecargaCompra') ||
                 subBloque.id.startsWith('bloqueMaquina') || 
                 subBloque.id.startsWith('bloqueTituloRecargado') || 
                 subBloque.id.startsWith('bloqueDabTarjeta') || 
@@ -1161,16 +1162,21 @@ document.addEventListener('DOMContentLoaded', () => {
     function ocultarYResetearTodosLosBloques() {
         const bloques = [
             'bloqueTituloViaje',
+            'bloqueIncidenciaRecargaCompra',
             'bloqueEMV',
             'bloqueEMVFisica',
             'bloqueEMVMovil',
             'bloqueABT',
             'bloqueOnline',
+            'bloqueOnlineTarjeta',
             'bloqueMaquina',
             'bloqueTituloRecargado',
             'bloqueDabTarjeta',
             'bloqueDabTarjetaFisica',
             'bloqueDabTarjetaMovil',
+            'bloqueTarjetaOtras11',
+            'bloqueTarjetaOtrasDabFisica',
+            'bloqueTarjetaOtrasDabMovil',
             'bloqueTarjetaOtras2',
             'bloqueTarjetaOtras3',
             'bloqueTituloViajeObjetos',
@@ -1208,10 +1214,29 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Event Listener Principal para tipo de título
+    const clasificacion = document.getElementById('clasificacion');
     const tipoTitulo = document.getElementById('tipoTitulo');
     const bloqueTituloViaje = document.getElementById('bloqueTituloViaje');
+    const bloqueIncidenciaRecargaCompra = document.getElementById('bloqueIncidenciaRecargaCompra');
     const bloqueEMV = document.getElementById('bloqueEMV');
     const bloqueABT = document.getElementById('bloqueABT');
+
+    function actualizarVisibilidadIncidenciaRecargaCompra() {
+        const esReclamacion = clasificacion && clasificacion.value === 'reclamacion';
+        const tituloViajeVisible = bloqueTituloViaje && !bloqueTituloViaje.classList.contains('hidden');
+
+        if (esReclamacion && tituloViajeVisible) {
+            if (bloqueIncidenciaRecargaCompra) bloqueIncidenciaRecargaCompra.classList.remove('hidden');
+        } else if (bloqueIncidenciaRecargaCompra) {
+            resetearBloque(bloqueIncidenciaRecargaCompra);
+            bloqueIncidenciaRecargaCompra.classList.add('hidden');
+        }
+        comprobarCamposObligatorios();
+    }
+
+    if (clasificacion) {
+        clasificacion.addEventListener('change', actualizarVisibilidadIncidenciaRecargaCompra);
+    }
 
     if (tipoTitulo) {
         tipoTitulo.addEventListener('change', (e) => {
@@ -1228,6 +1253,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (opcionesTituloViaje.includes(opcion)) {
                 if (bloqueTituloViaje) bloqueTituloViaje.classList.remove('hidden');
+                actualizarVisibilidadIncidenciaRecargaCompra();
             } else if (opcion === 'validacion-emv-fisica' || opcion === 'validacion-emv-movil') {
                 if (bloqueEMV) bloqueEMV.classList.remove('hidden');
                 const bloqueEMVFisica = document.getElementById('bloqueEMVFisica');
@@ -1246,7 +1272,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Sub-condicionales: Punto de venta o recarga
     const puntoVentaRecarga = document.getElementById('punto_venta_recarga');
     const bloqueOnline = document.getElementById('bloqueOnline');
+    const plataformaPago = document.getElementById('plataforma_pago');
+    const bloqueOnlineTarjeta = document.getElementById('bloqueOnlineTarjeta');
     const bloqueMaquina = document.getElementById('bloqueMaquina');
+
+    function actualizarVisibilidadOnlineTarjeta() {
+        if (!plataformaPago || !bloqueOnlineTarjeta) return;
+
+        if (plataformaPago.value === 'AppWeb') {
+            bloqueOnlineTarjeta.classList.remove('hidden');
+        } else {
+            resetearBloque(bloqueOnlineTarjeta);
+            bloqueOnlineTarjeta.classList.add('hidden');
+        }
+        comprobarCamposObligatorios();
+    }
+
     if (puntoVentaRecarga) {
         puntoVentaRecarga.addEventListener('change', (e) => {
             const opcion = e.target.value;
@@ -1273,6 +1314,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
+    }
+
+    if (plataformaPago) {
+        plataformaPago.addEventListener('change', actualizarVisibilidadOnlineTarjeta);
     }
 
     // Filtrado de DABs por estación
@@ -1346,37 +1391,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Sub-condicionales de tipo_tarjeta_bancaria_2 (EMV)
-    const tipoTarjetaBancaria2 = document.getElementById('tipo_tarjeta_bancaria_2');
-    const bloqueTarjetaOtras2 = document.getElementById('bloqueTarjetaOtras2');
-    if (tipoTarjetaBancaria2) {
-        tipoTarjetaBancaria2.addEventListener('change', (e) => {
+    function configurarCampoOtraTarjeta(selectId, bloqueId) {
+        const select = document.getElementById(selectId);
+        const bloque = document.getElementById(bloqueId);
+        if (!select || !bloque) return;
+
+        select.addEventListener('change', (e) => {
             if (e.target.value === 'Otras') {
-                if (bloqueTarjetaOtras2) bloqueTarjetaOtras2.classList.remove('hidden');
+                bloque.classList.remove('hidden');
             } else {
-                if (bloqueTarjetaOtras2) {
-                    resetearBloque(bloqueTarjetaOtras2);
-                    bloqueTarjetaOtras2.classList.add('hidden');
-                }
+                resetearBloque(bloque);
+                bloque.classList.add('hidden');
             }
+            comprobarCamposObligatorios();
         });
     }
 
-    // Sub-condicionales de tipo_tarjeta_bancaria_3 (ABT)
-    const tipoTarjetaBancaria3 = document.getElementById('tipo_tarjeta_bancaria_3');
-    const bloqueTarjetaOtras3 = document.getElementById('bloqueTarjetaOtras3');
-    if (tipoTarjetaBancaria3) {
-        tipoTarjetaBancaria3.addEventListener('change', (e) => {
-            if (e.target.value === 'Otras') {
-                if (bloqueTarjetaOtras3) bloqueTarjetaOtras3.classList.remove('hidden');
-            } else {
-                if (bloqueTarjetaOtras3) {
-                    resetearBloque(bloqueTarjetaOtras3);
-                    bloqueTarjetaOtras3.classList.add('hidden');
-                }
-            }
-        });
-    }
+    configurarCampoOtraTarjeta('tipo_tarjeta_bancaria_11', 'bloqueTarjetaOtras11');
+    configurarCampoOtraTarjeta('tipo_tarjeta_bancaria_dab_fisica', 'bloqueTarjetaOtrasDabFisica');
+    configurarCampoOtraTarjeta('tipo_tarjeta_bancaria_dab_movil', 'bloqueTarjetaOtrasDabMovil');
+    configurarCampoOtraTarjeta('tipo_tarjeta_bancaria_2', 'bloqueTarjetaOtras2');
+    configurarCampoOtraTarjeta('tipo_tarjeta_bancaria_3', 'bloqueTarjetaOtras3');
 
     // ============================================
     // GESTIÓN DINÁMICA DE OBJETOS PERDIDOS
