@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Secciones del formulario
     const secciones = {
         datosPersonales: document.getElementById('datosPersonales'),
+        avisoConsultas: document.getElementById('avisoConsultas'),
         reclamaciones: document.getElementById('seccionReclamaciones'),
         consultas: document.getElementById('seccionConsultas'),
         sugerencias: document.getElementById('seccionSugerencias'),
@@ -120,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         consultas: {
             titulo: 'Consulta de Información',
-            secciones: ['datosPersonales', 'consultas', 'consentimiento']
+            secciones: ['avisoConsultas', 'datosPersonales', 'consultas', 'consentimiento']
         },
         sugerencias: {
             titulo: 'Sugerencias',
@@ -175,6 +176,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const grupoDatosCorrectosCheck = document.getElementById('grupoDatosCorrectosCheck');
         const containerFirmaTarjetas = document.getElementById('containerFirmaTarjetas');
         const lopdTextoTarjetas = document.getElementById('lopdTextoTarjetas');
+        const recibirPostalNormalContainer = document.getElementById('recibirPostalNormalContainer');
+        const recibirPostal = document.getElementById('recibirPostal');
         
         if (tipo === 'tarjetas') {
             if (txtTituloDatosPersonales) txtTituloDatosPersonales.textContent = 'Datos personales del interesado';
@@ -183,6 +186,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (grupoDatosCorrectosCheck) grupoDatosCorrectosCheck.classList.remove('hidden');
             if (containerFirmaTarjetas) containerFirmaTarjetas.classList.remove('hidden');
             if (lopdTextoTarjetas) lopdTextoTarjetas.classList.remove('hidden');
+            if (recibirPostalNormalContainer) recibirPostalNormalContainer.classList.add('hidden');
+            if (recibirPostal) recibirPostal.checked = false;
+            if (typeof actualizarVisibilidadEnvio === 'function') {
+                actualizarVisibilidadEnvio();
+            }
             
             // Actualizar visibilidad de representante/dirección según el checkbox
             if (typeof actualizarVisibilidadRepresentante === 'function') {
@@ -207,6 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (containerFirmaTarjetas) containerFirmaTarjetas.classList.add('hidden');
             if (lopdTextoTarjetas) lopdTextoTarjetas.classList.add('hidden');
+            if (recibirPostalNormalContainer) recibirPostalNormalContainer.classList.remove('hidden');
             
             // Si no es tarjetas, restauramos comportamiento normal para representante
             const bloqueRepresentante = document.getElementById('bloqueRepresentante');
@@ -1129,20 +1138,16 @@ document.addEventListener('DOMContentLoaded', () => {
         bloque.querySelectorAll('.form-grid, .form-group').forEach(subBloque => {
             if (subBloque.id && (
                 subBloque.id.startsWith('bloqueOnline') || 
+                subBloque.id.startsWith('bloqueIncidenciaRecargaCompra') ||
                 subBloque.id.startsWith('bloqueMaquina') || 
                 subBloque.id.startsWith('bloqueTituloRecargado') || 
                 subBloque.id.startsWith('bloqueDabTarjeta') || 
                 subBloque.id.startsWith('bloqueTarjetaOtras') ||
                 subBloque.id.startsWith('bloqueTituloViajeObjetos') ||
-                subBloque.id.startsWith('bloqueTarjetaBancariaObjetos') ||
                 subBloque.id.startsWith('bloqueEstacionObjetos') ||
                 subBloque.id.startsWith('bloqueTrenObjetos') ||
                 subBloque.id.startsWith('bloqueTituloViajeConsulta') ||
-                subBloque.id.startsWith('bloqueTarjetaFisicaConsulta') ||
-                subBloque.id.startsWith('bloqueTarjetaMovilConsulta') ||
-                subBloque.id.startsWith('bloqueTituloViajeSugerencia') ||
-                subBloque.id.startsWith('bloqueTarjetaFisicaSugerencia') ||
-                subBloque.id.startsWith('bloqueTarjetaMovilSugerencia')
+                subBloque.id.startsWith('bloqueTituloViajeSugerencia')
             )) {
                 subBloque.classList.add('hidden');
             }
@@ -1152,28 +1157,28 @@ document.addEventListener('DOMContentLoaded', () => {
     function ocultarYResetearTodosLosBloques() {
         const bloques = [
             'bloqueTituloViaje',
+            'bloqueIncidenciaRecargaCompra',
             'bloqueEMV',
             'bloqueEMVFisica',
             'bloqueEMVMovil',
             'bloqueABT',
             'bloqueOnline',
+            'bloqueOnlineTarjeta',
             'bloqueMaquina',
             'bloqueTituloRecargado',
             'bloqueDabTarjeta',
             'bloqueDabTarjetaFisica',
             'bloqueDabTarjetaMovil',
+            'bloqueTarjetaOtras11',
+            'bloqueTarjetaOtrasDabFisica',
+            'bloqueTarjetaOtrasDabMovil',
             'bloqueTarjetaOtras2',
             'bloqueTarjetaOtras3',
             'bloqueTituloViajeObjetos',
-            'bloqueTarjetaBancariaObjetos',
             'bloqueEstacionObjetos',
             'bloqueTrenObjetos',
             'bloqueTituloViajeConsulta',
-            'bloqueTarjetaFisicaConsulta',
-            'bloqueTarjetaMovilConsulta',
             'bloqueTituloViajeSugerencia',
-            'bloqueTarjetaFisicaSugerencia',
-            'bloqueTarjetaMovilSugerencia',
             'grupoEstacionAgradecimiento',
             'grupoTrenAgradecimiento',
             'grupoVariosColectivos',
@@ -1199,10 +1204,47 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Event Listener Principal para tipo de título
+    const clasificacion = document.getElementById('clasificacion');
     const tipoTitulo = document.getElementById('tipoTitulo');
     const bloqueTituloViaje = document.getElementById('bloqueTituloViaje');
+    const bloqueIncidenciaRecargaCompra = document.getElementById('bloqueIncidenciaRecargaCompra');
     const bloqueEMV = document.getElementById('bloqueEMV');
     const bloqueABT = document.getElementById('bloqueABT');
+    const gruposImporteReclamado = [
+        document.getElementById('grupoImporteReclamado1'),
+        document.getElementById('grupoImporteReclamado2'),
+        document.getElementById('grupoImporteReclamado3')
+    ];
+
+    function actualizarVisibilidadImportesReclamados() {
+        const esReclamacion = clasificacion && clasificacion.value === 'reclamacion';
+
+        gruposImporteReclamado.forEach(grupo => {
+            if (!grupo) return;
+            grupo.classList.toggle('hidden', !esReclamacion);
+            if (!esReclamacion) {
+                resetearBloque(grupo);
+            }
+        });
+    }
+
+    function actualizarVisibilidadIncidenciaRecargaCompra() {
+        const esReclamacion = clasificacion && clasificacion.value === 'reclamacion';
+        const tituloViajeVisible = bloqueTituloViaje && !bloqueTituloViaje.classList.contains('hidden');
+
+        if (esReclamacion && tituloViajeVisible) {
+            if (bloqueIncidenciaRecargaCompra) bloqueIncidenciaRecargaCompra.classList.remove('hidden');
+        } else if (bloqueIncidenciaRecargaCompra) {
+            resetearBloque(bloqueIncidenciaRecargaCompra);
+            bloqueIncidenciaRecargaCompra.classList.add('hidden');
+        }
+        actualizarVisibilidadImportesReclamados();
+        comprobarCamposObligatorios();
+    }
+
+    if (clasificacion) {
+        clasificacion.addEventListener('change', actualizarVisibilidadIncidenciaRecargaCompra);
+    }
 
     if (tipoTitulo) {
         tipoTitulo.addEventListener('change', (e) => {
@@ -1219,6 +1261,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (opcionesTituloViaje.includes(opcion)) {
                 if (bloqueTituloViaje) bloqueTituloViaje.classList.remove('hidden');
+                actualizarVisibilidadIncidenciaRecargaCompra();
             } else if (opcion === 'validacion-emv-fisica' || opcion === 'validacion-emv-movil') {
                 if (bloqueEMV) bloqueEMV.classList.remove('hidden');
                 const bloqueEMVFisica = document.getElementById('bloqueEMVFisica');
@@ -1231,13 +1274,29 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (opcion === 'metropay') {
                 if (bloqueABT) bloqueABT.classList.remove('hidden');
             }
+            actualizarVisibilidadImportesReclamados();
         });
     }
 
     // Sub-condicionales: Punto de venta o recarga
     const puntoVentaRecarga = document.getElementById('punto_venta_recarga');
     const bloqueOnline = document.getElementById('bloqueOnline');
+    const plataformaPago = document.getElementById('plataforma_pago');
+    const bloqueOnlineTarjeta = document.getElementById('bloqueOnlineTarjeta');
     const bloqueMaquina = document.getElementById('bloqueMaquina');
+
+    function actualizarVisibilidadOnlineTarjeta() {
+        if (!plataformaPago || !bloqueOnlineTarjeta) return;
+
+        if (plataformaPago.value === 'AppWeb') {
+            bloqueOnlineTarjeta.classList.remove('hidden');
+        } else {
+            resetearBloque(bloqueOnlineTarjeta);
+            bloqueOnlineTarjeta.classList.add('hidden');
+        }
+        comprobarCamposObligatorios();
+    }
+
     if (puntoVentaRecarga) {
         puntoVentaRecarga.addEventListener('change', (e) => {
             const opcion = e.target.value;
@@ -1264,6 +1323,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
+    }
+
+    if (plataformaPago) {
+        plataformaPago.addEventListener('change', actualizarVisibilidadOnlineTarjeta);
     }
 
     // Filtrado de DABs por estación
@@ -1337,37 +1400,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Sub-condicionales de tipo_tarjeta_bancaria_2 (EMV)
-    const tipoTarjetaBancaria2 = document.getElementById('tipo_tarjeta_bancaria_2');
-    const bloqueTarjetaOtras2 = document.getElementById('bloqueTarjetaOtras2');
-    if (tipoTarjetaBancaria2) {
-        tipoTarjetaBancaria2.addEventListener('change', (e) => {
+    function configurarCampoOtraTarjeta(selectId, bloqueId) {
+        const select = document.getElementById(selectId);
+        const bloque = document.getElementById(bloqueId);
+        if (!select || !bloque) return;
+
+        select.addEventListener('change', (e) => {
             if (e.target.value === 'Otras') {
-                if (bloqueTarjetaOtras2) bloqueTarjetaOtras2.classList.remove('hidden');
+                bloque.classList.remove('hidden');
             } else {
-                if (bloqueTarjetaOtras2) {
-                    resetearBloque(bloqueTarjetaOtras2);
-                    bloqueTarjetaOtras2.classList.add('hidden');
-                }
+                resetearBloque(bloque);
+                bloque.classList.add('hidden');
             }
+            comprobarCamposObligatorios();
         });
     }
 
-    // Sub-condicionales de tipo_tarjeta_bancaria_3 (ABT)
-    const tipoTarjetaBancaria3 = document.getElementById('tipo_tarjeta_bancaria_3');
-    const bloqueTarjetaOtras3 = document.getElementById('bloqueTarjetaOtras3');
-    if (tipoTarjetaBancaria3) {
-        tipoTarjetaBancaria3.addEventListener('change', (e) => {
-            if (e.target.value === 'Otras') {
-                if (bloqueTarjetaOtras3) bloqueTarjetaOtras3.classList.remove('hidden');
-            } else {
-                if (bloqueTarjetaOtras3) {
-                    resetearBloque(bloqueTarjetaOtras3);
-                    bloqueTarjetaOtras3.classList.add('hidden');
-                }
-            }
-        });
-    }
+    configurarCampoOtraTarjeta('tipo_tarjeta_bancaria_11', 'bloqueTarjetaOtras11');
+    configurarCampoOtraTarjeta('tipo_tarjeta_bancaria_dab_fisica', 'bloqueTarjetaOtrasDabFisica');
+    configurarCampoOtraTarjeta('tipo_tarjeta_bancaria_dab_movil', 'bloqueTarjetaOtrasDabMovil');
+    configurarCampoOtraTarjeta('tipo_tarjeta_bancaria_2', 'bloqueTarjetaOtras2');
+    configurarCampoOtraTarjeta('tipo_tarjeta_bancaria_3', 'bloqueTarjetaOtras3');
 
     // ============================================
     // GESTIÓN DINÁMICA DE OBJETOS PERDIDOS
@@ -1426,7 +1479,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Desplegable tipo de título para Objetos
     const tipoTituloObjetos = document.getElementById('tipoTituloObjetos');
     const bloqueTituloViajeObjetos = document.getElementById('bloqueTituloViajeObjetos');
-    const bloqueTarjetaBancariaObjetos = document.getElementById('bloqueTarjetaBancariaObjetos');
 
     if (tipoTituloObjetos) {
         tipoTituloObjetos.addEventListener('change', (e) => {
@@ -1437,10 +1489,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 resetearBloque(bloqueTituloViajeObjetos);
                 bloqueTituloViajeObjetos.classList.add('hidden');
             }
-            if (bloqueTarjetaBancariaObjetos) {
-                resetearBloque(bloqueTarjetaBancariaObjetos);
-                bloqueTarjetaBancariaObjetos.classList.add('hidden');
-            }
 
             const opcionesFisicas = [
                 'monedero-metro-malaga',
@@ -1450,15 +1498,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 'tarjeta-consorcio-joven',
                 'tarjeta-consorcio-familia-numerosa'
             ];
-            const opcionesBancarias = [
-                'validacion-tarjeta-ocasional',
-                'metropay'
-            ];
 
             if (opcionesFisicas.includes(opcion)) {
                 if (bloqueTituloViajeObjetos) bloqueTituloViajeObjetos.classList.remove('hidden');
-            } else if (opcionesBancarias.includes(opcion)) {
-                if (bloqueTarjetaBancariaObjetos) bloqueTarjetaBancariaObjetos.classList.remove('hidden');
             }
         });
     }
@@ -1466,8 +1508,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1c. Desplegables y campos condicionales para Consulta de Información
     const tipoTituloConsulta = document.getElementById('tipoTituloConsulta');
     const bloqueTituloViajeConsulta = document.getElementById('bloqueTituloViajeConsulta');
-    const bloqueTarjetaFisicaConsulta = document.getElementById('bloqueTarjetaFisicaConsulta');
-    const bloqueTarjetaMovilConsulta = document.getElementById('bloqueTarjetaMovilConsulta');
 
     if (tipoTituloConsulta) {
         tipoTituloConsulta.addEventListener('change', (e) => {
@@ -1478,14 +1518,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 resetearBloque(bloqueTituloViajeConsulta);
                 bloqueTituloViajeConsulta.classList.add('hidden');
             }
-            if (bloqueTarjetaFisicaConsulta) {
-                resetearBloque(bloqueTarjetaFisicaConsulta);
-                bloqueTarjetaFisicaConsulta.classList.add('hidden');
-            }
-            if (bloqueTarjetaMovilConsulta) {
-                resetearBloque(bloqueTarjetaMovilConsulta);
-                bloqueTarjetaMovilConsulta.classList.add('hidden');
-            }
 
             const opcionesFisicas = [
                 'monedero-metro-malaga',
@@ -1495,18 +1527,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 'tarjeta-consorcio-joven',
                 'tarjeta-consorcio-familia-numerosa'
             ];
-            
-            const opcionesFisicaOBancaria = [
-                'validacion-emv-fisica',
-                'metropay'
-            ];
 
             if (opcionesFisicas.includes(opcion)) {
                 if (bloqueTituloViajeConsulta) bloqueTituloViajeConsulta.classList.remove('hidden');
-            } else if (opcionesFisicaOBancaria.includes(opcion)) {
-                if (bloqueTarjetaFisicaConsulta) bloqueTarjetaFisicaConsulta.classList.remove('hidden');
-            } else if (opcion === 'validacion-emv-movil') {
-                if (bloqueTarjetaMovilConsulta) bloqueTarjetaMovilConsulta.classList.remove('hidden');
             }
             
             comprobarCamposObligatorios();
@@ -1516,8 +1539,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1d. Desplegables y campos condicionales para Sugerencias
     const tipoTituloSugerencia = document.getElementById('tipoTituloSugerencia');
     const bloqueTituloViajeSugerencia = document.getElementById('bloqueTituloViajeSugerencia');
-    const bloqueTarjetaFisicaSugerencia = document.getElementById('bloqueTarjetaFisicaSugerencia');
-    const bloqueTarjetaMovilSugerencia = document.getElementById('bloqueTarjetaMovilSugerencia');
 
     if (tipoTituloSugerencia) {
         tipoTituloSugerencia.addEventListener('change', (e) => {
@@ -1528,14 +1549,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 resetearBloque(bloqueTituloViajeSugerencia);
                 bloqueTituloViajeSugerencia.classList.add('hidden');
             }
-            if (bloqueTarjetaFisicaSugerencia) {
-                resetearBloque(bloqueTarjetaFisicaSugerencia);
-                bloqueTarjetaFisicaSugerencia.classList.add('hidden');
-            }
-            if (bloqueTarjetaMovilSugerencia) {
-                resetearBloque(bloqueTarjetaMovilSugerencia);
-                bloqueTarjetaMovilSugerencia.classList.add('hidden');
-            }
 
             const opcionesFisicas = [
                 'monedero-metro-malaga',
@@ -1545,18 +1558,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 'tarjeta-consorcio-joven',
                 'tarjeta-consorcio-familia-numerosa'
             ];
-            
-            const opcionesFisicaOBancaria = [
-                'validacion-emv-fisica',
-                'metropay'
-            ];
 
             if (opcionesFisicas.includes(opcion)) {
                 if (bloqueTituloViajeSugerencia) bloqueTituloViajeSugerencia.classList.remove('hidden');
-            } else if (opcionesFisicaOBancaria.includes(opcion)) {
-                if (bloqueTarjetaFisicaSugerencia) bloqueTarjetaFisicaSugerencia.classList.remove('hidden');
-            } else if (opcion === 'validacion-emv-movil') {
-                if (bloqueTarjetaMovilSugerencia) bloqueTarjetaMovilSugerencia.classList.remove('hidden');
             }
             
             comprobarCamposObligatorios();

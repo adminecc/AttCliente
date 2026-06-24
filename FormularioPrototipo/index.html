@@ -50,6 +50,15 @@
                         </p>
                     </div>
 
+                    <!-- Aviso para Consulta de Información (visible solo en este tipo de formulario) -->
+                    <section class="form-section hidden" id="avisoConsultas">
+                        <div class="disclaimer-box" style="padding: var(--spacing-md); background-color: rgba(227, 24, 55, 0.05); border-left: 4px solid var(--color-primary); border-radius: var(--radius-sm);">
+                            <p style="font-size: 0.95rem; line-height: 1.5; color: var(--color-secondary); font-weight: 500; text-align: justify; margin: 0;">
+                                Este formulario está destinado a la gestión de consultas de información relacionadas con el servicio prestado por Metro de Málaga. Para otros fines, tales como realización de ofertas comerciales o solicitudes de información sobre temas ajenos al servicio que presta el metro, le rogamos que formule su petición a través del correo electrónico <a href="mailto:info@metromalaga.es" class="link" style="color: var(--color-primary); font-weight: 600;">info@metromalaga.es</a>
+                            </p>
+                        </div>
+                    </section>
+
                     <!-- Sección común: Datos personales -->
                     <section class="form-section" id="datosPersonales">
                         <h2 class="section-title">
@@ -606,46 +615,64 @@
                                     <label for="numeracion_titulo_viaje" class="label required">Numeración del título de viaje</label>
                                     <input type="text" id="numeracion_titulo_viaje" name="numeracion_titulo_viaje" class="input" required placeholder="Ej: 1000234567">
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group hidden" id="grupoImporteReclamado1">
                                     <label for="importe_reclamado_1" class="label">Importe reclamado (€)</label>
                                     <input type="number" id="importe_reclamado_1" name="importe_reclamado_1" class="input" required min="0" step="0.01" placeholder="0,00">
                                 </div>
                                 
-                                <div class="form-group full-width" style="margin-top: var(--spacing-xs); margin-bottom: var(--spacing-xs); color: var(--color-gray-600); font-weight: 500;">
-                                    Si es reclamación por incidencia en recarga o compra de títulos, indique:
-                                </div>
-
-                                <div class="form-group full-width">
-                                    <label for="punto_venta_recarga" class="label">Punto de venta o recarga</label>
-                                    <select id="punto_venta_recarga" name="punto_venta_recarga" class="select">
-                                        <option value="">Seleccione...</option>
-                                        <option value="Online">Online</option>
-                                        <option value="Maquina">Máquina automática de billetes</option>
-                                    </select>
-                                </div>
-
-                                <!-- Sub-bloque 1.1: Online -->
-                                <div id="bloqueOnline" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
-                                    <div class="form-group">
-                                        <label for="pan_tarjeta_primeros_6_11" class="label required">PAN tarjeta — primeros seis dígitos</label>
-                                        <input type="text" id="pan_tarjeta_primeros_6_11" name="pan_tarjeta_primeros_6_11" class="input input-pan" required placeholder="123456" maxlength="6">
+                                <div id="bloqueIncidenciaRecargaCompra" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
+                                    <div class="form-group full-width" style="margin-top: var(--spacing-xs); margin-bottom: var(--spacing-xs); color: var(--color-gray-600); font-weight: 500;">
+                                        Si es reclamación por incidencia en recarga o compra de títulos, indique:
                                     </div>
-                                    <div class="form-group">
-                                        <label for="pan_tarjeta_ultimos_4_11" class="label required">PAN tarjeta — cuatro últimos dígitos</label>
-                                        <input type="text" id="pan_tarjeta_ultimos_4_11" name="pan_tarjeta_ultimos_4_11" class="input input-pan" required placeholder="1234" maxlength="4">
-                                    </div>
+
                                     <div class="form-group full-width">
-                                        <label for="plataforma_pago" class="label">Plataforma de pago</label>
-                                        <select id="plataforma_pago" name="plataforma_pago" class="select">
+                                        <label for="punto_venta_recarga" class="label">Punto de venta o recarga</label>
+                                        <select id="punto_venta_recarga" name="punto_venta_recarga" class="select">
                                             <option value="">Seleccione...</option>
-                                            <option value="AppWeb">Recarga online app/Web recargas Metro de Málaga</option>
-                                            <option value="PayPal">Recarga por PayPal</option>
+                                            <option value="Online">Online</option>
+                                            <option value="Maquina">Máquina automática de billetes</option>
                                         </select>
                                     </div>
-                                </div>
 
-                                <!-- Sub-bloque 1.2: Máquina automática de billetes -->
-                                <div id="bloqueMaquina" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
+                                    <!-- Sub-bloque 1.1: Online -->
+                                    <div id="bloqueOnline" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
+                                        <div class="form-group full-width">
+                                            <label for="plataforma_pago" class="label">Plataforma de pago</label>
+                                            <select id="plataforma_pago" name="plataforma_pago" class="select">
+                                                <option value="">Seleccione...</option>
+                                                <option value="AppWeb">Recarga online app/Web recargas Metro de Málaga</option>
+                                                <option value="PayPal">Recarga por PayPal</option>
+                                            </select>
+                                        </div>
+                                        <div id="bloqueOnlineTarjeta" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
+                                            <div class="form-group full-width">
+                                                <label for="tipo_tarjeta_bancaria_11" class="label required">Tipo de tarjeta bancaria</label>
+                                                <select id="tipo_tarjeta_bancaria_11" name="tipo_tarjeta_bancaria_11" class="select" required>
+                                                    <option value="">Seleccione...</option>
+                                                    <option value="Mastercard">Mastercard</option>
+                                                    <option value="Visa">Visa</option>
+                                                    <option value="Revolut">Revolut</option>
+                                                    <option value="Prepago">Tarjeta prepago de transporte</option>
+                                                    <option value="Otras">Otras (Indicar)</option>
+                                                </select>
+                                            </div>
+                                            <div id="bloqueTarjetaOtras11" class="form-group full-width hidden">
+                                                <label for="tipo_tarjeta_bancaria_otras_11" class="label required">Indique el tipo de tarjeta</label>
+                                                <input type="text" id="tipo_tarjeta_bancaria_otras_11" name="tipo_tarjeta_bancaria_otras_11" class="input" required placeholder="Ej: Maestro">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="pan_tarjeta_primeros_6_11" class="label required">PAN tarjeta — primeros seis dígitos</label>
+                                                <input type="text" id="pan_tarjeta_primeros_6_11" name="pan_tarjeta_primeros_6_11" class="input input-pan" required placeholder="123456" maxlength="6">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="pan_tarjeta_ultimos_4_11" class="label required">PAN tarjeta — cuatro últimos dígitos</label>
+                                                <input type="text" id="pan_tarjeta_ultimos_4_11" name="pan_tarjeta_ultimos_4_11" class="input input-pan" required placeholder="1234" maxlength="4">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Sub-bloque 1.2: Máquina automática de billetes -->
+                                    <div id="bloqueMaquina" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
                                     <div class="form-group">
                                         <label for="estacion" class="label required">Estación</label>
                                         <select id="estacion" name="estacion" class="select" required>
@@ -712,6 +739,21 @@
                                      <div id="bloqueDabTarjeta" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
                                          <!-- Sub-sub-bloque 2.1: Tarjeta física -->
                                          <div id="bloqueDabTarjetaFisica" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
+                                             <div class="form-group full-width">
+                                                 <label for="tipo_tarjeta_bancaria_dab_fisica" class="label required">Tipo de tarjeta bancaria</label>
+                                                 <select id="tipo_tarjeta_bancaria_dab_fisica" name="tipo_tarjeta_bancaria_dab_fisica" class="select" required>
+                                                     <option value="">Seleccione...</option>
+                                                     <option value="Mastercard">Mastercard</option>
+                                                     <option value="Visa">Visa</option>
+                                                     <option value="Revolut">Revolut</option>
+                                                     <option value="Prepago">Tarjeta prepago de transporte</option>
+                                                     <option value="Otras">Otras (Indicar)</option>
+                                                 </select>
+                                             </div>
+                                             <div id="bloqueTarjetaOtrasDabFisica" class="form-group full-width hidden">
+                                                 <label for="tipo_tarjeta_bancaria_otras_dab_fisica" class="label required">Indique el tipo de tarjeta</label>
+                                                 <input type="text" id="tipo_tarjeta_bancaria_otras_dab_fisica" name="tipo_tarjeta_bancaria_otras_dab_fisica" class="input" required placeholder="Ej: Maestro">
+                                             </div>
                                              <div class="form-group">
                                                  <label for="pan_dab_fisica_primeros_6" class="label required">PAN tarjeta física — primeros seis dígitos</label>
                                                  <input type="text" id="pan_dab_fisica_primeros_6" name="pan_dab_fisica_primeros_6" class="input input-pan" required placeholder="123456" maxlength="6">
@@ -724,6 +766,21 @@
 
                                          <!-- Sub-sub-bloque 2.2: Tarjeta en el móvil -->
                                          <div id="bloqueDabTarjetaMovil" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
+                                             <div class="form-group full-width">
+                                                 <label for="tipo_tarjeta_bancaria_dab_movil" class="label required">Tipo de tarjeta bancaria</label>
+                                                 <select id="tipo_tarjeta_bancaria_dab_movil" name="tipo_tarjeta_bancaria_dab_movil" class="select" required>
+                                                     <option value="">Seleccione...</option>
+                                                     <option value="Mastercard">Mastercard</option>
+                                                     <option value="Visa">Visa</option>
+                                                     <option value="Revolut">Revolut</option>
+                                                     <option value="Prepago">Tarjeta prepago de transporte</option>
+                                                     <option value="Otras">Otras (Indicar)</option>
+                                                 </select>
+                                             </div>
+                                             <div id="bloqueTarjetaOtrasDabMovil" class="form-group full-width hidden">
+                                                 <label for="tipo_tarjeta_bancaria_otras_dab_movil" class="label required">Indique el tipo de tarjeta</label>
+                                                 <input type="text" id="tipo_tarjeta_bancaria_otras_dab_movil" name="tipo_tarjeta_bancaria_otras_dab_movil" class="input" required placeholder="Ej: Maestro">
+                                             </div>
                                              <div class="form-group">
                                                  <label for="pan_dab_movil_fisica_asoc_primeros_6" class="label required">PAN tarjeta física asociada — primeros seis dígitos</label>
                                                  <input type="text" id="pan_dab_movil_fisica_asoc_primeros_6" name="pan_dab_movil_fisica_asoc_primeros_6" class="input input-pan" required placeholder="123456" maxlength="6">
@@ -741,15 +798,31 @@
                                                  <input type="text" id="pan_dab_movil_virtual_ultimos_4" name="pan_dab_movil_virtual_ultimos_4" class="input input-pan" required placeholder="1234" maxlength="4">
                                              </div>
                                          </div>
-                                     </div>
-                                 </div>
+                                    </div>
+                                </div>
                              </div>
+                            </div>
 
                             <!-- BLOQUE 2: EMV -->
                             <div id="bloqueEMV" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
-                                <div class="form-group full-width">
+                                <div class="form-group full-width hidden" id="grupoImporteReclamado2">
                                     <label for="importe_reclamado_2" class="label">Importe reclamado (€)</label>
                                     <input type="number" id="importe_reclamado_2" name="importe_reclamado_2" class="input" required min="0" step="0.01" placeholder="0,00">
+                                </div>
+                                <div class="form-group full-width">
+                                    <label for="tipo_tarjeta_bancaria_2" class="label required">Tipo de tarjeta bancaria</label>
+                                    <select id="tipo_tarjeta_bancaria_2" name="tipo_tarjeta_bancaria_2" class="select" required>
+                                        <option value="">Seleccione...</option>
+                                        <option value="Mastercard">Mastercard</option>
+                                        <option value="Visa">Visa</option>
+                                        <option value="Revolut">Revolut</option>
+                                        <option value="Prepago">Tarjeta prepago de transporte</option>
+                                        <option value="Otras">Otras (Indicar)</option>
+                                    </select>
+                                </div>
+                                <div id="bloqueTarjetaOtras2" class="form-group full-width hidden">
+                                    <label for="tipo_tarjeta_bancaria_otras_2" class="label required">Indique el tipo de tarjeta</label>
+                                    <input type="text" id="tipo_tarjeta_bancaria_otras_2" name="tipo_tarjeta_bancaria_otras_2" class="input" required placeholder="Ej: Maestro">
                                 </div>
                                 <!-- Sub-bloque 2.1: EMV física -->
                                 <div id="bloqueEMVFisica" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
@@ -782,40 +855,17 @@
                                         <input type="text" id="pan_emv_movil_virtual_ultimos_4" name="pan_emv_movil_virtual_ultimos_4" class="input input-pan" required placeholder="1234" maxlength="4">
                                     </div>
                                 </div>
-                                <div class="form-group full-width">
-                                    <label for="tipo_tarjeta_bancaria_2" class="label required">Tipo de tarjeta bancaria</label>
-                                    <select id="tipo_tarjeta_bancaria_2" name="tipo_tarjeta_bancaria_2" class="select" required>
-                                        <option value="">Seleccione...</option>
-                                        <option value="Mastercard">Mastercard</option>
-                                        <option value="Visa">Visa</option>
-                                        <option value="Revolut">Revolut</option>
-                                        <option value="Prepago">Tarjeta prepago de transporte</option>
-                                        <option value="Otras">Otras</option>
-                                    </select>
-                                </div>
-                                <div id="bloqueTarjetaOtras2" class="form-group full-width hidden">
-                                    <label for="tipo_tarjeta_bancaria_otras_2" class="label required">Indique el tipo de tarjeta</label>
-                                    <input type="text" id="tipo_tarjeta_bancaria_otras_2" name="tipo_tarjeta_bancaria_otras_2" class="input" required placeholder="Ej: Maestro">
-                                </div>
                             </div>
 
                             <!-- BLOQUE 3: ABT / MetroPay -->
                             <div id="bloqueABT" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
-                                <div class="form-group">
+                                <div class="form-group hidden" id="grupoImporteReclamado3">
                                     <label for="importe_reclamado_3" class="label">Importe reclamado (€)</label>
                                     <input type="number" id="importe_reclamado_3" name="importe_reclamado_3" class="input" required min="0" step="0.01" placeholder="0,00">
                                 </div>
                                 <div class="form-group">
                                     <label for="email_usuario_metro_pay" class="label required">Correo electrónico de usuario/a en Metro Pay</label>
                                     <input type="email" id="email_usuario_metro_pay" name="email_usuario_metro_pay" class="input" required placeholder="ejemplo@correo.com">
-                                </div>
-                                <div class="form-group">
-                                    <label for="pan_tarjeta_registrada_primeros_6" class="label required">PAN tarjeta registrada — primeros seis dígitos</label>
-                                    <input type="text" id="pan_tarjeta_registrada_primeros_6" name="pan_tarjeta_registrada_primeros_6" class="input input-pan" required placeholder="123456" maxlength="6">
-                                </div>
-                                <div class="form-group">
-                                    <label for="pan_tarjeta_registrada_ultimos_4" class="label required">PAN tarjeta registrada — cuatro últimos dígitos</label>
-                                    <input type="text" id="pan_tarjeta_registrada_ultimos_4" name="pan_tarjeta_registrada_ultimos_4" class="input input-pan" required placeholder="1234" maxlength="4">
                                 </div>
                                 <div class="form-group full-width">
                                     <label for="tipo_tarjeta_bancaria_3" class="label required">Tipo de tarjeta bancaria</label>
@@ -825,12 +875,20 @@
                                         <option value="Visa">Visa</option>
                                         <option value="Revolut">Revolut</option>
                                         <option value="Prepago">Tarjeta prepago de transporte</option>
-                                        <option value="Otras">Otras</option>
+                                        <option value="Otras">Otras (Indicar)</option>
                                     </select>
                                 </div>
                                 <div id="bloqueTarjetaOtras3" class="form-group full-width hidden">
                                     <label for="tipo_tarjeta_bancaria_otras_3" class="label required">Indique el tipo de tarjeta</label>
                                     <input type="text" id="tipo_tarjeta_bancaria_otras_3" name="tipo_tarjeta_bancaria_otras_3" class="input" required placeholder="Ej: Maestro">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pan_tarjeta_registrada_primeros_6" class="label required">PAN tarjeta registrada — primeros seis dígitos</label>
+                                    <input type="text" id="pan_tarjeta_registrada_primeros_6" name="pan_tarjeta_registrada_primeros_6" class="input input-pan" required placeholder="123456" maxlength="6">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pan_tarjeta_registrada_ultimos_4" class="label required">PAN tarjeta registrada — cuatro últimos dígitos</label>
+                                    <input type="text" id="pan_tarjeta_registrada_ultimos_4" name="pan_tarjeta_registrada_ultimos_4" class="input input-pan" required placeholder="1234" maxlength="4">
                                 </div>
                             </div>
                             <div class="form-group full-width">
@@ -859,13 +917,6 @@
                             Consulta de Información
                         </h2>
 
-                        <!-- Mensaje de inicio para consultas de información -->
-                        <div class="disclaimer-box" style="margin-bottom: var(--spacing-lg); padding: var(--spacing-md); background-color: rgba(227, 24, 55, 0.05); border-left: 4px solid var(--color-primary); border-radius: var(--radius-sm);">
-                            <p style="font-size: 0.95rem; line-height: 1.5; color: var(--color-secondary); font-weight: 500; text-align: justify; margin: 0;">
-                                Este formulario está destinado a la gestión de consultas de información relacionadas con el servicio prestado por Metro de Málaga. Para otros fines, tales como realización de ofertas comerciales o solicitudes de información sobre temas ajenos al servicio que presta el metro, le rogamos que formule su petición a través del correo electrónico <a href="mailto:info@metromalaga.es" class="link" style="color: var(--color-primary); font-weight: 600;">info@metromalaga.es</a>
-                            </p>
-                        </div>
-
                         <div class="form-grid">
                             <div class="form-group full-width">
                                 <label for="tipoTituloConsulta" class="label">Tipo de título de viaje</label>
@@ -889,37 +940,6 @@
                                 <input type="text" id="numeracionTituloConsulta" name="numeracionTituloConsulta" class="input" placeholder="Ej: 1234567890">
                             </div>
 
-                            <!-- Bloque 2: EMV física o MetroPay (no obligatorio) -->
-                            <div id="bloqueTarjetaFisicaConsulta" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
-                                <div class="form-group">
-                                    <label for="panFisicaPrimeros6Consulta" class="label">PAN tarjeta física — primeros seis dígitos</label>
-                                    <input type="text" id="panFisicaPrimeros6Consulta" name="panFisicaPrimeros6Consulta" class="input input-pan" placeholder="123456" maxlength="6">
-                                </div>
-                                <div class="form-group">
-                                    <label for="panFisicaUltimos4Consulta" class="label">PAN tarjeta física — cuatro últimos dígitos</label>
-                                    <input type="text" id="panFisicaUltimos4Consulta" name="panFisicaUltimos4Consulta" class="input input-pan" placeholder="1234" maxlength="4">
-                                </div>
-                            </div>
-
-                            <!-- Bloque 3: EMV móvil (no obligatorio) -->
-                            <div id="bloqueTarjetaMovilConsulta" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
-                                <div class="form-group">
-                                    <label for="panMovilFisicaAsocPrimeros6Consulta" class="label">PAN tarjeta física asociada — primeros seis dígitos</label>
-                                    <input type="text" id="panMovilFisicaAsocPrimeros6Consulta" name="panMovilFisicaAsocPrimeros6Consulta" class="input input-pan" placeholder="123456" maxlength="6">
-                                </div>
-                                <div class="form-group">
-                                    <label for="panMovilFisicaAsocUltimos4Consulta" class="label">PAN tarjeta física asociada — últimos cuatro dígitos</label>
-                                    <input type="text" id="panMovilFisicaAsocUltimos4Consulta" name="panMovilFisicaAsocUltimos4Consulta" class="input input-pan" placeholder="1234" maxlength="4">
-                                </div>
-                                <div class="form-group">
-                                    <label for="panMovilVirtualPrimeros6Consulta" class="label">PAN tarjeta virtual — primeros seis dígitos (si los conoce)</label>
-                                    <input type="text" id="panMovilVirtualPrimeros6Consulta" name="panMovilVirtualPrimeros6Consulta" class="input input-pan" placeholder="123456" maxlength="6">
-                                </div>
-                                <div class="form-group">
-                                    <label for="panMovilVirtualUltimos4Consulta" class="label">PAN tarjeta virtual — últimos cuatro dígitos</label>
-                                    <input type="text" id="panMovilVirtualUltimos4Consulta" name="panMovilVirtualUltimos4Consulta" class="input input-pan" placeholder="1234" maxlength="4">
-                                </div>
-                            </div>
                             
                             <div class="form-group full-width">
                                 <label for="descripcionDetalladaConsulta" class="label required">Descripción detallada</label>
@@ -1032,41 +1052,9 @@
                                 <input type="text" id="numeracionTituloSugerencia" name="numeracionTituloSugerencia" class="input" placeholder="Ej: 1234567890">
                             </div>
 
-                            <!-- Bloque 2: EMV física o MetroPay (no obligatorio) -->
-                            <div id="bloqueTarjetaFisicaSugerencia" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
-                                <div class="form-group">
-                                    <label for="panFisicaPrimeros6Sugerencia" class="label">PAN tarjeta física — primeros seis dígitos</label>
-                                    <input type="text" id="panFisicaPrimeros6Sugerencia" name="panFisicaPrimeros6Sugerencia" class="input input-pan" placeholder="123456" maxlength="6">
-                                </div>
-                                <div class="form-group">
-                                    <label for="panFisicaUltimos4Sugerencia" class="label">PAN tarjeta física — cuatro últimos dígitos</label>
-                                    <input type="text" id="panFisicaUltimos4Sugerencia" name="panFisicaUltimos4Sugerencia" class="input input-pan" placeholder="1234" maxlength="4">
-                                </div>
-                            </div>
-
-                            <!-- Bloque 3: EMV móvil (no obligatorio) -->
-                            <div id="bloqueTarjetaMovilSugerencia" class="form-grid full-width hidden" style="grid-column: 1 / -1;">
-                                <div class="form-group">
-                                    <label for="panMovilFisicaAsocPrimeros6Sugerencia" class="label">PAN tarjeta física asociada — primeros seis dígitos</label>
-                                    <input type="text" id="panMovilFisicaAsocPrimeros6Sugerencia" name="panMovilFisicaAsocPrimeros6Sugerencia" class="input input-pan" placeholder="123456" maxlength="6">
-                                </div>
-                                <div class="form-group">
-                                    <label for="panMovilFisicaAsocUltimos4Sugerencia" class="label">PAN tarjeta física asociada — últimos cuatro dígitos</label>
-                                    <input type="text" id="panMovilFisicaAsocUltimos4Sugerencia" name="panMovilFisicaAsocUltimos4Sugerencia" class="input input-pan" placeholder="1234" maxlength="4">
-                                </div>
-                                <div class="form-group">
-                                    <label for="panMovilVirtualPrimeros6Sugerencia" class="label">PAN tarjeta virtual — primeros seis dígitos (si los conoce)</label>
-                                    <input type="text" id="panMovilVirtualPrimeros6Sugerencia" name="panMovilVirtualPrimeros6Sugerencia" class="input input-pan" placeholder="123456" maxlength="6">
-                                </div>
-                                <div class="form-group">
-                                    <label for="panMovilVirtualUltimos4Sugerencia" class="label">PAN tarjeta virtual — últimos cuatro dígitos</label>
-                                    <input type="text" id="panMovilVirtualUltimos4Sugerencia" name="panMovilVirtualUltimos4Sugerencia" class="input input-pan" placeholder="1234" maxlength="4">
-                                </div>
-                            </div>
-
                             <div class="form-group full-width">
                                 <label for="descripcionSugerencia" class="label required">Descripción de la sugerencia</label>
-                                <textarea id="descripcionSugerencia" name="descripcionSugerencia" class="textarea" required placeholder="Explique su propuesta de mejora con detalle..." rows="5"></textarea>
+                                <textarea id="descripcionSugerencia" name="descripcionSugerencia" class="textarea" required placeholder="Describa aquí su propuesta" rows="5"></textarea>
                             </div>
                         </div>
                     </section>
@@ -1223,20 +1211,8 @@
 
                             <!-- Condicional Bloque 1 (Tarjetas físicas) -->
                             <div id="bloqueTituloViajeObjetos" class="form-group full-width hidden">
-                                <label for="numeracion_titulo_viaje_objetos" class="label required">Numeración del título de viaje</label>
+                                <label for="numeracion_titulo_viaje_objetos" class="label">Numeración del título de viaje</label>
                                 <input type="text" id="numeracion_titulo_viaje_objetos" name="numeracion_titulo_viaje_objetos" class="input" required placeholder="Ej: 1000234567">
-                            </div>
-
-                            <!-- Condicional Bloque 2 (Tarjetas bancarias EMV/ABT) -->
-                            <div id="bloqueTarjetaBancariaObjetos" class="form-grid full-width hidden" style="grid-column: 1 / -1; gap: var(--spacing-md);">
-                                <div class="form-group">
-                                    <label for="pan_tarjeta_primeros_6_objetos" class="label required">PAN tarjeta — primeros seis dígitos</label>
-                                    <input type="text" id="pan_tarjeta_primeros_6_objetos" name="pan_tarjeta_primeros_6_objetos" class="input input-pan" required placeholder="123456" maxlength="6">
-                                </div>
-                                <div class="form-group">
-                                    <label for="pan_tarjeta_ultimos_4_objetos" class="label required">PAN tarjeta — cuatro últimos dígitos</label>
-                                    <input type="text" id="pan_tarjeta_ultimos_4_objetos" name="pan_tarjeta_ultimos_4_objetos" class="input input-pan" required placeholder="1234" maxlength="4">
-                                </div>
                             </div>
                         </div>
 
@@ -1285,7 +1261,7 @@
                             <!-- Sub-bloque: En un tren -->
                             <div id="bloqueTrenObjetos" class="form-grid full-width hidden" style="grid-column: 1 / -1; gap: var(--spacing-md);">
                                 <div class="form-group full-width" id="grupoNumeroTrenObjetos">
-                                    <label for="numeroTrenObjetos" class="label">Indique la numeración que conozca del tren en caso de conocerla</label>
+                                    <label for="numeroTrenObjetos" class="label">Si conoce la numeración del tren, indíquela</label>
                                     <input type="text" id="numeroTrenObjetos" name="numeroTrenObjetos" class="input" placeholder="Ej: 4182, Tren 4..." maxlength="20">
                                 </div>
                                 <div class="form-group">
@@ -1379,7 +1355,7 @@
                             <div class="checkbox-group">
                                 <input type="checkbox" id="consentimiento" name="consentimiento" class="checkbox" required>
                                 <label for="consentimiento" class="checkbox-label">
-                                    He leído y acepto la política de privacidad y el tratamiento de mis datos personales para la gestión de esta solicitud. <span class="required">*</span>
+                                    He leído y acepto la <a href="https://metromalaga.es/politica-de-privacidad/" target="_blank" rel="noopener noreferrer">política de privacidad y el tratamiento de mis datos personales</a> para la gestión de esta solicitud. <span class="required">*</span>
                                 </label>
                             </div>
 
