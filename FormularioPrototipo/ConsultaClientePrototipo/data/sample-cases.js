@@ -15,9 +15,16 @@ window.SAMPLE_CASES = [
       {
         id: 'acuse-reclamacion',
         name: 'Acuse de recibo de reclamación',
-        url: 'attachments/acuse-reclamacion.txt',
-        mimeType: 'text/plain',
-        size: '2 KB'
+        url: 'attachments/acuse-reclamacion.pdf',
+        mimeType: 'application/pdf',
+        size: '5 KB'
+      },
+      {
+        id: 'foto-incidencia',
+        name: 'Fotografía aportada',
+        url: 'attachments/foto-incidencia.svg',
+        mimeType: 'image/svg+xml',
+        size: '6 KB'
       }
     ]
   },
@@ -62,6 +69,13 @@ window.SAMPLE_CASES = [
         url: 'attachments/valoracion-sugerencia.txt',
         mimeType: 'text/plain',
         size: '3 KB'
+      },
+      {
+        id: 'anexo-datos',
+        name: 'Anexo de datos de valoración',
+        url: 'attachments/resumen-datos-tarjeta.csv',
+        mimeType: 'text/csv',
+        size: '1 KB'
       }
     ]
   },

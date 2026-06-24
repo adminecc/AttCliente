@@ -4,14 +4,14 @@ Este prototipo permite consultar el estado de una solicitud, reclamación, suger
 
 ## Estructura
 
-- `index.html`: pantalla publica de consulta.
+- `index.html`: pantalla pública de consulta.
 - `styles.css`: estilos propios del prototipo, alineados con el formulario principal.
 - `script.js`: comportamiento de la interfaz, búsqueda y verificación.
 - `data/sample-cases.js`: casos ficticios de muestra en un archivo de datos separado.
 - `data/demo-credentials.txt`: IDs y datos de confirmación para pruebas.
 - `attachments/`: adjuntos ficticios asociados a los casos.
 
-## Como probarlo
+## Cómo probarlo
 
 Abre directamente `index.html` en el navegador. No hace falta servidor local.
 
@@ -19,14 +19,23 @@ Para probar todos los estados y tipos de solicitud, copia los datos de `data/dem
 
 ## Flujo funcional esperado
 
-1. El usuario introduce el ID de solicitud o numero de caso.
-2. El sistema busca si existe un expediente con ese identificador.
-3. Si existe, se solicita un dato personal de confirmación: email o teléfono usado en la solicitud.
-4. Si el dato coincide, se muestra el estado del caso.
-5. Si el dato no coincide, se muestra un error y no se expone información del expediente.
-6. Si el caso tiene adjuntos, se muestran como enlaces normales.
+1. El usuario introduce el ID de solicitud o número de caso.
+2. En la misma pantalla introduce el correo electrónico o teléfono usado en la solicitud.
+3. Al pulsar `Buscar`, el sistema valida ambos datos en una única operación.
+4. Si la combinación coincide, se muestra el expediente.
+5. Si no coincide, se muestra un error genérico y no se expone información del expediente.
+6. Si el caso tiene adjuntos, se muestran como enlaces normales con una pequeña etiqueta por tipo de archivo.
 
 Los enlaces de adjuntos no usan el atributo `download`. La intención es que el navegador intente abrir el archivo por defecto. Si el navegador o dispositivo no tiene visor para el tipo de archivo, descargará el archivo o mostrará su comportamiento nativo.
+
+## Seguimiento visual
+
+El seguimiento tiene siempre dos pasos:
+
+- `En trámite`: aparece siempre activo porque el caso ya ha sido registrado.
+- Estado final: aparece como `Pendiente de resolución` si el caso sigue en trámite, o como `Resuelta aceptada`, `Resuelta denegada` o `Resuelta gestionada` si el expediente ya está cerrado.
+
+Cuando el caso solo está en trámite, la línea queda abierta. Cuando existe un estado resuelto, la línea se cierra con el estado correspondiente.
 
 ## Estados contemplados
 
@@ -43,6 +52,18 @@ Los enlaces de adjuntos no usan el atributo `download`. La intención es que el 
 - `Agradecimientos y felicitaciones`
 - `Objetos perdidos`
 - `Solicitud de tarjeta +Metro`
+
+## Adjuntos de muestra
+
+El prototipo incluye ejemplos de tipos habituales:
+
+- PDF: `attachments/acuse-reclamacion.pdf`
+- Imagen: `attachments/foto-incidencia.svg`
+- HTML: `attachments/respuesta-consulta.html`
+- Texto: `attachments/valoracion-sugerencia.txt`
+- CSV: `attachments/resumen-datos-tarjeta.csv`
+
+La interfaz asigna una etiqueta compacta por familia de archivo: PDF, imagen, hoja de cálculo/CSV, documento, comprimido, código/HTML, texto y archivo genérico. Está hecho así para que el prototipo no dependa de librerías externas; en producción el desarrollador puede sustituir esas etiquetas por la librería de iconos que prefiera.
 
 ## Modelo de datos del prototipo
 
@@ -65,9 +86,9 @@ Cada elemento de `data/sample-cases.js` sigue esta forma:
     {
       "id": "acuse-reclamacion",
       "name": "Acuse de recibo de reclamación",
-      "url": "attachments/acuse-reclamacion.txt",
-      "mimeType": "text/plain",
-      "size": "2 KB"
+      "url": "attachments/acuse-reclamacion.pdf",
+      "mimeType": "application/pdf",
+      "size": "5 KB"
     }
   ]
 }
@@ -77,85 +98,25 @@ Cada elemento de `data/sample-cases.js` sigue esta forma:
 
 ## Sustitución por API real
 
-El prototipo no incluye mock API. Los siguientes endpoints son una propuesta para la implementación real.
+El prototipo no incluye mock API. El flujo real puede resolverse con un único endpoint de consulta verificada.
 
-### 1. Buscar expediente
+### Consultar expediente
 
 ```http
-POST /api/public/cases/lookup
+POST /api/public/cases/status
 Content-Type: application/json
 ```
 
 Petición:
-
-```json
-{
-  "caseId": "ATT-2026-41001"
-}
-```
-
-Respuesta si el caso existe:
 
 ```json
 {
   "caseId": "ATT-2026-41001",
-  "verificationRequired": true
-}
-```
-
-Respuesta si no existe:
-
-```json
-{
-  "error": "CASE_NOT_FOUND",
-  "message": "No se ha encontrado ninguna solicitud con ese identificador."
-}
-```
-
-### 2. Verificar dato personal
-
-```http
-POST /api/public/cases/ATT-2026-41001/verify
-Content-Type: application/json
-```
-
-Petición:
-
-```json
-{
   "verificationValue": "reclamacion.demo@correo.test"
 }
 ```
 
 Respuesta correcta:
-
-```json
-{
-  "verified": true,
-  "accessToken": "token-temporal-de-consulta"
-}
-```
-
-Respuesta incorrecta:
-
-```json
-{
-  "verified": false,
-  "error": "VERIFICATION_FAILED",
-  "message": "El dato indicado no coincide con la informacion registrada para este caso."
-}
-```
-
-El token debe ser temporal, de un solo propósito y limitado al caso verificado.
-
-### 3. Obtener estado del expediente
-
-```http
-GET /api/public/cases/ATT-2026-41001
-Authorization: Bearer token-temporal-de-consulta
-```
-
-Respuesta:
 
 ```json
 {
@@ -170,44 +131,54 @@ Respuesta:
     {
       "id": "acuse-reclamacion",
       "name": "Acuse de recibo de reclamación",
-      "mimeType": "text/plain",
-      "size": "2 KB",
+      "mimeType": "application/pdf",
+      "size": "5 KB",
       "url": "/api/public/cases/ATT-2026-41001/attachments/acuse-reclamacion"
     }
   ]
 }
 ```
 
-La API debe traer solo los adjuntos asociados al número de caso solicitado y ya verificado.
+Respuesta si el caso no existe o el dato de confirmación no coincide:
 
-### 4. Abrir adjunto
+```json
+{
+  "error": "CASE_NOT_FOUND_OR_VERIFICATION_FAILED",
+  "message": "No se ha encontrado una solicitud que coincida con el identificador y el dato de confirmación."
+}
+```
+
+El error debe ser genérico para no revelar si existe el número de caso o si el dato personal es incorrecto.
+
+### Abrir adjunto
 
 ```http
 GET /api/public/cases/ATT-2026-41001/attachments/acuse-reclamacion
-Authorization: Bearer token-temporal-de-consulta
 ```
 
 Respuesta:
 
 ```http
 HTTP/1.1 200 OK
-Content-Type: text/plain
-Content-Disposition: inline; filename="acuse-reclamacion.txt"
+Content-Type: application/pdf
+Content-Disposition: inline; filename="acuse-reclamacion.pdf"
 ```
 
 El uso de `Content-Disposition: inline` permite que el navegador intente abrir el archivo. Si no existe visor compatible, el navegador aplicará su comportamiento por defecto, normalmente descargar o preguntar.
 
+La API debe traer solo los adjuntos asociados al número de caso verificado.
+
 ## Reglas de seguridad para producción
 
-- No devolver datos personales al navegador despues de la busqueda.
-- No indicar si un email o telefono concreto existe en otros expedientes.
-- Limitar intentos de verificacion por caso e IP.
+- No devolver datos personales al navegador.
+- No indicar si un email o teléfono concreto existe en otros expedientes.
+- Usar un error genérico para caso inexistente y verificación fallida.
+- Limitar intentos de consulta por caso e IP.
 - Registrar auditoría de consultas y descargas.
 - Usar HTTPS.
-- Caducar el token temporal rápidamente.
 - Validar que cada descarga pertenece al caso verificado.
 - Evitar exponer rutas internas de almacenamiento en las URLs públicas.
 
 ## Nota sobre el prototipo sin servidor
 
-Para que el prototipo pueda abrirse con doble clic, los datos de muestra se cargan como un script (`data/sample-cases.js`) en vez de como JSON mediante `fetch`. La API real sustituira ese archivo por las llamadas documentadas arriba.
+Para que el prototipo pueda abrirse con doble clic, los datos de muestra se cargan como un script (`data/sample-cases.js`) en vez de como JSON mediante `fetch`. La API real sustituirá ese archivo por las llamadas documentadas arriba.

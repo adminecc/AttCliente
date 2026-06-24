@@ -163,7 +163,7 @@ body {
 }
 
 .search-grid {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
     align-items: end;
 }
 
@@ -314,41 +314,86 @@ body {
     color: var(--color-secondary);
 }
 
-.status-badge {
-    flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-    padding: 0.4rem 0.75rem;
-    border-radius: var(--radius);
-    font-size: 0.875rem;
-    font-weight: 700;
-    border: 1px solid transparent;
-}
-
-.status-progress {
-    color: var(--color-warning);
-    background: var(--color-warning-light);
-    border-color: rgba(217, 119, 6, 0.25);
-}
-
-.status-accepted,
-.status-managed {
-    color: var(--color-success);
-    background: var(--color-success-light);
-    border-color: rgba(5, 150, 105, 0.25);
-}
-
-.status-denied {
-    color: var(--color-error);
-    background: var(--color-error-light);
-    border-color: rgba(220, 38, 38, 0.25);
-}
-
 .detail-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--spacing-md);
     margin-bottom: var(--spacing-xl);
+}
+
+.tracking-block {
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--color-gray-50);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius);
+}
+
+.tracking-block h3 {
+    margin-bottom: var(--spacing-md);
+    color: var(--color-secondary);
+    font-size: 1.125rem;
+}
+
+.tracking-line {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+.tracking-line::before {
+    content: "";
+    position: absolute;
+    top: 0.7rem;
+    left: 25%;
+    right: 25%;
+    height: 2px;
+    background: var(--color-primary);
+}
+
+.tracking-open::before {
+    background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary) 78%, var(--color-gray-300) 78%, var(--color-gray-300) 100%);
+}
+
+.tracking-closed::before {
+    background: var(--color-primary);
+}
+
+.tracking-step {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-rows: 1.5rem auto;
+    justify-items: center;
+    gap: var(--spacing-xs);
+    min-width: 0;
+    text-align: center;
+}
+
+.tracking-dot {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px rgba(227, 24, 55, 0.1);
+}
+
+.tracking-open .tracking-step.waiting .tracking-dot {
+    background: var(--color-gray-300);
+    border-color: var(--color-gray-300);
+    box-shadow: none;
+}
+
+.tracking-step strong {
+    color: var(--color-gray-800);
+    line-height: 1.3;
+}
+
+.tracking-step.waiting strong {
+    color: var(--color-gray-500);
 }
 
 .detail-item {
@@ -394,7 +439,6 @@ body {
 .empty-attachments {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: var(--spacing-md);
     padding: var(--spacing-md);
     background: var(--color-gray-50);
@@ -421,8 +465,52 @@ body {
 
 .attachment-action {
     flex-shrink: 0;
+    margin-left: auto;
     color: var(--color-primary);
     font-weight: 700;
+}
+
+.file-type-badge {
+    width: 2.25rem;
+    height: 1.5rem;
+    flex: 0 0 2.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    color: var(--color-gray-700);
+    background: white;
+    border: 1px solid var(--color-gray-300);
+    font-size: 0.625rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.file-type-pdf {
+    color: var(--color-error);
+    border-color: rgba(220, 38, 38, 0.35);
+    background: var(--color-error-light);
+}
+
+.file-type-image,
+.file-type-sheet {
+    color: var(--color-success);
+    border-color: rgba(5, 150, 105, 0.35);
+    background: var(--color-success-light);
+}
+
+.file-type-doc,
+.file-type-code,
+.file-type-text {
+    color: var(--color-info);
+    border-color: rgba(37, 99, 235, 0.35);
+    background: var(--color-info-light);
+}
+
+.file-type-zip {
+    color: var(--color-warning);
+    border-color: rgba(217, 119, 6, 0.35);
+    background: var(--color-warning-light);
 }
 
 .empty-attachments {
@@ -476,6 +564,10 @@ body {
     .search-grid,
     .detail-grid {
         grid-template-columns: 1fr;
+    }
+
+    .tracking-line {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .inline-action,

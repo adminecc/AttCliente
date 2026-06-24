@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="560" viewBox="0 0 900 560" role="img" aria-label="Imagen de muestra de incidencia">
+  <rect width="900" height="560" fill="#f3f4f6"/>
+  <rect x="90" y="80" width="720" height="400" rx="16" fill="#ffffff" stroke="#d1d5db" stroke-width="4"/>
+  <circle cx="650" cy="170" r="42" fill="#fbbf24"/>
+  <path d="M130 430 L340 250 L480 365 L575 285 L770 430 Z" fill="#1a365d"/>
+  <path d="M130 430 L340 250 L480 365 L575 285 L770 430 Z" fill="#059669" opacity=".55"/>
+  <text x="450" y="520" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" fill="#374151">Imagen de muestra adjunta al expediente</text>
+</svg>
