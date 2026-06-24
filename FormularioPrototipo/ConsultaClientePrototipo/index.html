@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estado de su consulta - Metro de Málaga</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+                    <circle cx="24" cy="24" r="22" fill="#E31837"/>
+                    <text x="24" y="30" text-anchor="middle" fill="white" font-size="18" font-weight="bold">M</text>
+                </svg>
+                <div class="header-text">
+                    <h1>Estado de su consulta</h1>
+                    <p>Seguimiento de solicitudes, reclamaciones y gestiones</p>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <section class="form-section intro-section">
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">?</span>
+                    Consulta del expediente
+                </h2>
+                <p class="intro-text">
+                    Introduce el identificador de tu caso recibido en el momento de realizar la solicitud para ver en qué estado se encuentra.
+                </p>
+
+                <form id="searchForm" class="form" novalidate>
+                    <div class="form-grid search-grid">
+                        <div class="form-group">
+                            <label for="caseId" class="label required">ID de solicitud o número de caso</label>
+                            <input
+                                type="text"
+                                id="caseId"
+                                name="caseId"
+                                class="input input-large"
+                                autocomplete="off"
+                                placeholder="Ej: ATT-2026-41001"
+                                required
+                            >
+                        </div>
+                        <div class="form-actions inline-action">
+                            <button type="submit" class="btn btn-primary" id="searchButton">
+                                <span class="btn-icon" aria-hidden="true">⌕</span>
+                                Buscar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+
+            <section class="form-section hidden" id="verificationSection" aria-live="polite">
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">✓</span>
+                    Confirmación de identidad
+                </h2>
+                <p class="helper-text">
+                    Para proteger la información de la solicitud, introduce el correo electrónico o el teléfono indicado al registrar el caso.
+                </p>
+
+                <form id="verificationForm" class="form" novalidate>
+                    <div class="form-grid search-grid">
+                        <div class="form-group">
+                            <label for="personalData" class="label required">Correo electrónico o teléfono</label>
+                            <input
+                                type="text"
+                                id="personalData"
+                                name="personalData"
+                                class="input"
+                                autocomplete="off"
+                                placeholder="correo@ejemplo.com o 612345678"
+                                required
+                            >
+                        </div>
+                        <div class="form-actions inline-action">
+                            <button type="submit" class="btn btn-primary" id="verifyButton">
+                                <span class="btn-icon" aria-hidden="true">→</span>
+                                Ver estado
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+
+            <div id="messageArea" class="message-area" aria-live="polite"></div>
+
+            <section class="result-section hidden" id="resultSection" aria-live="polite">
+                <div class="result-header">
+                    <div>
+                        <p class="eyebrow">Expediente</p>
+                        <h2 id="resultCaseId">ATT-2026-00000</h2>
+                    </div>
+                    <span id="resultStatus" class="status-badge">En trámite</span>
+                </div>
+
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Tipo de solicitud</span>
+                        <strong id="resultType">-</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Fecha de solicitud</span>
+                        <strong id="resultSubmittedAt">-</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Última actualización</span>
+                        <strong id="resultUpdatedAt">-</strong>
+                    </div>
+                </div>
+
+                <div class="status-detail">
+                    <h3>Información del estado</h3>
+                    <p id="resultSummary">-</p>
+                    <p id="resultNextStep" class="next-step">-</p>
+                </div>
+
+                <div class="attachments-block">
+                    <h3>Archivos adjuntos</h3>
+                    <div id="attachmentsList" class="attachments-list"></div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>© 2026 Metro de Málaga · <a href="#">Aviso legal</a> · <a href="#">Privacidad</a> · <a href="#">Accesibilidad</a></p>
+        </footer>
+    </div>
+
+    <script src="data/sample-cases.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
