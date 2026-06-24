@@ -28,7 +28,7 @@
                     Consulta del expediente
                 </h2>
                 <p class="intro-text">
-                    Introduce el identificador de tu caso recibido en el momento de realizar la solicitud para ver en qué estado se encuentra.
+                    Introduce el identificador de tu caso recibido en el momento de realizar la solicitud y el dato de confirmación asociado.
                 </p>
 
                 <form id="searchForm" class="form" novalidate>
@@ -45,43 +45,22 @@
                                 required
                             >
                         </div>
-                        <div class="form-actions inline-action">
-                            <button type="submit" class="btn btn-primary" id="searchButton">
-                                <span class="btn-icon" aria-hidden="true">⌕</span>
-                                Buscar
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </section>
-
-            <section class="form-section hidden" id="verificationSection" aria-live="polite">
-                <h2 class="section-title">
-                    <span class="section-icon" aria-hidden="true">✓</span>
-                    Confirmación de identidad
-                </h2>
-                <p class="helper-text">
-                    Para proteger la información de la solicitud, introduce el correo electrónico o el teléfono indicado al registrar el caso.
-                </p>
-
-                <form id="verificationForm" class="form" novalidate>
-                    <div class="form-grid search-grid">
                         <div class="form-group">
                             <label for="personalData" class="label required">Correo electrónico o teléfono</label>
                             <input
                                 type="text"
                                 id="personalData"
                                 name="personalData"
-                                class="input"
+                                class="input input-large"
                                 autocomplete="off"
                                 placeholder="correo@ejemplo.com o 612345678"
                                 required
                             >
                         </div>
                         <div class="form-actions inline-action">
-                            <button type="submit" class="btn btn-primary" id="verifyButton">
-                                <span class="btn-icon" aria-hidden="true">→</span>
-                                Ver estado
+                            <button type="submit" class="btn btn-primary" id="searchButton">
+                                <span class="btn-icon" aria-hidden="true">⌕</span>
+                                Buscar
                             </button>
                         </div>
                     </div>
@@ -96,7 +75,11 @@
                         <p class="eyebrow">Expediente</p>
                         <h2 id="resultCaseId">ATT-2026-00000</h2>
                     </div>
-                    <span id="resultStatus" class="status-badge">En trámite</span>
+                </div>
+
+                <div class="tracking-block" aria-label="Seguimiento del expediente">
+                    <h3>Seguimiento</h3>
+                    <div id="trackingLine" class="tracking-line"></div>
                 </div>
 
                 <div class="detail-grid">
