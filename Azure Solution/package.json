@@ -1,0 +1,30 @@
+{
+  "name": "metro-malaga-att-cliente-functions",
+  "version": "1.0.0",
+  "description": "Azure Functions para el formulario de Atencion al Cliente de Metro de Malaga.",
+  "main": "src/functions/*.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "start": "func start",
+    "test": "python tests/api_smoke_tests.py"
+  },
+  "keywords": [
+    "azure-functions",
+    "sharepoint",
+    "microsoft-graph",
+    "metro-malaga"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.16.1",
+    "axios": "^1.18.1",
+    "jsonwebtoken": "^9.0.3"
+  }
+}

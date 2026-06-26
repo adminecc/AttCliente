@@ -1,16 +1,16 @@
-# Tests simples de API
+# API Smoke Tests
 
-Esta carpeta contiene pruebas locales para comprobar respuestas basicas de las Azure Functions sin llamar a servicios externos.
+Pruebas locales basicas para las Azure Functions sin llamar a servicios externos.
 
-## Como ejecutarlos
+## Ejecutar
 
-Desde `Azure Solution/tests`:
+Desde `Azure Solution`:
 
 ```bash
-python api_smoke_tests.py
+npm test
 ```
 
-O ejecutando desde `Azure Solution`:
+O directamente:
 
 ```bash
 python tests/api_smoke_tests.py
@@ -18,21 +18,19 @@ python tests/api_smoke_tests.py
 
 ## Que comprueban
 
-- `validateRequest`: acepta una solicitud valida y rechaza una incompleta.
-- `generateToken`: genera un token con formato esperado y rechaza `listaDestino` invalida.
-- `createSharePointItem`: rechaza `listaDestino` invalida antes de llamar a Microsoft Graph.
-- `consultarSolicitud`: valida errores basicos de `email` y `token` antes de llamar a Microsoft Graph.
+- `crearSolicitud` rechaza payloads incompletos segun el contrato real del prototipo.
+- `crearSolicitud` acepta una reclamacion valida y falla de forma controlada si no hay credenciales de Microsoft Graph.
+- `generateToken` genera tokens con el prefijo correcto para el tipo real.
+- `generateToken` rechaza tipos de formulario invalidos.
+- `consultarSolicitud` valida `email` y `token` antes de llamar a Graph.
+- `consultarSolicitud` identifica la lista a consultar a partir del prefijo del token.
 
 ## Logs
 
-Cada ejecucion crea un archivo en `tests/logs` con fecha y hora:
+Cada ejecucion crea un log en `tests/logs`:
 
 ```text
 api-smoke-YYYY-MM-DD_HH-mm-ss.log
 ```
 
-El log guarda resumen, avisos y detalle de cada prueba.
-
-## Nota
-
-El arnes simula `@azure/functions` para invocar los handlers directamente. Si aparece un aviso, conviene revisarlo aunque las pruebas pasen.
+Los logs son utiles para revisar fallos locales, pero no son necesarios para desplegar.

@@ -1,0 +1,73 @@
+{
+  "tipoFormulario": "OBJ",
+  "form": {
+    "id": "metro-atencion-cliente-unificado",
+    "version": "1.0.0",
+    "typeCode": "OBJ",
+    "legacyType": "objetos"
+  },
+  "submission": {
+    "id": "a0fb3230-b973-4ace-961b-ae4f73e2ca73",
+    "submittedAt": "2026-06-10T06:18:09.136Z",
+    "source": "wordpress",
+    "sourceSite": "file://",
+    "language": "es-ES"
+  },
+  "applicant": {
+    "nombre": "Prueba",
+    "apellidos": "Pruebez",
+    "tipoDocumento": "NIF",
+    "numeroDocumento": "12345678Z",
+    "email": "prueba@test.com",
+    "telefono": "666666666",
+    "nacionalidad": "ES",
+    "direccionContacto": {
+      "via": "Calle de prueba",
+      "numero": "12",
+      "escalera": null,
+      "piso": null,
+      "puerta": null,
+      "codigoPostal": "29590",
+      "municipio": "Málaga",
+      "provincia": "malaga"
+    }
+  },
+  "representative": null,
+  "postalReply": {
+    "enabled": true,
+    "addressMode": "misma",
+    "direccionEnvio": null
+  },
+  "values": {
+    "tipoTituloObjetos": "pago-tarjeta-ocasional",
+    "numeracion_titulo_viaje_objetos": null,
+    "pan_tarjeta_primeros_6_objetos": null,
+    "pan_tarjeta_ultimos_4_objetos": null,
+    "fechaPerdida": "2026-05-12",
+    "horaPerdida": "15:55",
+    "lineaMetroObjetos": "ambas",
+    "dondePerdidoObjetos": "desconocido",
+    "estacionPerdidaObjetos": null,
+    "numeroTrenObjetos": null,
+    "estacionOrigenObjetos": "atarazanas",
+    "estacionDestinoObjetos": "palacio-deportes",
+    "nombreObjetoObjetos": "Cartera",
+    "colorObjetoObjetos": "Negro",
+    "distintivoObjetoObjetos": "Mi DNI",
+    "descripcionObjeto": "Cartera negra con toda mi documentación y 50€ en efectivo"
+  },
+  "signatures": [],
+  "attachments": [],
+  "consents": [
+    {
+      "id": "consentimiento",
+      "accepted": true,
+      "acceptedAt": "2026-06-10T06:18:09.136Z",
+      "textVersion": "lopd-general-2026-06"
+    }
+  ],
+  "metadata": {
+    "referenceClientSide": "ATT-2026-99190",
+    "notes": "Envío automático de prueba - tipo OBJ"
+  }
+}

@@ -3,7 +3,6 @@ const Module = require("module");
 
 const azureDir = path.resolve(__dirname, "..");
 const registry = new Map();
-const warnings = [];
 const originalLoad = Module._load;
 
 const mockApp = {
@@ -103,69 +102,68 @@ async function runTest(name, fn) {
 }
 
 async function main() {
-  loadFunction("fn1-validateRequest.js");
-  loadFunction("fn2-generateToken.js");
-  loadFunction("fn3-createSharePointItem.js");
-  loadFunction("fn4-getRequestDetails.js");
+  loadFunction("src/functions/solicitudes-create.js");
+  loadFunction("src/functions/solicitudes-consultar.js");
+  loadFunction("src/functions/token-generate.js");
+  const { FORM_TYPES } = require("../src/shared/form-contract");
+  const { assertGraphConfig } = require("../src/shared/config");
 
   const tests = [
-    runTest("validateRequest acepta una incidencia valida", async () => {
-      const { response, body } = await invoke("validateRequest", {
-        listaDestino: "INCIDENCIAS",
-        nombreCompleto: "  Maria Lopez  ",
+    runTest("crearSolicitud rechaza payload incompleto con contrato real", async () => {
+      const { response, body } = await invoke("crearSolicitud", {
+        tipoFormulario: "reclamaciones",
         email: "maria.lopez@example.com",
-        telefonoContacto: "600123456",
-        lineaAfectada: "L1",
-        tipoIncidencia: "Retraso",
-        descripcion: "El tren llego con bastante retraso esta mañana.",
-      });
-
-      assert(response.status === 200, `Se esperaba 200 y llego ${response.status}.`);
-      assert(body.valid === true, "Se esperaba valid=true.");
-      assert(body.sanitizedPayload.nombreCompleto === "Maria Lopez", "El nombre debe llegar sin espacios extra.");
-    }),
-
-    runTest("validateRequest rechaza payload incompleto", async () => {
-      const { response, body } = await invoke("validateRequest", {
-        listaDestino: "INCIDENCIAS",
-        nombreCompleto: "",
-        email: "correo-no-valido",
       });
 
       assert(response.status === 400, `Se esperaba 400 y llego ${response.status}.`);
-      assert(body.valid === false, "Se esperaba valid=false.");
-      assert(Array.isArray(body.errors) && body.errors.length > 0, "Se esperaban errores de validacion.");
+      assert(Array.isArray(body.errors), "Se esperaba lista de errores.");
+      assert(body.errors.includes("nombre"), "Se esperaba error del campo nombre.");
+      assert(body.errors.includes("apellidos"), "Se esperaba error del campo apellidos.");
+      assert(body.errors.includes("telefono"), "Se esperaba error del campo telefono.");
     }),
 
-    runTest("generateToken genera token con formato esperado", async () => {
+    runTest("crearSolicitud acepta contrato real y falla despues al no tener credenciales Graph", async () => {
+      const { response, body } = await invoke("crearSolicitud", {
+        tipoFormulario: "reclamaciones",
+        nombre: "  Maria  ",
+        apellidos: "Lopez Garcia",
+        tipoDocumento: "NIF",
+        numeroDocumento: "12345678Z",
+        email: "maria.lopez@example.com",
+        confirmEmail: "maria.lopez@example.com",
+        telefono: "600123456",
+        clasificacion: "reclamacion",
+        fechaIncidencia: "2026-06-01",
+        tipologia: "servicio",
+        lugarIncidencia: "estacion",
+        descripcionDetallada: "El servicio sufrio una interrupcion prolongada y solicito revision del caso.",
+        consentimiento: true,
+      });
+
+      assert(response.status === 500, `Se esperaba 500 por credenciales no configuradas y llego ${response.status}.`);
+      assert(String(body.error || "").includes("Microsoft Graph"), "Se esperaba error controlado de Graph.");
+    }),
+
+    runTest("generateToken genera token con formato esperado para reclamaciones", async () => {
       const { response, body } = await invoke("generateToken", {
-        listaDestino: "INCIDENCIAS",
+        tipoFormulario: "reclamaciones",
       });
 
       assert(response.status === 200, `Se esperaba 200 y llego ${response.status}.`);
       assert(
-        /^INC-\d{4}-[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{8}$/.test(body.token),
+        /^REC-\d{4}-[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{8}$/.test(body.token),
         `Token con formato inesperado: ${body.token}.`
       );
       assert(Boolean(body.generadoEn), "Se esperaba fecha generadoEn.");
     }),
 
-    runTest("generateToken rechaza listaDestino invalida", async () => {
+    runTest("generateToken rechaza tipo de formulario invalido", async () => {
       const { response, body } = await invoke("generateToken", {
-        listaDestino: "LISTA_INEXISTENTE",
+        tipoFormulario: "lista-inexistente",
       });
 
       assert(response.status === 400, `Se esperaba 400 y llego ${response.status}.`);
-      assert(String(body.error || "").includes("no es valida") || String(body.error || "").includes("no es válida"), "Se esperaba mensaje de lista invalida.");
-    }),
-
-    runTest("createSharePointItem rechaza listaDestino invalida sin llamar a Graph", async () => {
-      const { response, body } = await invoke("createSharePointItem", {
-        listaDestino: "LISTA_INEXISTENTE",
-      });
-
-      assert(response.status === 400, `Se esperaba 400 y llego ${response.status}.`);
-      assert(String(body.error || "").includes("no reconocida"), "Se esperaba mensaje de lista no reconocida.");
+      assert(String(body.error || "").includes("tipoFormulario"), "Se esperaba mensaje de tipoFormulario invalido.");
     }),
 
     runTest("consultarSolicitud exige email y token", async () => {
@@ -182,7 +180,58 @@ async function main() {
       });
 
       assert(response.status === 400, `Se esperaba 400 y llego ${response.status}.`);
-      assert(String(body.error || "").includes("lista de consulta valida") || String(body.error || "").includes("lista de consulta válida"), "Se esperaba mensaje de token no consultable.");
+      assert(String(body.error || "").includes("lista de consulta valida"), "Se esperaba mensaje de token no consultable.");
+    }),
+
+    runTest("consultarSolicitud acepta prefijo real y falla despues al no tener credenciales Graph", async () => {
+      const { response, body } = await invoke("consultarSolicitud", {
+        email: "consulta@example.com",
+        token: "REC-2026-ABCDEFGH",
+      });
+
+      assert(response.status === 500, `Se esperaba 500 por credenciales no configuradas y llego ${response.status}.`);
+      assert(String(body.error || "").includes("Microsoft Graph"), "Se esperaba error controlado de Graph.");
+    }),
+
+    runTest("contrato SharePoint apunta a las listas reales", async () => {
+      const expected = {
+        RECLAMACIONES: ["SHAREPOINT_CONNECTA_SITE_ID", "ReclamacionesQuejas"],
+        CONSULTAS: ["SHAREPOINT_CONNECTA_SITE_ID", "ConsultaInformacion"],
+        SUGERENCIAS: ["SHAREPOINT_CONNECTA_SITE_ID", "Sugerencias"],
+        AGRADECIMIENTOS: ["SHAREPOINT_CONNECTA_SITE_ID", "Agradecimientos"],
+        OBJETOS_PERDIDOS: ["SHAREPOINT_CONNECTA_SITE_ID", "Objetos Perdidos NUEVA"],
+        TARJETAS_METRO: ["SHAREPOINT_TARJETAS_SITE_ID", "ClientesTarjetaMetro"],
+      };
+
+      for (const [key, [siteEnvKey, listName]] of Object.entries(expected)) {
+        assert(FORM_TYPES[key].sharePoint.siteEnvKey === siteEnvKey, `${key} debe usar ${siteEnvKey}.`);
+        assert(FORM_TYPES[key].sharePoint.listName === listName, `${key} debe usar lista ${listName}.`);
+      }
+    }),
+
+    runTest("configuracion Graph acepta client secret sin certificado", async () => {
+      assertGraphConfig({
+        tenantId: "tenant",
+        clientId: "client",
+        clientSecret: "secret",
+        sites: {
+          SHAREPOINT_CONNECTA_SITE_ID: "connecta-site",
+          SHAREPOINT_TARJETAS_SITE_ID: "tarjetas-site",
+        },
+      });
+    }),
+
+    runTest("configuracion Graph acepta certificado sin client secret", async () => {
+      assertGraphConfig({
+        tenantId: "tenant",
+        clientId: "client",
+        certThumbprint: "thumbprint",
+        certPrivateKey: "private-key",
+        sites: {
+          SHAREPOINT_CONNECTA_SITE_ID: "connecta-site",
+          SHAREPOINT_TARJETAS_SITE_ID: "tarjetas-site",
+        },
+      });
     }),
   ];
 
@@ -195,7 +244,7 @@ async function main() {
       passed: results.length - failed,
       failed,
     },
-    warnings,
+    warnings: [],
     results,
   }, null, 2));
 

@@ -33,6 +33,7 @@ Desktop.ini
 # Testing / Coverage
 coverage/
 .nyc_output
+Azure Solution/tests/logs/*.log
 
 # Build/Dist output
 dist/
