@@ -187,17 +187,29 @@ function buildCertificateTokenParams(config, tokenUrl) {
 async function createListItem(accessToken, type, fields, config = getConfig(), context) {
   const target = await resolveSharePointTarget(accessToken, type, config, context);
   const url = `${GRAPH_BASE_URL}/sites/${encodeURIComponent(target.siteId)}/lists/${encodeURIComponent(target.listId)}/items`;
-  const writableColumns = await resolveWritableColumnNames(accessToken, target, context);
+  const writableColumns = await resolveWritableColumnDefinitions(accessToken, target, context);
   const filteredFields = filterKnownFields(fields, writableColumns, context, target);
+  const compatibilityWarnings = buildFieldCompatibilityWarnings(filteredFields, writableColumns);
+
+  for (const message of compatibilityWarnings) {
+    warn(context, `createListItem - posible incompatibilidad de tipo en ${target.listName}: ${message}`);
+  }
 
   context?.log?.(`createListItem - POST ${url}`);
+  context?.log?.(`createListItem - campos enviados a ${target.listName}: ${Object.keys(filteredFields).join(", ")}`);
 
-  const response = await axios.post(url, { fields: filteredFields }, {
-    headers: graphHeaders(accessToken),
-    timeout: 15000,
-  });
+  try {
+    const response = await axios.post(url, { fields: filteredFields }, {
+      headers: graphHeaders(accessToken),
+      timeout: 15000,
+    });
 
-  return response.data;
+    return response.data;
+  } catch (error) {
+    error.sharePointDiagnostics = buildSharePointErrorDiagnostics(error, target, filteredFields, compatibilityWarnings);
+    warn(context, `createListItem - error Graph en ${target.listName}: ${error.sharePointDiagnostics.summary}`);
+    throw error;
+  }
 }
 
 async function findListItemByEmailAndToken(accessToken, type, email, token, config = getConfig(), context) {
@@ -314,7 +326,7 @@ function buildSharePointFields(payload, type, token, createdAt) {
     TokenConsulta: token,
     TipoFormulario: type.formValue,
     TipoSolicitud: type.key,
-    EstadoCliente: "En tramite",
+    EstadoCliente: "En trámite",
     FechaCreacion: createdAt,
     RecibirPostal: payload.recibirPostal === true || payload.recibirPostal === "on",
     Direccion: payload.viaContacto || "",
@@ -338,12 +350,17 @@ function buildSharePointFields(payload, type, token, createdAt) {
 }
 
 async function resolveWritableColumnNames(accessToken, target, context) {
+  const columns = await resolveWritableColumnDefinitions(accessToken, target, context);
+  return new Set(columns.keys());
+}
+
+async function resolveWritableColumnDefinitions(accessToken, target, context) {
   const cacheKey = `${target.siteId}|${target.listId}|columns`;
   if (listColumnsCache.has(cacheKey)) {
     return listColumnsCache.get(cacheKey);
   }
 
-  const url = `${GRAPH_BASE_URL}/sites/${encodeURIComponent(target.siteId)}/lists/${encodeURIComponent(target.listId)}/columns?$select=name,hidden,readOnly`;
+  const url = `${GRAPH_BASE_URL}/sites/${encodeURIComponent(target.siteId)}/lists/${encodeURIComponent(target.listId)}/columns`;
   context?.log?.(`resolveWritableColumnNames - GET ${url}`);
 
   const response = await axios.get(url, {
@@ -351,10 +368,10 @@ async function resolveWritableColumnNames(accessToken, target, context) {
     timeout: 15000,
   });
 
-  const columns = new Set(
+  const columns = new Map(
     (response.data?.value || [])
       .filter((column) => !column.hidden && column.readOnly !== true)
-      .map((column) => column.name)
+      .map((column) => [column.name, column])
   );
 
   listColumnsCache.set(cacheKey, columns);
@@ -390,6 +407,83 @@ function filterKnownFields(fields, writableColumns, context, target) {
   }
 
   return filtered;
+}
+
+function buildFieldCompatibilityWarnings(fields, writableColumns) {
+  const warnings = [];
+
+  for (const [name, value] of Object.entries(fields)) {
+    const column = writableColumns.get?.(name);
+    if (!column || isEmptySharePointValue(value)) continue;
+
+    const warning = getFieldCompatibilityWarning(name, value, column);
+    if (warning) warnings.push(warning);
+  }
+
+  return warnings;
+}
+
+function getFieldCompatibilityWarning(name, value, column) {
+  if (column.choice?.choices?.length && !column.choice.choices.includes(value)) {
+    return `${name}: valor '${value}' no aparece entre las opciones configuradas (${column.choice.choices.join(" | ")}).`;
+  }
+
+  if (column.number && !isNumberLike(value)) {
+    return `${name}: se esperaba numero y llega '${value}' (${typeof value}).`;
+  }
+
+  if (column.dateTime && !isDateLike(value)) {
+    return `${name}: se esperaba fecha/hora valida y llega '${value}'.`;
+  }
+
+  if (column.boolean && typeof value !== "boolean") {
+    return `${name}: se esperaba booleano y llega '${value}' (${typeof value}).`;
+  }
+
+  return "";
+}
+
+function isNumberLike(value) {
+  if (typeof value === "number") return Number.isFinite(value);
+  if (typeof value !== "string") return false;
+  const normalized = value.trim().replace(",", ".");
+  return normalized !== "" && Number.isFinite(Number(normalized));
+}
+
+function isDateLike(value) {
+  if (value instanceof Date) return !Number.isNaN(value.getTime());
+  if (typeof value !== "string") return false;
+  return value.trim() !== "" && !Number.isNaN(Date.parse(value));
+}
+
+function buildSharePointErrorDiagnostics(error, target, fields, compatibilityWarnings = []) {
+  const graphError = error.response?.data?.error || error.response?.data || {};
+  const graphMessage = graphError.message || error.message;
+
+  return {
+    summary: `status=${error.response?.status || "sin-status"}; message=${graphMessage}; campos=${Object.keys(fields).join(", ")}`,
+    listName: target?.listName,
+    listUrl: target?.listUrl,
+    status: error.response?.status,
+    graphMessage,
+    graphCode: graphError.code,
+    compatibilityWarnings,
+    fieldSummary: Object.entries(fields).map(([name, value]) => ({
+      name,
+      type: Array.isArray(value) ? "array" : typeof value,
+      preview: previewValue(value),
+    })),
+  };
+}
+
+function previewValue(value) {
+  if (typeof value === "string") {
+    return value.length > 120 ? `${value.slice(0, 117)}...` : value;
+  }
+
+  if (value === null || value === undefined) return value;
+  if (typeof value === "object") return JSON.stringify(value).slice(0, 120);
+  return value;
 }
 
 function warn(context, message) {
@@ -583,6 +677,7 @@ module.exports = {
   getListItemAttachments,
   getListItemTimeline,
   buildSharePointFields,
+  buildFieldCompatibilityWarnings,
   buildSolicitudResponse,
   resolveSharePointTarget,
   hexThumbprintToBase64Url,

@@ -101,5 +101,6 @@ function buildDiagnostics(error) {
     message: error.message,
     status: error.response?.status,
     data: error.response?.data,
+    sharePoint: error.sharePointDiagnostics,
   };
 }

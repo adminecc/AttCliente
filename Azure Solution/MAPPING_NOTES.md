@@ -14,6 +14,8 @@ La idea es mantener aqui cualquier ajuste de nombres de campos, normalizaciones 
 - Antes de crear un item, la Function consulta las columnas reales de la lista y omite campos que no existan en esa lista.
 - No se envian valores vacios a SharePoint para evitar errores en columnas de tipo `Choice`, `Number`, fecha u otros tipos estrictos.
 - Si se omiten campos porque no existen en la lista destino, la Function debe registrar un warning.
+- Si un campo existe pero el valor parece incompatible con el tipo de columna (`Choice`, `Number`, `DateTime`, `Boolean`), la Function debe registrar un warning antes de enviar a Graph.
+- Si Graph rechaza el alta, con `DEBUG_ERRORS=true` la respuesta incluye `diagnostics.sharePoint` con lista, mensaje de Graph, warnings previos y resumen de campos enviados.
 - Cada problema detectado en pruebas debe quedar registrado en este documento con fecha y estado.
 
 ## Adaptaciones generales
@@ -229,6 +231,7 @@ Columnas internas relevantes observadas:
 | 2026-06-29 | Agradecimientos | Varios campos llegaban al payload pero no a SharePoint por nombres internos incorrectos. | Solucionado | Mapear a `Motivo`, `FechaEpisodio`, `Lugar`, `Estacion`, `Tren`, `DirigidoA`, `Colectivos` y `NumIdentificacionPersonaTrabajad`. |
 | 2026-06-29 | Formulario prototipo | El modal mostraba una referencia local `ATT-*` en lugar del token real de la API. | Solucionado | El modal usa `response.token` devuelto por `crearSolicitud`. |
 | 2026-06-29 | Sugerencias | La API rechazaba payloads reales del prototipo si no incluian `areaSugerencia` y `tituloSugerencia`. | Solucionado | El contrato obligatorio pasa a `lugarSugerencia` + `descripcionSugerencia`; los campos antiguos quedan como derivados opcionales. |
+| 2026-06-29 | Diagnostico SharePoint | Cuando una columna existia pero tenia tipo/formato incorrecto era dificil identificar el campo causante. | Solucionado | Se anaden warnings preventivos para `Choice`, `Number`, `DateTime` y `Boolean`, mas `diagnostics.sharePoint` si Graph devuelve error. |
 | 2026-06-29 | `Sugerencias` | `NombreCompleto` no existe en la lista. | Solucionado | Filtrar campos contra columnas reales antes del `POST` a Graph. |
 | 2026-06-29 | `Sugerencias` | Varios campos comunes no existen en la lista (`TokenConsulta`, `TipoFormulario`, `TipoSolicitud`, `FechaCreacion`, `RecibirPostal`, `PayloadJson`, etc.). | Detectado | La Function los omite y avisa con warning; decidir si se crean columnas o se dejan fuera. |
 | 2026-06-29 | `Sugerencias` | `DNI` no es valor admitido en `TipoDeDocumento`. | Solucionado | Normalizar `DNI` a `NIF`. |

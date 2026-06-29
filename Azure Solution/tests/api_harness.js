@@ -107,7 +107,7 @@ async function main() {
   loadFunction("src/functions/token-generate.js");
   const { FORM_TYPES } = require("../src/shared/form-contract");
   const { assertGraphConfig } = require("../src/shared/config");
-  const { buildSharePointFields } = require("../src/shared/sharepoint");
+  const { buildSharePointFields, buildFieldCompatibilityWarnings } = require("../src/shared/sharepoint");
   const { validateSolicitudPayload } = require("../src/shared/validation");
 
   const tests = [
@@ -187,7 +187,7 @@ async function main() {
       );
 
       assert(fields.Title === "SUG-2026-ABCDEFGH", "Title debe contener el token de solicitud.");
-      assert(fields.EstadoCliente === "En tramite", "EstadoCliente inicial debe ser En tramite.");
+      assert(fields.EstadoCliente === "En trámite", "EstadoCliente inicial debe ser En trámite.");
     }),
 
     runTest("consultas no exige descripcion corta y mapea titulo de viaje", async () => {
@@ -297,6 +297,44 @@ async function main() {
       assert(fields.Colectivos === "Personal de estacion y seguridad", "Se esperaba Colectivos.");
       assert(fields.NumIdentificacionPersonaTrabajad === "233", "Se esperaba NumIdentificacionPersonaTrabajadora.");
       assert(fields.Descripcion === "Texto de agradecimiento.", "Se esperaba Descripcion.");
+    }),
+
+    runTest("diagnostico SharePoint avisa de valores incompatibles con columnas", async () => {
+      const columns = new Map([
+        ["TipoDeTitulo", { name: "TipoDeTitulo", choice: { choices: ["Monedero Metro Málaga"] } }],
+        ["NumIdentificacionPersonaTrabajad", { name: "NumIdentificacionPersonaTrabajad", number: {} }],
+        ["FechaEpisodio", { name: "FechaEpisodio", dateTime: {} }],
+        ["RecibirPostal", { name: "RecibirPostal", boolean: {} }],
+      ]);
+      const warnings = buildFieldCompatibilityWarnings({
+        TipoDeTitulo: "valor-no-configurado",
+        NumIdentificacionPersonaTrabajad: "ABC",
+        FechaEpisodio: "no-es-fecha",
+        RecibirPostal: "si",
+      }, columns);
+
+      assert(warnings.length === 4, `Se esperaban 4 warnings y llegaron ${warnings.length}.`);
+      assert(warnings.some((warning) => warning.includes("TipoDeTitulo")), "Se esperaba warning de Choice.");
+      assert(warnings.some((warning) => warning.includes("NumIdentificacionPersonaTrabajad")), "Se esperaba warning de Number.");
+      assert(warnings.some((warning) => warning.includes("FechaEpisodio")), "Se esperaba warning de DateTime.");
+      assert(warnings.some((warning) => warning.includes("RecibirPostal")), "Se esperaba warning de Boolean.");
+    }),
+
+    runTest("diagnostico SharePoint acepta formatos compatibles", async () => {
+      const columns = new Map([
+        ["TipoDeTitulo", { name: "TipoDeTitulo", choice: { choices: ["Monedero Metro Málaga"] } }],
+        ["NumIdentificacionPersonaTrabajad", { name: "NumIdentificacionPersonaTrabajad", number: {} }],
+        ["FechaEpisodio", { name: "FechaEpisodio", dateTime: {} }],
+        ["RecibirPostal", { name: "RecibirPostal", boolean: {} }],
+      ]);
+      const warnings = buildFieldCompatibilityWarnings({
+        TipoDeTitulo: "Monedero Metro Málaga",
+        NumIdentificacionPersonaTrabajad: "233",
+        FechaEpisodio: "2026-06-29",
+        RecibirPostal: true,
+      }, columns);
+
+      assert(warnings.length === 0, `No se esperaban warnings y llegaron ${warnings.join(", ")}.`);
     }),
 
     runTest("consultarSolicitud exige email y token", async () => {
