@@ -203,7 +203,7 @@ async function main() {
   loadFunction("src/functions/token-generate.js");
   const { FORM_TYPES } = require("../src/shared/form-contract");
   const { assertGraphConfig } = require("../src/shared/config");
-  const { buildSharePointFields, buildFieldCompatibilityWarnings } = require("../src/shared/sharepoint");
+  const { buildSharePointFields, buildFieldCompatibilityWarnings, prepareLookupFieldWrites } = require("../src/shared/sharepoint");
   const { validateSolicitudPayload } = require("../src/shared/validation");
 
   const tests = [
@@ -523,6 +523,51 @@ async function main() {
       }, columns);
 
       assert(warnings.length === 0, `No se esperaban warnings y llegaron ${warnings.join(", ")}.`);
+    }),
+
+    runTest("lookups SharePoint se escriben como CampoLookupId", async () => {
+      const columns = new Map([
+        ["DAB", { name: "DAB", lookup: { listId: "lookup-list-id", columnName: "Title" } }],
+        ["DescripcionConsulta", { name: "DescripcionConsulta" }],
+      ]);
+      const fields = await prepareLookupFieldWrites(
+        "access-token",
+        { siteId: "site-id", listName: "ReclamacionesQuejas" },
+        {
+          DAB: "42",
+          DescripcionConsulta: "Texto de prueba.",
+        },
+        columns
+      );
+
+      assert(fields.DAB === undefined, "No debe enviarse el campo lookup textual original.");
+      assert(fields.DABLookupId === 42, "Se esperaba DABLookupId numerico.");
+      assert(fields.DescripcionConsulta === "Texto de prueba.", "Se esperaba conservar campos no lookup.");
+    }),
+
+    runTest("DAB del prototipo se normaliza al titulo lookup", async () => {
+      const fields = buildSharePointFields(
+        {
+          tipoFormulario: "reclamaciones",
+          Nombre: "Maria",
+          Apellidos: "Lopez",
+          TipoDeDocumento: "NIF",
+          NumeroDeDocumento: "12345678Z",
+          CorreoElectronico: "maria.lopez@example.com",
+          Telefono: "600123456",
+          consentimiento: true,
+          Clasificacion: "queja",
+          FechaYHoraConsulta: "2026-06-29T10:00:00",
+          Lugar: "atarazanas",
+          DAB: "ATZ-DAB-101",
+          DescripcionConsulta: "Texto de prueba.",
+        },
+        FORM_TYPES.RECLAMACIONES,
+        "REC-2026-ABCDEFGH",
+        "2026-06-29T08:00:00.000Z"
+      );
+
+      assert(fields.DAB === "DAB 101", `Se esperaba DAB 101 y llego ${fields.DAB}.`);
     }),
 
     runTest("consultarSolicitud exige email y token", async () => {

@@ -998,11 +998,19 @@ document.addEventListener('DOMContentLoaded', () => {
             payloadApi.Lugar = values.lugarIncidencia;
             payloadApi.TipoDeTitulo = values.tipoTitulo;
             payloadApi.NBilleteTitulo = values.numeracion_titulo_viaje;
+            payloadApi.NClienteNTarjCredito = values.email_usuario_metro_pay;
+            payloadApi.PuntoDeVenta = values.estacion;
+            payloadApi.DAB = values.numero_dab;
+            payloadApi.TipoDeInstalacion = values.numero_dab ? 'dab' : null;
             payloadApi.ImporteAPagar = values.importe_reclamado_1 || values.importe_reclamado_2 || values.importe_reclamado_3;
             payloadApi.DescripcionConsulta = values.descripcionDetallada;
             payloadApi.Observaciones = [
                 values.otroLugarIncidencia ? `Otro lugar: ${values.otroLugarIncidencia}` : '',
                 values.trenIncidencia ? `Tren: ${values.trenIncidencia}` : '',
+                values.punto_venta_recarga ? `Punto venta/recarga: ${values.punto_venta_recarga}` : '',
+                values.tipo_operacion ? `Tipo operacion: ${values.tipo_operacion}` : '',
+                values.modo_pago ? `Modo pago: ${values.modo_pago}` : '',
+                values.numeracion_titulo_recarga ? `Titulo recargado: ${values.numeracion_titulo_recarga}` : '',
             ].filter(Boolean).join('\n') || null;
         }
 

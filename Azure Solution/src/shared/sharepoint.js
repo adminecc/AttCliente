@@ -6,6 +6,7 @@ const { getConfig, assertGraphConfig, getSiteIdForType } = require("./config");
 const GRAPH_BASE_URL = "https://graph.microsoft.com/v1.0";
 const listIdCache = new Map();
 const listColumnsCache = new Map();
+const lookupItemsCache = new Map();
 
 const TITLE_TYPE_VALUES = {
   "monedero-metro-malaga": "Monedero Metro Málaga",
@@ -194,7 +195,8 @@ async function createListItem(accessToken, type, fields, config = getConfig(), c
   const target = await resolveSharePointTarget(accessToken, type, config, context);
   const url = `${GRAPH_BASE_URL}/sites/${encodeURIComponent(target.siteId)}/lists/${encodeURIComponent(target.listId)}/items`;
   const writableColumns = await resolveWritableColumnDefinitions(accessToken, target, context);
-  const filteredFields = filterKnownFields(fields, writableColumns, context, target);
+  const lookupReadyFields = await prepareLookupFieldWrites(accessToken, target, fields, writableColumns, context);
+  const filteredFields = filterKnownFields(lookupReadyFields, writableColumns, context, target);
   const compatibilityWarnings = buildFieldCompatibilityWarnings(filteredFields, writableColumns);
 
   for (const message of compatibilityWarnings) {
@@ -216,6 +218,78 @@ async function createListItem(accessToken, type, fields, config = getConfig(), c
     warn(context, `createListItem - error Graph en ${target.listName}: ${error.sharePointDiagnostics.summary}`);
     throw error;
   }
+}
+
+async function prepareLookupFieldWrites(accessToken, target, fields, writableColumns, context) {
+  const prepared = {};
+
+  for (const [name, value] of Object.entries(fields)) {
+    const column = writableColumns.get?.(name);
+    if (!column?.lookup || isEmptySharePointValue(value)) {
+      prepared[name] = value;
+      continue;
+    }
+
+    const lookupId = await resolveLookupId(accessToken, target, column, value, context);
+    if (lookupId !== null) {
+      prepared[`${name}LookupId`] = lookupId;
+    }
+  }
+
+  return prepared;
+}
+
+async function resolveLookupId(accessToken, target, column, value, context) {
+  if (isNumberLike(value)) {
+    return Number(String(value).replace(",", "."));
+  }
+
+  const lookupListId = column.lookup?.listId;
+  const lookupColumnName = column.lookup?.columnName || "Title";
+  if (!lookupListId) {
+    warn(context, `prepareLookupFieldWrites - ${column.name} es lookup pero no indica lista auxiliar.`);
+    return null;
+  }
+
+  const items = await resolveLookupItems(accessToken, target.siteId, lookupListId, context);
+  const expected = normalizeComparable(value);
+  const match = items.find((item) => {
+    const fields = item.fields || {};
+    return normalizeComparable(item.id) === expected
+      || normalizeComparable(fields.id) === expected
+      || normalizeComparable(fields[lookupColumnName]) === expected
+      || normalizeComparable(fields.Title) === expected;
+  });
+
+  if (!match?.id) {
+    warn(context, `prepareLookupFieldWrites - no se encontro valor lookup '${value}' para ${column.name}.`);
+    return null;
+  }
+
+  return Number(match.id);
+}
+
+async function resolveLookupItems(accessToken, siteId, lookupListId, context) {
+  const cacheKey = `${siteId}|${lookupListId}|lookup-items`;
+  if (lookupItemsCache.has(cacheKey)) {
+    return lookupItemsCache.get(cacheKey);
+  }
+
+  const url =
+    `${GRAPH_BASE_URL}/sites/${encodeURIComponent(siteId)}/lists/${encodeURIComponent(lookupListId)}/items` +
+    "?$expand=fields" +
+    "&$top=999";
+
+  context?.log?.(`resolveLookupItems - GET ${url}`);
+
+  const response = await axios.get(url, {
+    headers: graphHeaders(accessToken),
+    timeout: 15000,
+  });
+
+  const items = response.data?.value || [];
+  lookupItemsCache.set(cacheKey, items);
+  return items;
 }
 
 async function findListItemByEmailAndToken(accessToken, type, email, token, config = getConfig(), context) {
@@ -456,7 +530,7 @@ function filterKnownFields(fields, writableColumns, context, target) {
       continue;
     }
 
-    if (writableColumns.has(name)) {
+    if (writableColumns.has(name) || isLookupIdWriteField(name, writableColumns)) {
       filtered[name] = value;
     } else {
       omitted.push(name);
@@ -471,6 +545,12 @@ function filterKnownFields(fields, writableColumns, context, target) {
   }
 
   return filtered;
+}
+
+function isLookupIdWriteField(name, writableColumns) {
+  if (!name.endsWith("LookupId")) return false;
+  const baseName = name.slice(0, -"LookupId".length);
+  return Boolean(writableColumns.get?.(baseName)?.lookup);
 }
 
 function buildFieldCompatibilityWarnings(fields, writableColumns) {
@@ -584,6 +664,10 @@ function transformSharePointValue(sharePointField, value, type) {
     return INSTALLATION_TYPE_VALUES[value] || value;
   }
 
+  if (sharePointField === "DAB") {
+    return normalizeDabCode(value);
+  }
+
   if (sharePointField === "Motivo") {
     return THANKS_REASON_VALUES[value] || value;
   }
@@ -607,6 +691,11 @@ function transformSharePointValue(sharePointField, value, type) {
   }
 
   return value;
+}
+
+function normalizeDabCode(value) {
+  const match = /^([A-Z]{2,4}-)?DAB-(\d+)$/i.exec(String(value || "").trim());
+  return match ? `DAB ${match[2]}` : value;
 }
 
 function buildSolicitudResponse(item, listName, attachments = [], timeline = []) {
@@ -777,6 +866,7 @@ module.exports = {
   getSharePointAccessToken,
   createListItem,
   uploadListItemAttachments,
+  prepareLookupFieldWrites,
   findListItemByEmailAndToken,
   getListItemAttachments,
   getListItemTimeline,

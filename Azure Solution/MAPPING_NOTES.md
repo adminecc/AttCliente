@@ -64,11 +64,16 @@ Este documento recoge el contrato entre el formulario prototipo, la Azure Functi
 | `Lugar` | Choice de ubicacion normalizado desde slug. Obligatorio. |
 | `TipoDeTitulo` | Choice normalizado desde slug si aplica. |
 | `NBilleteTitulo` | Numero de billete/titulo. |
+| `DAB` | Lookup. La API normaliza codigos del prototipo (`ATZ-DAB-101` -> `DAB 101`) y resuelve `DABLookupId` si el valor existe en la lista auxiliar. |
+| `PuntoDeVenta` | Choice de estacion/punto de venta si aplica. |
+| `TipoDeInstalacion` | Choice normalizado (`dab` -> `DAB`) cuando aplica. |
+| `NClienteNTarjCredito` | Identificador auxiliar para MetroPay/tarjeta cuando aplica. |
 | `ImporteAPagar` | Importe reclamado si aplica. |
 | `DescripcionConsulta` | Texto principal obligatorio. |
 | `Observaciones` | Detalles auxiliares no estructurados. |
 
-Pendiente: campos `lookup` como `Tipologia`, `Subtipologia`, `DAB`, `EstadoDeLaResolucion`, etc. requieren resolver IDs antes de enviarlos de forma fiable.
+La API convierte campos lookup a `CampoLookupId`. Si el payload trae un numero, lo usa como ID; si trae texto, busca el valor en la lista auxiliar por `Title`.
+Pendiente: `DAB` tiene valores duplicados por estacion en su lista auxiliar; ahora se resuelve por titulo y falta desambiguar con `EstacionLookupId`. Tambien falta validar catalogos reales para `Tipologia`, `Subtipologia`, `EstadoDeLaResolucion` y otros lookups que aun no tienen campo visible en el prototipo.
 
 ## Objetos Perdidos NUEVA
 
@@ -113,5 +118,6 @@ Pendiente: campos `lookup` como `Tipologia`, `Subtipologia`, `DAB`, `EstadoDeLaR
 | 2026-06-29 | Agradecimientos | Varios campos llegaban con nombres prototipo. | Solucionado | El payload API usa nombres internos reales (`Motivo`, `FechaEpisodio`, `Lugar`, etc.). |
 | 2026-06-29 | Formulario prototipo | El modal mostraba referencia local `ATT-*`. | Solucionado | El modal usa `response.token`. |
 | 2026-06-29 | Diagnostico SharePoint | Eran dificiles de detectar errores de tipo/formato. | Solucionado | Warnings preventivos y `diagnostics.sharePoint`. |
-| 2026-06-29 | Contrato API | Habia dependencia de `FIELD_MAP` y nombres prototipo. | En curso | API y prototipo migrados a nombres directos; quedan pendientes lookups de Reclamaciones. |
+| 2026-06-29 | Contrato API | Habia dependencia de `FIELD_MAP` y nombres prototipo. | En curso | API y prototipo migrados a nombres directos; lookup resolver generico implementado; quedan pendientes catalogos/controles de `Tipologia` y `Subtipologia`. |
 | 2026-06-29 | Adjuntos / firma | El prototipo declaraba multipart pero enviaba JSON. | Codigo preparado / permiso pendiente | El prototipo envia `FormData` cuando hay binarios y la API intenta subir adjuntos por SharePoint REST. Prueba real: item `1372`, token `TAR-2026-UYCZGF22`, adjunto rechazado con `401`. |
+| 2026-06-29 | Tarjetas +Metro | Registros de prueba de adjuntos/firma. | Solucionado | Borrados items `1372` y `1374` en `ClientesTarjetaMetro` con Graph (`204`). |
