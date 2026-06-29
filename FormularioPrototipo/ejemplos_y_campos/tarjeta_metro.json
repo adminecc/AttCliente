@@ -1,92 +1,20 @@
 {
-  "tipoFormulario": "TAR",
-  "form": {
-    "id": "metro-atencion-cliente-unificado",
-    "version": "1.0.0",
-    "typeCode": "TAR",
-    "legacyType": "tarjetas"
-  },
-  "submission": {
-    "id": "9a92c301-44bb-4e89-98dd-e71c8c5ff84b",
-    "submittedAt": "2026-06-09T18:30:00+02:00",
-    "source": "wordpress",
-    "sourceSite": "https://www.metromalaga.es",
-    "language": "es-ES"
-  },
-  "applicant": {
-    "nombre": "Luis",
-    "apellidos": "Martín Gómez",
-    "tipoDocumento": "NIF",
-    "numeroDocumento": "87654321Q",
-    "email": "luis.martin@example.com",
-    "telefono": "677112233",
-    "nacionalidad": "ES",
-    "direccionContacto": {
-      "via": "Avenida de Plutarco",
-      "numero": "24",
-      "escalera": null,
-      "piso": "3º",
-      "puerta": "2",
-      "codigoPostal": "29010",
-      "municipio": "Málaga",
-      "provincia": "malaga"
-    }
-  },
-  "representative": {
-    "nombre": "Sofía",
-    "apellidos": "Gómez Ruiz",
-    "tipoDocumento": "NIF",
-    "numeroDocumento": "76543210M",
-    "email": "sofia.gomez@example.com",
-    "telefono": "655443322"
-  },
-  "postalReply": {
-    "enabled": true,
-    "addressMode": "diferente",
-    "direccionEnvio": {
-      "via": "Calle Héroe de Sostoa",
-      "numero": "148",
-      "escalera": "B",
-      "piso": "Bajo",
-      "puerta": "C",
-      "codigoPostal": "29003",
-      "municipio": "Málaga",
-      "provincia": "malaga"
-    }
-  },
-  "values": {
-    "motivoTarjeta": "nueva",
-    "fechaNacimiento": "2010-05-12",
-    "genero": "H",
-    "fechaCitaTarjeta": "2026-06-15",
-    "horaCitaTarjeta": "10:30",
-    "medioNotificacionTarjeta": "email"
-  },
-  "signatures": [
-    {
-      "fieldId": "signature-data",
-      "contentType": "image/png",
-      "storageMode": "multipart",
-      "multipartFieldName": "signature_interesado_0"
-    }
-  ],
-  "attachments": [],
-  "consents": [
-    {
-      "id": "datosCorrectos",
-      "accepted": true,
-      "acceptedAt": "2026-06-09T18:28:45+02:00",
-      "textVersion": "declaracion-veracidad-2026-06"
-    },
-    {
-      "id": "consentimiento",
-      "accepted": true,
-      "acceptedAt": "2026-06-09T18:28:45+02:00",
-      "textVersion": "lopd-general-2026-06"
-    }
-  ],
-  "metadata": {
-    "referenceClientSide": null,
-    "notes": "Solicitud de tarjeta +Metro para menor de edad con representante y dirección de entrega postal diferente."
-  }
+  "tipoFormulario": "tarjetas",
+  "NombreCliente": "Luis",
+  "ApellidoCliente1": "Martin",
+  "ApellidoCliente2": "Gomez",
+  "DNICliente": "87654321Q",
+  "EmailCliente": "luis.martin@example.com",
+  "confirmEmail": "luis.martin@example.com",
+  "TelefonoCliente1": "677112233",
+  "MetodoNotificacion": "email",
+  "NombreRep": "Sofia",
+  "ApellidoRep1": "Gomez",
+  "ApellidoRep2": "Ruiz",
+  "DNIRep": "76543210M",
+  "EmailRep": "sofia.gomez@example.com",
+  "TelefonoRep1": "655443322",
+  "Firma": "Firma capturada en formulario",
+  "consentimiento": true,
+  "datosCorrectos": true
 }

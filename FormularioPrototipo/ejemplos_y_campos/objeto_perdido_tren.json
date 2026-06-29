@@ -1,74 +1,20 @@
 {
-  "tipoFormulario": "OBJ",
-  "form": {
-    "id": "metro-atencion-cliente-unificado",
-    "version": "1.0.0",
-    "typeCode": "OBJ",
-    "legacyType": "objetos"
-  },
-  "submission": {
-    "id": "3e4b9464-77a7-4110-936a-1c6a31b0d536",
-    "submittedAt": "2026-06-09T12:00:00+02:00",
-    "source": "wordpress",
-    "sourceSite": "https://www.metromalaga.es",
-    "language": "es-ES"
-  },
-  "applicant": {
-    "nombre": "Nombre",
-    "apellidos": "Apellidos",
-    "tipoDocumento": "NIF",
-    "numeroDocumento": "12345678Z",
-    "email": "usuario@example.com",
-    "telefono": "612345678",
-    "nacionalidad": "ES",
-    "direccionContacto": null
-  },
-  "representative": null,
-  "postalReply": {
-    "enabled": false,
-    "addressMode": "misma",
-    "direccionEnvio": null
-  },
-  "values": {
-    "tipoTituloObjetos": "monedero-metro-malaga",
-    "numeracionTituloViajeObjetos": "1000234567",
-    "panTarjetaPrimeros6Objetos": null,
-    "panTarjetaUltimos4Objetos": null,
-    "fechaPerdida": "2026-06-08",
-    "horaPerdida": "14:30",
-    "lineaMetroObjetos": "1",
-    "dondePerdidoObjetos": "tren",
-    "numeroTrenObjetos": "UT-3010",
-    "estacionPerdidaObjetos": null,
-    "estacionOrigenObjetos": "atarazanas",
-    "estacionDestinoObjetos": "universidad",
-    "nombreObjetoObjetos": "Mochila",
-    "colorObjetoObjetos": "Negra",
-    "distintivoObjetoObjetos": "Llavero rojo",
-    "descripcionObjeto": "Mochila negra con documentación y llavero rojo."
-  },
-  "signatures": [],
-  "attachments": [
-    {
-      "fieldId": "fotoObjeto",
-      "fileName": "foto-objeto.png",
-      "contentType": "image/png",
-      "sizeBytes": 245123,
-      "storageMode": "multipart",
-      "multipartFieldName": "file_fotoObjeto_0",
-      "sha256": ""
-    }
-  ],
-  "consents": [
-    {
-      "id": "consentimiento",
-      "accepted": true,
-      "acceptedAt": "2026-06-09T12:00:00+02:00",
-      "textVersion": "lopd-general-2026-06"
-    }
-  ],
-  "metadata": {
-    "referenceClientSide": null,
-    "notes": "Objeto perdido en tren. Título de transporte físico. Respuesta postal desactivada."
-  }
+  "tipoFormulario": "objetos",
+  "Nombre": "Nombre",
+  "Apellidos": "Apellidos",
+  "TipoDeDocumento": "NIF",
+  "NumeroDeDocumento": "12345678Z",
+  "CorreoElectronico": "usuario@example.com",
+  "confirmEmail": "usuario@example.com",
+  "Telefono": "612345678",
+  "Nacionalidad": "ESPA?A",
+  "TipoDeTitulo": "monedero-metro-malaga",
+  "NumTituloViaje": "1000234567",
+  "FechaPerdida": "2026-06-08",
+  "Localizacion": "tren",
+  "NUnidadTren": "UT-3010",
+  "TipoObjeto": "Mochila",
+  "Descripcion": "Mochila negra con documentacion y llavero rojo.",
+  "Observaciones": "Hora aproximada: 14:30\nOrigen: Atarazanas\nDestino: Universidad",
+  "consentimiento": true
 }

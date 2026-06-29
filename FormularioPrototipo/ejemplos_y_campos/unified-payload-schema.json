@@ -1,291 +1,400 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "UnifiedCustomerServicePayload",
-  "description": "Esquema JSON de validación para el payload unificado de Atención al Cliente de Metro de Málaga",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://metro-malaga.example/schemas/att-cliente-solicitud.schema.json",
+  "title": "Metro Malaga - Solicitud de Atencion al Cliente",
+  "description": "Contrato JSON para POST /api/solicitudes/crear. Los campos funcionales usan nombres internos de SharePoint (field_internal_name_for_create).",
   "type": "object",
+  "additionalProperties": true,
   "required": [
     "tipoFormulario",
-    "form",
-    "submission",
-    "applicant",
-    "representative",
-    "postalReply",
-    "values",
-    "signatures",
-    "attachments",
-    "consents",
-    "metadata"
+    "consentimiento"
   ],
   "properties": {
     "tipoFormulario": {
       "type": "string",
-      "enum": ["REC", "CON", "SUG", "AGR", "OBJ", "TAR"]
-    },
-    "form": {
-      "type": "object",
-      "required": ["id", "version", "typeCode", "legacyType"],
-      "properties": {
-        "id": { "type": "string", "const": "metro-atencion-cliente-unificado" },
-        "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
-        "typeCode": { "type": "string", "enum": ["REC", "CON", "SUG", "AGR", "OBJ", "TAR"] },
-        "legacyType": { "type": "string", "enum": ["reclamaciones", "consultas", "sugerencias", "agradecimientos", "objetos", "tarjetas"] }
-      }
-    },
-    "submission": {
-      "type": "object",
-      "required": ["id", "submittedAt", "source", "sourceSite", "language"],
-      "properties": {
-        "id": { "type": "string", "format": "uuid" },
-        "submittedAt": { "type": "string", "format": "date-time" },
-        "source": { "type": "string" },
-        "sourceSite": { "type": "string", "format": "uri" },
-        "language": { "type": "string", "pattern": "^[a-z]{2}-[A-Z]{2}$" }
-      }
-    },
-    "applicant": {
-      "type": "object",
-      "required": ["nombre", "apellidos", "tipoDocumento", "numeroDocumento", "email", "telefono", "nacionalidad", "direccionContacto"],
-      "properties": {
-        "nombre": { "type": "string", "minLength": 1 },
-        "apellidos": { "type": "string", "minLength": 1 },
-        "tipoDocumento": { "type": "string", "enum": ["NIF", "PAS", "NIE"] },
-        "numeroDocumento": { "type": "string", "minLength": 5 },
-        "email": { "type": "string", "format": "email" },
-        "telefono": { "type": "string", "pattern": "^(\\+34|0034|34)?[6789][0-9]{8}$" },
-        "nacionalidad": { "type": "string", "pattern": "^[A-Z]{2}$" },
-        "direccionContacto": { "$ref": "#/definitions/direccionPostal" }
-      }
-    },
-    "representative": {
-      "anyOf": [
-        { "type": "null" },
-        {
-          "type": "object",
-          "required": ["nombre", "apellidos", "tipoDocumento", "numeroDocumento", "email", "telefono"],
-          "properties": {
-            "nombre": { "type": "string", "minLength": 1 },
-            "apellidos": { "type": "string", "minLength": 1 },
-            "tipoDocumento": { "type": "string", "enum": ["NIF", "PAS", "NIE"] },
-            "numeroDocumento": { "type": "string", "minLength": 5 },
-            "email": { "type": "string", "format": "email" },
-            "telefono": { "type": "string", "pattern": "^(\\+34|0034|34)?[6789][0-9]{8}$" }
-          }
-        }
+      "enum": [
+        "reclamaciones",
+        "consultas",
+        "sugerencias",
+        "agradecimientos",
+        "objetos",
+        "tarjetas"
       ]
     },
-    "postalReply": {
-      "type": "object",
-      "required": ["enabled", "addressMode", "direccionEnvio"],
-      "properties": {
-        "enabled": { "type": "boolean" },
-        "addressMode": { "type": "string", "enum": ["misma", "diferente"] },
-        "direccionEnvio": { "$ref": "#/definitions/direccionPostal" }
-      }
+    "consentimiento": {
+      "type": "boolean",
+      "const": true
     },
-    "values": {
-      "type": "object"
+    "confirmEmail": {
+      "type": "string",
+      "format": "email"
     },
-    "signatures": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["fieldId", "contentType", "storageMode", "multipartFieldName"],
-        "properties": {
-          "fieldId": { "type": "string", "const": "signature-data" },
-          "contentType": { "type": "string", "const": "image/png" },
-          "storageMode": { "type": "string", "const": "multipart" },
-          "multipartFieldName": { "type": "string", "minLength": 1 }
-        }
-      }
+    "Nombre": {
+      "type": "string",
+      "maxLength": 255
     },
-    "attachments": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["fieldId", "fileName", "contentType", "sizeBytes", "storageMode", "multipartFieldName"],
-        "properties": {
-          "fieldId": { "type": "string" },
-          "fileName": { "type": "string" },
-          "contentType": { "type": "string" },
-          "sizeBytes": { "type": "integer", "minimum": 0 },
-          "storageMode": { "type": "string", "const": "multipart" },
-          "multipartFieldName": { "type": "string" },
-          "sha256": { "type": "string" }
-        }
-      }
+    "Apellidos": {
+      "type": "string",
+      "maxLength": 255
     },
-    "consents": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "required": ["id", "accepted", "acceptedAt", "textVersion"],
-        "properties": {
-          "id": { "type": "string", "enum": ["consentimiento", "datosCorrectos"] },
-          "accepted": { "type": "boolean", "const": true },
-          "acceptedAt": { "type": "string", "format": "date-time" },
-          "textVersion": { "type": "string" }
-        }
-      }
+    "TipoDeDocumento": {
+      "type": "string",
+      "enum": [
+        "NIF",
+        "NIE",
+        "PAS"
+      ]
     },
-    "metadata": {
-      "type": "object",
-      "required": ["referenceClientSide"],
-      "properties": {
-        "referenceClientSide": { "type": "null" },
-        "notes": { "type": ["string", "null"] }
-      }
+    "NumeroDeDocumento": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "CorreoElectronico": {
+      "type": "string",
+      "format": "email"
+    },
+    "Telefono": {
+      "type": "string"
+    },
+    "Nacionalidad": {
+      "type": "string"
+    },
+    "Direccion": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "Numero": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "Escalera": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "Piso": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "Puerta": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "CP": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "Localidad": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "Provincia": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "TipoDeTitulo": {
+      "type": "string"
+    },
+    "NumTituloViaje": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "Descripcion": {
+      "type": "string"
+    },
+    "EstadoCliente": {
+      "type": "string"
+    },
+    "FechaModificacionEstadoCliente": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "Estacion": {
+      "type": "string"
+    },
+    "OtraUbicacion": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "Motivo": {
+      "type": "string"
+    },
+    "FechaEpisodio": {
+      "type": "string"
+    },
+    "Lugar": {
+      "type": "string"
+    },
+    "Tren": {
+      "type": "string"
+    },
+    "DirigidoA": {
+      "type": "string"
+    },
+    "Colectivos": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "NumIdentificacionPersonaTrabajad": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "Clasificacion": {
+      "type": "string"
+    },
+    "FechaYHoraConsulta": {
+      "type": "string"
+    },
+    "DescripcionConsulta": {
+      "type": "string"
+    },
+    "NBilleteTitulo": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "ImporteAPagar": {
+      "type": [
+        "number",
+        "string"
+      ]
+    },
+    "Observaciones": {
+      "type": "string"
+    },
+    "TipoDeInstalacion": {
+      "type": "string"
+    },
+    "Localizacion": {
+      "type": "string"
+    },
+    "FechaPerdida": {
+      "type": "string"
+    },
+    "TipoObjeto": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "NUnidadTren": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "NCirculacion": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "TipoRegistro": {
+      "type": "string"
+    },
+    "Estado": {
+      "type": "string"
+    },
+    "NombreCliente": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "ApellidoCliente1": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "ApellidoCliente2": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "DNICliente": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "EmailCliente": {
+      "type": "string",
+      "format": "email"
+    },
+    "TelefonoCliente1": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "TelefonoCliente2": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "NombreRep": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "ApellidoRep1": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "ApellidoRep2": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "DNIRep": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "EmailRep": {
+      "type": "string",
+      "format": "email"
+    },
+    "TelefonoRep1": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "TelefonoRep2": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "MetodoNotificacion": {
+      "type": "string"
+    },
+    "Firma": {
+      "type": "string"
     }
   },
-  "dependencies": {
-    "tipoFormulario": {
-      "oneOf": [
-        {
-          "properties": {
-            "tipoFormulario": { "const": "OBJ" },
-            "values": {
-              "type": "object",
-              "required": ["fechaPerdida", "lineaMetroObjetos", "dondePerdidoObjetos", "nombreObjetoObjetos", "descripcionObjeto"],
-              "properties": {
-                "tipoTituloObjetos": { "type": ["string", "null"] },
-                "numeracionTituloViajeObjetos": { "type": ["string", "null"] },
-                "panTarjetaPrimeros6Objetos": { "type": ["string", "null"], "pattern": "^[0-9]{6}$" },
-                "panTarjetaUltimos4Objetos": { "type": ["string", "null"], "pattern": "^[0-9]{4}$" },
-                "fechaPerdida": { "type": "string", "format": "date" },
-                "horaPerdida": { "type": ["string", "null"] },
-                "lineaMetroObjetos": { "type": "string", "enum": ["1", "2", "ambas"] },
-                "dondePerdidoObjetos": { "type": "string", "enum": ["estacion", "tren", "desconocido"] },
-                "numeroTrenObjetos": { "type": ["string", "null"] },
-                "estacionPerdidaObjetos": { "type": ["string", "null"] },
-                "estacionOrigenObjetos": { "type": ["string", "null"] },
-                "estacionDestinoObjetos": { "type": ["string", "null"] },
-                "nombreObjetoObjetos": { "type": "string", "minLength": 1 },
-                "colorObjetoObjetos": { "type": ["string", "null"] },
-                "distintivoObjetoObjetos": { "type": ["string", "null"] },
-                "descripcionObjeto": { "type": "string", "minLength": 5 }
-              }
-            }
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "tipoFormulario": {
+            "const": "reclamaciones"
           }
         },
-        {
-          "properties": {
-            "tipoFormulario": { "const": "TAR" },
-            "values": {
-              "type": "object",
-              "required": ["motivoTarjeta", "fechaNacimiento", "fechaCitaTarjeta", "horaCitaTarjeta", "medioNotificacionTarjeta"],
-              "properties": {
-                "motivoTarjeta": { "type": "string", "enum": ["nueva", "renovacion", "duplicado", "deterioro", "modificacion"] },
-                "fechaNacimiento": { "type": "string", "format": "date" },
-                "genero": { "type": ["string", "null"], "enum": ["H", "M", "O", null] },
-                "fechaCitaTarjeta": { "type": "string", "format": "date" },
-                "horaCitaTarjeta": { "type": "string" },
-                "medioNotificacionTarjeta": { "type": "string", "enum": ["email", "impreso"] }
-              }
-            }
+        "required": [
+          "tipoFormulario"
+        ]
+      },
+      "then": {
+        "required": [
+          "Nombre",
+          "Apellidos",
+          "TipoDeDocumento",
+          "NumeroDeDocumento",
+          "CorreoElectronico",
+          "Telefono",
+          "Clasificacion",
+          "FechaYHoraConsulta",
+          "Lugar",
+          "DescripcionConsulta"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "tipoFormulario": {
+            "const": "consultas"
           }
         },
-        {
-          "properties": {
-            "tipoFormulario": { "const": "REC" },
-            "values": {
-              "type": "object",
-              "required": ["clasificacion", "canalRecepcion", "fechaIncidencia", "tipologia", "descripcionCorta", "descripcionDetallada"],
-              "properties": {
-                "clasificacion": { "type": "string", "enum": ["Reclamacion", "Queja"] },
-                "canalRecepcion": { "type": "string", "const": "Web" },
-                "fechaIncidencia": { "type": "string", "format": "date" },
-                "tipologia": { "type": "string" },
-                "subtipologia": { "type": ["string", "null"] },
-                "tipoTitulo": { "type": ["string", "null"] },
-                "numeroDab": { "type": ["string", "null"] },
-                "importeReclamado": { "type": ["number", "null"], "minimum": 0 },
-                "descripcionCorta": { "type": "string", "maxLength": 100 },
-                "descripcionDetallada": { "type": "string", "maxLength": 2500 }
-              }
-            }
+        "required": [
+          "tipoFormulario"
+        ]
+      },
+      "then": {
+        "required": [
+          "Nombre",
+          "Apellidos",
+          "TipoDeDocumento",
+          "NumeroDeDocumento",
+          "CorreoElectronico",
+          "Telefono",
+          "Descripcion"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "tipoFormulario": {
+            "const": "sugerencias"
           }
         },
-        {
-          "properties": {
-            "tipoFormulario": { "const": "CON" },
-            "values": {
-              "type": "object",
-              "required": ["descripcionCortaConsulta", "descripcionDetalladaConsulta"],
-              "properties": {
-                "tipologiaConsulta": { "type": ["string", "null"] },
-                "subtipologiaConsulta": { "type": ["string", "null"] },
-                "tipoTituloConsulta": { "type": ["string", "null"] },
-                "numeracionTituloConsulta": { "type": ["string", "null"] },
-                "panFisicaPrimeros6Consulta": { "type": ["string", "null"] },
-                "panFisicaUltimos4Consulta": { "type": ["string", "null"] },
-                "panMovilFisicaAsocPrimeros6Consulta": { "type": ["string", "null"] },
-                "panMovilFisicaAsocUltimos4Consulta": { "type": ["string", "null"] },
-                "panMovilVirtualPrimeros6Consulta": { "type": ["string", "null"] },
-                "panMovilVirtualUltimos4Consulta": { "type": ["string", "null"] },
-                "descripcionCortaConsulta": { "type": "string", "maxLength": 100 },
-                "descripcionDetalladaConsulta": { "type": "string", "maxLength": 2500 }
-              }
-            }
+        "required": [
+          "tipoFormulario"
+        ]
+      },
+      "then": {
+        "required": [
+          "Nombre",
+          "Apellidos",
+          "TipoDeDocumento",
+          "NumeroDeDocumento",
+          "CorreoElectronico",
+          "Telefono",
+          "Estacion",
+          "Descripcion"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "tipoFormulario": {
+            "const": "agradecimientos"
           }
         },
-        {
-          "properties": {
-            "tipoFormulario": { "const": "SUG" },
-            "values": {
-              "type": "object",
-              "required": ["lugarSugerencia", "descripcionSugerencia"],
-              "properties": {
-                "areaSugerencia": { "type": ["string", "null"] },
-                "lugarSugerencia": { "type": "string" },
-                "trenSugerencia": { "type": ["string", "null"] },
-                "otroLugerSugerencia": { "type": ["string", "null"] },
-                "descripcionSugerencia": { "type": "string", "maxLength": 2500 }
-              }
-            }
+        "required": [
+          "tipoFormulario"
+        ]
+      },
+      "then": {
+        "required": [
+          "Nombre",
+          "Apellidos",
+          "TipoDeDocumento",
+          "NumeroDeDocumento",
+          "CorreoElectronico",
+          "Telefono",
+          "Motivo",
+          "Descripcion"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "tipoFormulario": {
+            "const": "objetos"
           }
         },
-        {
-          "properties": {
-            "tipoFormulario": { "const": "AGR" },
-            "values": {
-              "type": "object",
-              "required": ["motivoAgradecimiento", "dirigidoAgradecimiento", "descripcionAgradecimiento"],
-              "properties": {
-                "motivoAgradecimiento": { "type": "string" },
-                "fechaAgradecimiento": { "type": ["string", "null"], "format": "date" },
-                "lugarAgradecimiento": { "type": ["string", "null"] },
-                "estacionAgradecimientoDetalle": { "type": ["string", "null"] },
-                "trenAgradecimiento": { "type": ["string", "null"] },
-                "dirigidoAgradecimiento": { "type": "string" },
-                "variosColectivos": { "type": ["string", "null"] },
-                "nombreEmpleado": { "type": ["string", "null"] },
-                "descripcionAgradecimiento": { "type": "string", "maxLength": 2500 }
-              }
-            }
+        "required": [
+          "tipoFormulario"
+        ]
+      },
+      "then": {
+        "required": [
+          "Nombre",
+          "Apellidos",
+          "TipoDeDocumento",
+          "NumeroDeDocumento",
+          "CorreoElectronico",
+          "Telefono",
+          "FechaPerdida",
+          "Localizacion",
+          "TipoObjeto",
+          "Descripcion"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "tipoFormulario": {
+            "const": "tarjetas"
           }
-        }
-      ]
+        },
+        "required": [
+          "tipoFormulario"
+        ]
+      },
+      "then": {
+        "required": [
+          "NombreCliente",
+          "ApellidoCliente1",
+          "DNICliente",
+          "EmailCliente",
+          "TelefonoCliente1",
+          "MetodoNotificacion"
+        ]
+      }
     }
-  },
-  "definitions": {
-    "direccionPostal": {
-      "anyOf": [
-        { "type": "null" },
-        {
-          "type": "object",
-          "required": ["via", "numero", "codigoPostal", "municipio", "provincia"],
-          "properties": {
-            "via": { "type": "string", "minLength": 1 },
-            "numero": { "type": "string", "minLength": 1 },
-            "escalera": { "type": ["string", "null"] },
-            "piso": { "type": ["string", "null"] },
-            "puerta": { "type": ["string", "null"] },
-            "codigoPostal": { "type": "string", "pattern": "^[0-9]{5}$" },
-            "municipio": { "type": "string", "minLength": 1 },
-            "provincia": { "type": "string", "minLength": 1 }
-          }
-        }
-      ]
-    }
-  }
+  ]
 }

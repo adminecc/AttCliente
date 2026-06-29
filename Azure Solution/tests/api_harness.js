@@ -50,11 +50,91 @@ function createContext() {
 
 function requestWithJson(payload) {
   return {
+    headers: {
+      get(name) {
+        return String(name).toLowerCase() === "content-type" ? "application/json" : "";
+      },
+    },
     async json() {
       if (payload instanceof Error) {
         throw payload;
       }
       return payload;
+    },
+  };
+}
+
+function requestWithMultipart(payload, files = []) {
+  const entries = [
+    ["payload", JSON.stringify(payload)],
+    ...files.map((file) => [file.fieldName, file]),
+  ];
+
+  return {
+    headers: {
+      get(name) {
+        return String(name).toLowerCase() === "content-type"
+          ? "multipart/form-data; boundary=test"
+          : "";
+      },
+    },
+    async formData() {
+      return {
+        get(name) {
+          const match = entries.find(([key]) => key === name);
+          return match ? match[1] : null;
+        },
+        entries() {
+          return entries[Symbol.iterator]();
+        },
+      };
+    },
+  };
+}
+
+function requestWithRawMultipart(payload, files = [], boundary = "test-boundary") {
+  const chunks = [];
+  chunks.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="payload"\r\nContent-Type: application/json\r\n\r\n${JSON.stringify(payload)}\r\n`));
+
+  for (const file of files) {
+    chunks.push(Buffer.from(
+      `--${boundary}\r\n` +
+      `Content-Disposition: form-data; name="${file.fieldName}"; filename="${file.name}"\r\n` +
+      `Content-Type: ${file.type || "application/octet-stream"}\r\n\r\n`
+    ));
+    chunks.push(Buffer.from(file.content));
+    chunks.push(Buffer.from("\r\n"));
+  }
+
+  chunks.push(Buffer.from(`--${boundary}--\r\n`));
+  const body = Buffer.concat(chunks);
+
+  return {
+    headers: {
+      get(name) {
+        return String(name).toLowerCase() === "content-type"
+          ? `multipart/form-data; boundary=${boundary}`
+          : "";
+      },
+    },
+    async formData() {
+      throw new Error("Failed to parse body as FormData.");
+    },
+    async arrayBuffer() {
+      return body.buffer.slice(body.byteOffset, body.byteOffset + body.byteLength);
+    },
+  };
+}
+
+function createFileLike({ fieldName, name, type, content }) {
+  const buffer = Buffer.from(content);
+  return {
+    fieldName,
+    name,
+    type,
+    size: buffer.length,
+    async arrayBuffer() {
+      return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
     },
   };
 }
@@ -74,6 +154,22 @@ async function invoke(functionName, payload) {
 
   const context = createContext();
   const response = await config.handler(requestWithJson(payload), context);
+
+  return {
+    response,
+    body: parseBody(response),
+    logs: context.entries,
+  };
+}
+
+async function invokeWithRequest(functionName, request) {
+  const config = registry.get(functionName);
+  if (!config?.handler) {
+    throw new Error(`No se ha registrado el handler ${functionName}.`);
+  }
+
+  const context = createContext();
+  const response = await config.handler(request, context);
 
   return {
     response,
@@ -102,7 +198,7 @@ async function runTest(name, fn) {
 }
 
 async function main() {
-  loadFunction("src/functions/solicitudes-create.js");
+  const createModule = loadFunction("src/functions/solicitudes-create.js");
   loadFunction("src/functions/solicitudes-consultar.js");
   loadFunction("src/functions/token-generate.js");
   const { FORM_TYPES } = require("../src/shared/form-contract");
@@ -111,34 +207,84 @@ async function main() {
   const { validateSolicitudPayload } = require("../src/shared/validation");
 
   const tests = [
+    runTest("parseSolicitudRequest mantiene compatibilidad con JSON", async () => {
+      const { payload, files } = await createModule.parseSolicitudRequest(requestWithJson({
+        tipoFormulario: "consultas",
+        Nombre: "Maria",
+      }));
+
+      assert(payload.tipoFormulario === "consultas", "Se esperaba payload JSON.");
+      assert(payload.Nombre === "Maria", "Se esperaba Nombre desde JSON.");
+      assert(Array.isArray(files) && files.length === 0, "JSON no debe devolver archivos.");
+    }),
+
+    runTest("parseSolicitudRequest extrae payload y archivos multipart", async () => {
+      const file = createFileLike({
+        fieldName: "file_adjuntos_0",
+        name: "prueba.txt",
+        type: "text/plain",
+        content: "contenido de prueba",
+      });
+
+      const { payload, files } = await createModule.parseSolicitudRequest(requestWithMultipart({
+        tipoFormulario: "sugerencias",
+        Nombre: "Maria",
+      }, [file]));
+
+      assert(payload.tipoFormulario === "sugerencias", "Se esperaba payload desde campo multipart payload.");
+      assert(files.length === 1, `Se esperaba 1 archivo y llegaron ${files.length}.`);
+      assert(files[0].fieldName === "file_adjuntos_0", "Se esperaba fieldName multipart.");
+      assert(files[0].fileName === "prueba.txt", "Se esperaba nombre de archivo.");
+      assert(files[0].contentType === "text/plain", "Se esperaba contentType.");
+      assert(Buffer.isBuffer(files[0].content), "Se esperaba contenido Buffer.");
+    }),
+
+    runTest("parseSolicitudRequest usa fallback multipart si formData falla", async () => {
+      const { payload, files } = await createModule.parseSolicitudRequest(requestWithRawMultipart({
+        tipoFormulario: "tarjetas",
+        NombreCliente: "Luis",
+      }, [{
+        fieldName: "signature_interesado_0",
+        name: "firma.png",
+        type: "image/png",
+        content: "png-data",
+      }]));
+
+      assert(payload.tipoFormulario === "tarjetas", "Se esperaba payload desde fallback multipart.");
+      assert(files.length === 1, `Se esperaba 1 archivo y llegaron ${files.length}.`);
+      assert(files[0].fieldName === "signature_interesado_0", "Se esperaba fieldName de firma.");
+      assert(files[0].fileName === "firma.png", "Se esperaba nombre de firma.");
+      assert(files[0].content.toString("utf8") === "png-data", "Se esperaba contenido de firma.");
+    }),
+
+
     runTest("crearSolicitud rechaza payload incompleto con contrato real", async () => {
       const { response, body } = await invoke("crearSolicitud", {
         tipoFormulario: "reclamaciones",
-        email: "maria.lopez@example.com",
+        CorreoElectronico: "maria.lopez@example.com",
       });
 
       assert(response.status === 400, `Se esperaba 400 y llego ${response.status}.`);
       assert(Array.isArray(body.errors), "Se esperaba lista de errores.");
-      assert(body.errors.includes("nombre"), "Se esperaba error del campo nombre.");
-      assert(body.errors.includes("apellidos"), "Se esperaba error del campo apellidos.");
-      assert(body.errors.includes("telefono"), "Se esperaba error del campo telefono.");
+      assert(body.errors.includes("Nombre"), "Se esperaba error del campo Nombre.");
+      assert(body.errors.includes("Apellidos"), "Se esperaba error del campo Apellidos.");
+      assert(body.errors.includes("Telefono"), "Se esperaba error del campo Telefono.");
     }),
 
     runTest("crearSolicitud acepta contrato real y falla despues al no tener credenciales Graph", async () => {
       const { response, body } = await invoke("crearSolicitud", {
         tipoFormulario: "reclamaciones",
-        nombre: "  Maria  ",
-        apellidos: "Lopez Garcia",
-        tipoDocumento: "NIF",
-        numeroDocumento: "12345678Z",
-        email: "maria.lopez@example.com",
+        Nombre: "  Maria  ",
+        Apellidos: "Lopez Garcia",
+        TipoDeDocumento: "NIF",
+        NumeroDeDocumento: "12345678Z",
+        CorreoElectronico: "maria.lopez@example.com",
         confirmEmail: "maria.lopez@example.com",
-        telefono: "600123456",
-        clasificacion: "reclamacion",
-        fechaIncidencia: "2026-06-01",
-        tipologia: "servicio",
-        lugarIncidencia: "estacion",
-        descripcionDetallada: "El servicio sufrio una interrupcion prolongada y solicito revision del caso.",
+        Telefono: "600123456",
+        Clasificacion: "reclamacion",
+        FechaYHoraConsulta: "2026-06-01T10:00:00",
+        Lugar: "estacion",
+        DescripcionConsulta: "El servicio sufrio una interrupcion prolongada y solicito revision del caso.",
         consentimiento: true,
       });
 
@@ -172,14 +318,15 @@ async function main() {
       const fields = buildSharePointFields(
         {
           tipoFormulario: "sugerencias",
-          nombre: "Maria",
-          apellidos: "Lopez",
-          tipoDocumento: "NIF",
-          numeroDocumento: "12345678Z",
-          email: "maria.lopez@example.com",
-          telefono: "600123456",
+          Nombre: "Maria",
+          Apellidos: "Lopez",
+          TipoDeDocumento: "NIF",
+          NumeroDeDocumento: "12345678Z",
+          CorreoElectronico: "maria.lopez@example.com",
+          Telefono: "600123456",
           consentimiento: true,
-          descripcionSugerencia: "Texto de prueba.",
+          Estacion: "general",
+          Descripcion: "Texto de prueba.",
         },
         FORM_TYPES.SUGERENCIAS,
         "SUG-2026-ABCDEFGH",
@@ -187,23 +334,23 @@ async function main() {
       );
 
       assert(fields.Title === "SUG-2026-ABCDEFGH", "Title debe contener el token de solicitud.");
-      assert(fields.EstadoCliente === "En trámite", "EstadoCliente inicial debe ser En trámite.");
+      assert(fields.EstadoCliente === "En tr\u00e1mite", "EstadoCliente inicial debe ser En tramite.");
     }),
 
-    runTest("consultas no exige descripcion corta y mapea titulo de viaje", async () => {
+    runTest("consultas usa nombres directos de SharePoint", async () => {
       const payload = {
         tipoFormulario: "consultas",
-        nombre: "Maria",
-        apellidos: "Lopez",
-        tipoDocumento: "NIF",
-        numeroDocumento: "12345678Z",
-        email: "maria.lopez@example.com",
+        Nombre: "Maria",
+        Apellidos: "Lopez",
+        TipoDeDocumento: "NIF",
+        NumeroDeDocumento: "12345678Z",
+        CorreoElectronico: "maria.lopez@example.com",
         confirmEmail: "maria.lopez@example.com",
-        telefono: "600123456",
+        Telefono: "600123456",
         consentimiento: true,
-        tipoTituloConsulta: "tarjeta-consorcio",
-        numeracionTituloConsulta: "12345678900",
-        descripcionDetalladaConsulta: "Necesito informacion sobre mi titulo de viaje.",
+        TipoDeTitulo: "tarjeta-consorcio",
+        NumTituloViaje: "12345678900",
+        Descripcion: "Necesito informacion sobre mi titulo de viaje.",
       };
       const validation = validateSolicitudPayload(payload);
       const fields = buildSharePointFields(
@@ -214,89 +361,130 @@ async function main() {
       );
 
       assert(validation.valid, `No se esperaban errores de validacion: ${validation.errors.join(", ")}.`);
-      assert(fields.TipoDeTitulo === "Tarjeta Monedero Consorcio de Transportes de Andalucía", "Se esperaba TipoDeTitulo normalizado.");
+      assert(fields.TipoDeTitulo === "Tarjeta Monedero Consorcio de Transportes de Andaluc\u00eda", "Se esperaba TipoDeTitulo normalizado.");
       assert(fields.NumTituloViaje === "12345678900", "Se esperaba NumTituloViaje.");
-      assert(fields.Descripcion === "Necesito informacion sobre mi titulo de viaje.", "Se esperaba Descripcion desde descripcionDetalladaConsulta.");
+      assert(fields.Descripcion === "Necesito informacion sobre mi titulo de viaje.", "Se esperaba Descripcion directa.");
     }),
 
-    runTest("sugerencias mapea campos reales de ubicacion y titulo de viaje", async () => {
-      const validation = validateSolicitudPayload({
+    runTest("sugerencias usa nombres directos de SharePoint", async () => {
+      const payload = {
         tipoFormulario: "sugerencias",
-        nombre: "Maria",
-        apellidos: "Lopez",
-        tipoDocumento: "NIF",
-        numeroDocumento: "12345678Z",
-        email: "maria.lopez@example.com",
+        Nombre: "Maria",
+        Apellidos: "Lopez",
+        TipoDeDocumento: "NIF",
+        NumeroDeDocumento: "12345678Z",
+        CorreoElectronico: "maria.lopez@example.com",
         confirmEmail: "maria.lopez@example.com",
-        telefono: "600123456",
+        Telefono: "600123456",
         consentimiento: true,
-        lugarSugerencia: "general",
-        descripcionSugerencia: "Texto de prueba.",
-      });
+        Estacion: "general",
+        OtraUbicacion: "Anden de pruebas",
+        TipoDeTitulo: "tarjeta-consorcio",
+        NumTituloViaje: "12345678900",
+        Descripcion: "Texto de prueba.",
+      };
+      const validation = validateSolicitudPayload(payload);
       const fields = buildSharePointFields(
-        {
-          tipoFormulario: "sugerencias",
-          nombre: "Maria",
-          apellidos: "Lopez",
-          tipoDocumento: "NIF",
-          numeroDocumento: "12345678Z",
-          email: "maria.lopez@example.com",
-          telefono: "600123456",
-          consentimiento: true,
-          lugarSugerencia: "general",
-          otroLugarSugerencia: "Anden de pruebas",
-          tipoTituloSugerencia: "tarjeta-consorcio",
-          numeracionTituloSugerencia: "12345678900",
-          descripcionSugerencia: "Texto de prueba.",
-        },
+        validation.payload,
         FORM_TYPES.SUGERENCIAS,
         "SUG-2026-ABCDEFGH",
         "2026-06-29T08:00:00.000Z"
       );
 
       assert(validation.valid, `No se esperaban errores de validacion: ${validation.errors.join(", ")}.`);
-      assert(fields.Estacion === "General / Ninguna específica", "Se esperaba Estacion normalizada.");
+      assert(fields.Estacion === "General / Ninguna espec\u00edfica", "Se esperaba Estacion normalizada.");
       assert(fields.OtraUbicacion === "Anden de pruebas", "Se esperaba OtraUbicacion.");
-      assert(fields.TipoDeTitulo === "Tarjeta Monedero Consorcio de Transportes de Andalucía", "Se esperaba TipoDeTitulo.");
+      assert(fields.TipoDeTitulo === "Tarjeta Monedero Consorcio de Transportes de Andaluc\u00eda", "Se esperaba TipoDeTitulo.");
       assert(fields.NumTituloViaje === "12345678900", "Se esperaba NumTituloViaje.");
       assert(fields.Descripcion === "Texto de prueba.", "Se esperaba Descripcion.");
     }),
 
-    runTest("agradecimientos mapea columnas internas reales de SharePoint", async () => {
+    runTest("agradecimientos usa nombres directos de SharePoint", async () => {
       const fields = buildSharePointFields(
         {
           tipoFormulario: "agradecimientos",
-          nombre: "Maria",
-          apellidos: "Lopez",
-          tipoDocumento: "NIF",
-          numeroDocumento: "12345678Z",
-          email: "maria.lopez@example.com",
-          telefono: "600123456",
+          Nombre: "Maria",
+          Apellidos: "Lopez",
+          TipoDeDocumento: "NIF",
+          NumeroDeDocumento: "12345678Z",
+          CorreoElectronico: "maria.lopez@example.com",
+          Telefono: "600123456",
           consentimiento: true,
-          motivoAgradecimiento: "atencion-personal",
-          fechaAgradecimiento: "2026-06-29",
-          lugarAgradecimiento: "estacion",
-          estacionAgradecimientoDetalle: "general",
-          trenAgradecimiento: "UT-3010",
-          dirigidoAgradecimiento: "varios",
-          variosColectivos: "Personal de estacion y seguridad",
-          nombreEmpleado: "233",
-          descripcionAgradecimiento: "Texto de agradecimiento.",
+          Motivo: "atencion-personal",
+          FechaEpisodio: "2026-06-29",
+          Lugar: "estacion",
+          Estacion: "general",
+          Tren: "UT-3010",
+          DirigidoA: "varios",
+          Colectivos: "Personal de estacion y seguridad",
+          NumIdentificacionPersonaTrabajad: "233",
+          Descripcion: "Texto de agradecimiento.",
         },
         FORM_TYPES.AGRADECIMIENTOS,
         "AGR-2026-ABCDEFGH",
         "2026-06-29T08:00:00.000Z"
       );
 
-      assert(fields.Motivo === "Atención del personal", "Se esperaba Motivo normalizado.");
+      assert(fields.Motivo === "Atenci\u00f3n del personal", "Se esperaba Motivo normalizado.");
       assert(fields.FechaEpisodio === "2026-06-29", "Se esperaba FechaEpisodio.");
-      assert(fields.Lugar === "Una estación", "Se esperaba Lugar normalizado.");
-      assert(fields.Estacion === "General / Ninguna específica", "Se esperaba Estacion normalizada.");
+      assert(fields.Lugar === "Una estaci\u00f3n", "Se esperaba Lugar normalizado.");
+      assert(fields.Estacion === "General / Ninguna espec\u00edfica", "Se esperaba Estacion normalizada.");
       assert(fields.Tren === "UT-3010", "Se esperaba Tren.");
-      assert(fields.DirigidoA === "Quiero agradecer a varios colectivos (indique cuáles)", "Se esperaba DirigidoA normalizado.");
+      assert(fields.DirigidoA === "Quiero agradecer a varios colectivos (indique cu\u00e1les)", "Se esperaba DirigidoA normalizado.");
       assert(fields.Colectivos === "Personal de estacion y seguridad", "Se esperaba Colectivos.");
       assert(fields.NumIdentificacionPersonaTrabajad === "233", "Se esperaba NumIdentificacionPersonaTrabajadora.");
       assert(fields.Descripcion === "Texto de agradecimiento.", "Se esperaba Descripcion.");
+    }),
+
+    runTest("objetos usa nombres directos de SharePoint", async () => {
+      const payload = {
+        tipoFormulario: "objetos",
+        Nombre: "Maria",
+        Apellidos: "Lopez",
+        TipoDeDocumento: "NIF",
+        NumeroDeDocumento: "12345678Z",
+        CorreoElectronico: "maria.lopez@example.com",
+        confirmEmail: "maria.lopez@example.com",
+        Telefono: "600123456",
+        consentimiento: true,
+        FechaPerdida: "2026-06-29",
+        Localizacion: "tren",
+        NUnidadTren: "UT-3010",
+        TipoObjeto: "Mochila",
+        Descripcion: "Mochila negra con documentacion.",
+      };
+      const validation = validateSolicitudPayload(payload);
+      const fields = buildSharePointFields(validation.payload, FORM_TYPES.OBJETOS_PERDIDOS, "OBJ-2026-ABCDEFGH", "2026-06-29T08:00:00.000Z");
+
+      assert(validation.valid, `No se esperaban errores de validacion: ${validation.errors.join(", ")}.`);
+      assert(fields.Title === "OBJ-2026-ABCDEFGH", "Title debe contener el token de solicitud.");
+      assert(fields.Localizacion === "Unidad-Tren", "Se esperaba Localizacion normalizada.");
+      assert(fields.Estado === "Registrado", "Se esperaba Estado por defecto.");
+      assert(fields.TipoRegistro === "Objeto Perdido Reclamado", "Se esperaba TipoRegistro por defecto.");
+      assert(fields.TipoObjeto === "Mochila", "Se esperaba TipoObjeto directo.");
+    }),
+
+    runTest("tarjetas usa nombres directos de ClientesTarjetaMetro", async () => {
+      const payload = {
+        tipoFormulario: "tarjetas",
+        NombreCliente: "Luis",
+        ApellidoCliente1: "Martin",
+        ApellidoCliente2: "Gomez",
+        DNICliente: "87654321Q",
+        EmailCliente: "luis.martin@example.com",
+        confirmEmail: "luis.martin@example.com",
+        TelefonoCliente1: "677112233",
+        MetodoNotificacion: "email",
+        consentimiento: true,
+      };
+      const validation = validateSolicitudPayload(payload);
+      const fields = buildSharePointFields(validation.payload, FORM_TYPES.TARJETAS_METRO, "TAR-2026-ABCDEFGH", "2026-06-29T08:00:00.000Z");
+
+      assert(validation.valid, `No se esperaban errores de validacion: ${validation.errors.join(", ")}.`);
+      assert(fields.Title === "TAR-2026-ABCDEFGH", "Title debe contener el token de solicitud.");
+      assert(fields.NombreCliente === "Luis", "Se esperaba NombreCliente directo.");
+      assert(fields.MetodoNotificacion === "Correo", "Se esperaba MetodoNotificacion normalizado.");
+      assert(fields.EstadoCliente === undefined, "ClientesTarjetaMetro no debe recibir EstadoCliente.");
     }),
 
     runTest("diagnostico SharePoint avisa de valores incompatibles con columnas", async () => {

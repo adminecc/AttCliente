@@ -1,73 +1,27 @@
 {
-  "tipoFormulario": "OBJ",
-  "form": {
-    "id": "metro-atencion-cliente-unificado",
-    "version": "1.0.0",
-    "typeCode": "OBJ",
-    "legacyType": "objetos"
-  },
-  "submission": {
-    "id": "f5d023a1-7c98-4bfa-8fb7-11119bfae7e2",
-    "submittedAt": "2026-06-09T14:15:00+02:00",
-    "source": "wordpress",
-    "sourceSite": "https://www.metromalaga.es",
-    "language": "es-ES"
-  },
-  "applicant": {
-    "nombre": "Ana",
-    "apellidos": "García Pérez",
-    "tipoDocumento": "NIE",
-    "numeroDocumento": "X1234567L",
-    "email": "ana.garcia@example.com",
-    "telefono": "699887766",
-    "nacionalidad": "FR",
-    "direccionContacto": {
-      "via": "Calle Larios",
-      "numero": "5",
-      "escalera": "Derecha",
-      "piso": "2º",
-      "puerta": "A",
-      "codigoPostal": "29005",
-      "municipio": "Málaga",
-      "provincia": "malaga"
-    }
-  },
-  "representative": null,
-  "postalReply": {
-    "enabled": true,
-    "addressMode": "misma",
-    "direccionEnvio": null
-  },
-  "values": {
-    "tipoTituloObjetos": "validacion-tarjeta-ocasional",
-    "numeracionTituloViajeObjetos": null,
-    "panTarjetaPrimeros6Objetos": "453095",
-    "panTarjetaUltimos4Objetos": "8824",
-    "fechaPerdida": "2026-06-09",
-    "horaPerdida": "10:15",
-    "lineaMetroObjetos": "2",
-    "dondePerdidoObjetos": "estacion",
-    "numeroTrenObjetos": null,
-    "estacionPerdidaObjetos": "palacio-deportes",
-    "estacionOrigenObjetos": null,
-    "estacionDestinoObjetos": null,
-    "nombreObjetoObjetos": "Paraguas",
-    "colorObjetoObjetos": "Rojo",
-    "distintivoObjetoObjetos": "Mango de madera con forma de pato",
-    "descripcionObjeto": "Paraguas rojo olvidado en el banco del andén dirección Guadalmedina."
-  },
-  "signatures": [],
-  "attachments": [],
-  "consents": [
-    {
-      "id": "consentimiento",
-      "accepted": true,
-      "acceptedAt": "2026-06-09T14:15:00+02:00",
-      "textVersion": "lopd-general-2026-06"
-    }
-  ],
-  "metadata": {
-    "referenceClientSide": null,
-    "notes": "Objeto perdido en estación. Validación EMV móvil. Respuesta postal activada."
-  }
+  "tipoFormulario": "objetos",
+  "Nombre": "Ana",
+  "Apellidos": "Garcia Perez",
+  "TipoDeDocumento": "NIE",
+  "NumeroDeDocumento": "X1234567L",
+  "CorreoElectronico": "ana.garcia@example.com",
+  "confirmEmail": "ana.garcia@example.com",
+  "Telefono": "699887766",
+  "Nacionalidad": "FRANCIA",
+  "Direccion": "Calle Larios",
+  "Numero": "5",
+  "Escalera": "Derecha",
+  "Piso": "2",
+  "Puerta": "A",
+  "CP": "29005",
+  "Localidad": "Malaga",
+  "Provincia": "Malaga",
+  "TipoDeTitulo": "tarjeta-consorcio",
+  "NumTituloViaje": "12345678900",
+  "FechaPerdida": "2026-06-09",
+  "Localizacion": "palacio-deportes",
+  "TipoObjeto": "Paraguas",
+  "Descripcion": "Paraguas rojo olvidado en el banco del anden direccion Guadalmedina. Color: rojo. Distintivo: mango de madera.",
+  "Observaciones": "Hora aproximada: 10:15\nLinea: 2",
+  "consentimiento": true
 }
