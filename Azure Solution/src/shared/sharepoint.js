@@ -8,16 +8,55 @@ const listIdCache = new Map();
 const listColumnsCache = new Map();
 
 const TITLE_TYPE_VALUES = {
-  "monedero-metro-malaga": "Monedero Metro Malaga",
-  "billete-ocasional": "Ocasional Metro de Malaga",
-  "masmetro": "Tarjeta MasMetro",
-  "tarjeta-consorcio": "Tarjeta Monedero Consorcio de Transportes de Andalucia",
-  "tarjeta-consorcio-joven": "Tarjeta Consorcio de Transportes de Andalucia Joven",
-  "tarjeta-consorcio-familia-numerosa": "Tarjeta Consorcio de Transportes de Andalucia Familia Numerosa",
-  "validacion-emv-fisica": "Validacion con sistema EMV (Tarjeta de Credito/Debito fisica no registrada)",
-  "validacion-emv-movil": "Validacion con sistema EMV movil (Tarjeta de Credito/Debito con NFC movil no registrada)",
-  "pago-emv-movil": "Validacion con sistema EMV movil (Tarjeta de Credito/Debito con NFC movil no registrada)",
-  "metropay": "Validacion con ABT (Tarjeta de Credito/Debito registrada en MetroPay)",
+  "monedero-metro-malaga": "Monedero Metro Málaga",
+  "billete-ocasional": "Ocasional Metro de Málaga",
+  "masmetro": "Tarjeta MásMetro",
+  "tarjeta-consorcio": "Tarjeta Monedero Consorcio de Transportes de Andalucía",
+  "tarjeta-consorcio-joven": "Tarjeta Consorcio de Transportes de Andalucía Joven",
+  "tarjeta-consorcio-familia-numerosa": "Tarjeta Consorcio de Transportes de Andalucía Familia Numerosa",
+  "validacion-emv-fisica": "Validación con sistema EMV (Tarjeta de Crédito/Débito física no registrada)",
+  "validacion-emv-movil": "Validación con sistema EMV móvil (Tarjeta de Crédito/Débito con NFC móvil no registrada)",
+  "pago-emv-movil": "Validación con sistema EMV móvil (Tarjeta de Crédito/Débito con NFC móvil no registrada)",
+  "metropay": "Validación con ABT (Tarjeta de Crédito/Débito registrada en MetroPay)",
+};
+
+const LOCATION_VALUES = {
+  general: "General / Ninguna específica",
+  "linea-1": "Cualquiera de Línea 1",
+  "linea-2": "Cualquiera de Línea 2",
+  tren: "Interior del tren",
+  otro: "Otra ubicación",
+  "otra-ubicacion": "Otra ubicación",
+};
+
+const THANKS_REASON_VALUES = {
+  "atencion-personal": "Atención del personal",
+  "resolucion-incidencia": "Resolución de incidencia",
+  "mejora-servicio": "Mejora del servicio",
+  "estado-instalaciones": "Estado de instalaciones",
+  "informacion-proporcionada": "Información proporcionada",
+  "actuacion-seguridad": "Actuación de seguridad",
+  "accesibilidad": "Asistencia sobre accesibilidad",
+  "objeto-perdido": "Ayuda para recuperar un objeto",
+  otros: "Otros",
+};
+
+const THANKS_PLACE_VALUES = {
+  estacion: "Una estación",
+  tren: "Un tren",
+  oac: "Oficina de Atención al Cliente",
+};
+
+const THANKS_TARGET_VALUES = {
+  "personal-metro": "Personal de Metro de Málaga",
+  "personal-estacion": "Personal de Metro de Málaga",
+  "personal-tren": "Personal de Metro de Málaga",
+  seguridad: "Personal de Vigilancia (Seguridad)",
+  limpieza: "Personal de Metro de Málaga",
+  mantenimiento: "Personal de Metro de Málaga",
+  "personal-oac": "Personal de la Oficina de Atención al Cliente",
+  varios: "Quiero agradecer a varios colectivos (indique cuáles)",
+  general: "Es un agradecimiento general sobre el servicio",
 };
 
 const FIELD_MAP = {
@@ -44,15 +83,22 @@ const FIELD_MAP = {
   tipoTituloConsulta: "TipoDeTitulo",
   numeracionTituloConsulta: "NumTituloViaje",
 
-  areaSugerencia: "AreaSugerencia",
+  lugarSugerencia: "Estacion",
   estacionSugerencia: "Estacion",
-  tituloSugerencia: "TituloSugerencia",
+  otroLugarSugerencia: "OtraUbicacion",
+  tipoTituloSugerencia: "TipoDeTitulo",
+  numeracionTituloSugerencia: "NumTituloViaje",
   descripcionSugerencia: "Descripcion",
 
-  motivoAgradecimiento: "MotivoAgradecimiento",
-  fechaAgradecimiento: "FechaAgradecimiento",
+  motivoAgradecimiento: "Motivo",
+  fechaAgradecimiento: "FechaEpisodio",
+  lugarAgradecimiento: "Lugar",
   estacionAgradecimiento: "Estacion",
-  nombreEmpleado: "NombreEmpleado",
+  estacionAgradecimientoDetalle: "Estacion",
+  trenAgradecimiento: "Tren",
+  dirigidoAgradecimiento: "DirigidoA",
+  variosColectivos: "Colectivos",
+  nombreEmpleado: "NumIdentificacionPersonaTrabajad",
   descripcionAgradecimiento: "Descripcion",
 
   fechaPerdida: "FechaPerdida",
@@ -362,6 +408,22 @@ function isEmptySharePointValue(value) {
 function transformSharePointValue(sharePointField, value) {
   if (sharePointField === "TipoDeTitulo") {
     return TITLE_TYPE_VALUES[value] || value;
+  }
+
+  if (sharePointField === "Estacion") {
+    return LOCATION_VALUES[value] || value;
+  }
+
+  if (sharePointField === "Motivo") {
+    return THANKS_REASON_VALUES[value] || value;
+  }
+
+  if (sharePointField === "Lugar") {
+    return THANKS_PLACE_VALUES[value] || value;
+  }
+
+  if (sharePointField === "DirigidoA") {
+    return THANKS_TARGET_VALUES[value] || value;
   }
 
   return value;

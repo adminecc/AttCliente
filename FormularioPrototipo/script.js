@@ -4,6 +4,9 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+    const API_CREATE_ENDPOINT = 'https://metroattfn-e0gucabgedacccey.spaincentral-01.azurewebsites.net/api/solicitudes/crear';
+    const API_LOG_STORAGE_KEY = 'metroApiLogs';
+
     // ============================================
     // ELEMENTOS DEL DOM
     // ============================================
@@ -588,8 +591,8 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Muestra el modal de confirmación
      */
-    function mostrarModal() {
-        modalReference.textContent = generarReferencia();
+    function mostrarModal(referencia = generarReferencia()) {
+        modalReference.textContent = referencia;
         modalOverlay.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
@@ -888,8 +891,121 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
+    function primerTextoDisponible(...valores) {
+        return valores.find(valor => typeof valor === 'string' && valor.trim() !== '')?.trim() || null;
+    }
+
+    function normalizarTipoDocumento(tipoDocumento) {
+        return tipoDocumento === 'DNI' ? 'NIF' : tipoDocumento;
+    }
+
+    function adaptarPayloadParaApi(payloadUnificado) {
+        const applicant = payloadUnificado.applicant || {};
+        const direccion = applicant.direccionContacto || {};
+        const values = payloadUnificado.values || {};
+        const descripcionSugerencia = values.descripcionSugerencia || '';
+        const descripcionConsulta = values.descripcionDetalladaConsulta || '';
+
+        const payloadApi = {
+            tipoFormulario: payloadUnificado.form?.legacyType || tipoFormulario.value,
+            nombre: applicant.nombre,
+            apellidos: applicant.apellidos,
+            tipoDocumento: normalizarTipoDocumento(applicant.tipoDocumento),
+            numeroDocumento: applicant.numeroDocumento,
+            email: applicant.email,
+            confirmEmail: applicant.email,
+            telefono: applicant.telefono,
+            nacionalidad: applicant.nacionalidad,
+            viaContacto: direccion.via,
+            numContacto: direccion.numero,
+            escContacto: direccion.escalera,
+            pisoContacto: direccion.piso,
+            puerContacto: direccion.puerta,
+            cpContacto: direccion.codigoPostal,
+            municipioContacto: direccion.municipio,
+            provinciaContacto: direccion.provincia,
+            recibirPostal: payloadUnificado.postalReply?.enabled === true,
+            consentimiento: payloadUnificado.consents?.some(consent => consent.id === 'consentimiento' && consent.accepted === true) === true,
+            ...values,
+        };
+
+        if (payloadApi.tipoFormulario === 'sugerencias') {
+            payloadApi.areaSugerencia = primerTextoDisponible(values.areaSugerencia, values.lugarSugerencia, 'general');
+            payloadApi.estacionSugerencia = primerTextoDisponible(values.estacionSugerencia, values.lugarSugerencia, 'general');
+            payloadApi.tituloSugerencia = primerTextoDisponible(values.tituloSugerencia, descripcionSugerencia.slice(0, 100), 'Sugerencia');
+        }
+
+        if (payloadApi.tipoFormulario === 'consultas') {
+            payloadApi.descripcionCortaConsulta = primerTextoDisponible(values.descripcionCortaConsulta, descripcionConsulta.slice(0, 100), 'Consulta');
+        }
+
+        return payloadApi;
+    }
+
+    function registrarLogApi(entry) {
+        const logEntry = {
+            timestamp: new Date().toISOString(),
+            ...entry,
+        };
+
+        console.log('[Metro API]', logEntry);
+
+        try {
+            const logs = JSON.parse(localStorage.getItem(API_LOG_STORAGE_KEY) || '[]');
+            logs.push(logEntry);
+            localStorage.setItem(API_LOG_STORAGE_KEY, JSON.stringify(logs.slice(-25)));
+        } catch (error) {
+            console.warn('[Metro API] No se pudo guardar el log local.', error);
+        }
+    }
+
+    async function enviarSolicitudApi(payloadUnificado) {
+        const request = adaptarPayloadParaApi(payloadUnificado);
+
+        try {
+            const response = await fetch(API_CREATE_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(request),
+            });
+
+            let responseBody = {};
+            try {
+                responseBody = await response.json();
+            } catch {
+                responseBody = {};
+            }
+
+            registrarLogApi({
+                endpoint: API_CREATE_ENDPOINT,
+                request,
+                status: response.status,
+                ok: response.ok,
+                response: responseBody,
+            });
+
+            if (!response.ok) {
+                const detail = Array.isArray(responseBody.errors) && responseBody.errors.length > 0
+                    ? responseBody.errors.join(', ')
+                    : responseBody.error || `HTTP ${response.status}`;
+                throw new Error(detail);
+            }
+
+            return responseBody;
+        } catch (error) {
+            registrarLogApi({
+                endpoint: API_CREATE_ENDPOINT,
+                ok: false,
+                error: error.message,
+            });
+            throw error;
+        }
+    }
+
     // Envío del formulario
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         // Asegurar sincronización de dirección si procede
@@ -898,57 +1014,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         if (validarFormulario()) {
-            console.log('Formulario válido, procesando envío...');
-            
-            // Establecer referencia visible en el modal
-            const referenciaFinal = generarReferencia();
-            modalReference.textContent = referenciaFinal;
+            console.log('Formulario valido, enviando a la API...');
 
-            // =========================================================================
-            // SOLO PARA PRUEBAS Y PROTOTIPADO (NO USAR EN PRODUCCIÓN)
-            // =========================================================================
-            // Las siguientes líneas de código generan y fuerzan la descarga local
-            // de un archivo JSON que contiene el payload completo estructurado. 
-            // Esto sirve exclusivamente para validar la coherencia y calidad de los datos.
-            // 
-            // EN ENTORNO DE PRODUCCIÓN:
-            // Este bloque debe eliminarse por completo. En su lugar, el payload unificado
-            // junto con los adjuntos y la firma (si existen) se enviará de forma robusta
-            // y estandarizada mediante un objeto FormData multipart/form-data haciendo
-            // una petición HTTP POST (fetch/AJAX) al endpoint definitivo de la API (Azure Function).
-            // =========================================================================
-            try {
-                const payload = generarPayloadFormulario();
-                const jsonString = JSON.stringify(payload, null, 2);
-                const blob = new Blob([jsonString], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                
-                const linkDescarga = document.createElement('a');
-                linkDescarga.href = url;
-                linkDescarga.download = `solicitud-${referenciaFinal}.json`;
-                document.body.appendChild(linkDescarga);
-                linkDescarga.click();
-                
-                // Limpieza de recursos del DOM
-                document.body.removeChild(linkDescarga);
-                URL.revokeObjectURL(url);
-                
-                console.log('JSON de prueba descargado correctamente:', payload);
-            } catch (errorDescarga) {
-                console.error('Error generando/descargando el JSON de prueba:', errorDescarga);
-            }
-            // =========================================================================
-
-            // Simular animación de envío antes de abrir el modal de confirmación
             const btnEnviar = document.getElementById('btnEnviar');
             btnEnviar.disabled = true;
-            btnEnviar.innerHTML = '<span class="btn-icon">⏳</span> Enviando...';
-            
-            setTimeout(() => {
+            btnEnviar.innerHTML = '<span class="btn-icon">...</span> Enviando...';
+
+            try {
+                const payload = generarPayloadFormulario();
+                const resultado = await enviarSolicitudApi(payload);
+                mostrarModal(resultado.token || resultado.solicitudId || resultado.id || 'Solicitud registrada');
+            } catch (errorEnvio) {
+                console.error('Error enviando la solicitud a la API:', errorEnvio);
+                alert(`No se pudo enviar la solicitud: ${errorEnvio.message}`);
+            } finally {
                 btnEnviar.disabled = false;
-                btnEnviar.innerHTML = '<span class="btn-icon">📤</span> Enviar solicitud';
-                mostrarModal();
-            }, 1500);
+                btnEnviar.innerHTML = '<span class="btn-icon">Enviar</span> Enviar solicitud';
+            }
         }
     });
     

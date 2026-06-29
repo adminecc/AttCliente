@@ -214,9 +214,89 @@ async function main() {
       );
 
       assert(validation.valid, `No se esperaban errores de validacion: ${validation.errors.join(", ")}.`);
-      assert(fields.TipoDeTitulo === "Tarjeta Monedero Consorcio de Transportes de Andalucia", "Se esperaba TipoDeTitulo normalizado.");
+      assert(fields.TipoDeTitulo === "Tarjeta Monedero Consorcio de Transportes de Andalucía", "Se esperaba TipoDeTitulo normalizado.");
       assert(fields.NumTituloViaje === "12345678900", "Se esperaba NumTituloViaje.");
       assert(fields.Descripcion === "Necesito informacion sobre mi titulo de viaje.", "Se esperaba Descripcion desde descripcionDetalladaConsulta.");
+    }),
+
+    runTest("sugerencias mapea campos reales de ubicacion y titulo de viaje", async () => {
+      const validation = validateSolicitudPayload({
+        tipoFormulario: "sugerencias",
+        nombre: "Maria",
+        apellidos: "Lopez",
+        tipoDocumento: "NIF",
+        numeroDocumento: "12345678Z",
+        email: "maria.lopez@example.com",
+        confirmEmail: "maria.lopez@example.com",
+        telefono: "600123456",
+        consentimiento: true,
+        lugarSugerencia: "general",
+        descripcionSugerencia: "Texto de prueba.",
+      });
+      const fields = buildSharePointFields(
+        {
+          tipoFormulario: "sugerencias",
+          nombre: "Maria",
+          apellidos: "Lopez",
+          tipoDocumento: "NIF",
+          numeroDocumento: "12345678Z",
+          email: "maria.lopez@example.com",
+          telefono: "600123456",
+          consentimiento: true,
+          lugarSugerencia: "general",
+          otroLugarSugerencia: "Anden de pruebas",
+          tipoTituloSugerencia: "tarjeta-consorcio",
+          numeracionTituloSugerencia: "12345678900",
+          descripcionSugerencia: "Texto de prueba.",
+        },
+        FORM_TYPES.SUGERENCIAS,
+        "SUG-2026-ABCDEFGH",
+        "2026-06-29T08:00:00.000Z"
+      );
+
+      assert(validation.valid, `No se esperaban errores de validacion: ${validation.errors.join(", ")}.`);
+      assert(fields.Estacion === "General / Ninguna específica", "Se esperaba Estacion normalizada.");
+      assert(fields.OtraUbicacion === "Anden de pruebas", "Se esperaba OtraUbicacion.");
+      assert(fields.TipoDeTitulo === "Tarjeta Monedero Consorcio de Transportes de Andalucía", "Se esperaba TipoDeTitulo.");
+      assert(fields.NumTituloViaje === "12345678900", "Se esperaba NumTituloViaje.");
+      assert(fields.Descripcion === "Texto de prueba.", "Se esperaba Descripcion.");
+    }),
+
+    runTest("agradecimientos mapea columnas internas reales de SharePoint", async () => {
+      const fields = buildSharePointFields(
+        {
+          tipoFormulario: "agradecimientos",
+          nombre: "Maria",
+          apellidos: "Lopez",
+          tipoDocumento: "NIF",
+          numeroDocumento: "12345678Z",
+          email: "maria.lopez@example.com",
+          telefono: "600123456",
+          consentimiento: true,
+          motivoAgradecimiento: "atencion-personal",
+          fechaAgradecimiento: "2026-06-29",
+          lugarAgradecimiento: "estacion",
+          estacionAgradecimientoDetalle: "general",
+          trenAgradecimiento: "UT-3010",
+          dirigidoAgradecimiento: "varios",
+          variosColectivos: "Personal de estacion y seguridad",
+          nombreEmpleado: "233",
+          descripcionAgradecimiento: "Texto de agradecimiento.",
+        },
+        FORM_TYPES.AGRADECIMIENTOS,
+        "AGR-2026-ABCDEFGH",
+        "2026-06-29T08:00:00.000Z"
+      );
+
+      assert(fields.Motivo === "Atención del personal", "Se esperaba Motivo normalizado.");
+      assert(fields.FechaEpisodio === "2026-06-29", "Se esperaba FechaEpisodio.");
+      assert(fields.Lugar === "Una estación", "Se esperaba Lugar normalizado.");
+      assert(fields.Estacion === "General / Ninguna específica", "Se esperaba Estacion normalizada.");
+      assert(fields.Tren === "UT-3010", "Se esperaba Tren.");
+      assert(fields.DirigidoA === "Quiero agradecer a varios colectivos (indique cuáles)", "Se esperaba DirigidoA normalizado.");
+      assert(fields.Colectivos === "Personal de estacion y seguridad", "Se esperaba Colectivos.");
+      assert(fields.NumIdentificacionPersonaTrabajad === "233", "Se esperaba NumIdentificacionPersonaTrabajadora.");
+      assert(fields.Descripcion === "Texto de agradecimiento.", "Se esperaba Descripcion.");
     }),
 
     runTest("consultarSolicitud exige email y token", async () => {

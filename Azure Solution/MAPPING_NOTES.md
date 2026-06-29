@@ -96,9 +96,10 @@ Estos mapeos siguen en `FIELD_MAP` dentro de `src/shared/sharepoint.js`. Igual q
 
 | Payload | Columna SharePoint | Nota |
 | --- | --- | --- |
-| `areaSugerencia` | `AreaSugerencia` | El prototipo puede derivarlo desde `lugarSugerencia`. |
-| `estacionSugerencia` | `Estacion` | En `Sugerencias` es columna `Choice`; debe coincidir con una opcion real si se envia. |
-| `tituloSugerencia` | `TituloSugerencia` | El prototipo puede derivarlo desde `descripcionSugerencia`. |
+| `lugarSugerencia` / `estacionSugerencia` | `Estacion` | En `Sugerencias` es columna `Choice`; se normalizan valores como `general`, `tren`, `otro`. |
+| `otroLugarSugerencia` | `OtraUbicacion` | Texto libre cuando se elige otra ubicacion. |
+| `tipoTituloSugerencia` | `TipoDeTitulo` | Se normaliza desde slug del prototipo a texto de SharePoint. |
+| `numeracionTituloSugerencia` | `NumTituloViaje` | Numeracion del titulo de viaje. |
 | `descripcionSugerencia` | `Descripcion` | Campo principal de descripcion. |
 
 Adaptacion actual del prototipo:
@@ -107,15 +108,21 @@ Adaptacion actual del prototipo:
 - Si tambien falta, se usa `general`.
 - Si falta `tituloSugerencia`, se usan los primeros 100 caracteres de `descripcionSugerencia`.
 - Si no hay descripcion, se usa `Sugerencia`.
+- `areaSugerencia` y `tituloSugerencia` se mantienen solo como campos derivados de validacion API; no existen como columnas reales en la lista `Sugerencias`.
+- El contrato API considera obligatorios `lugarSugerencia` y `descripcionSugerencia`, que son los campos reales del prototipo.
 
 ### Agradecimientos
 
 | Payload | Columna SharePoint |
 | --- | --- |
-| `motivoAgradecimiento` | `MotivoAgradecimiento` |
-| `fechaAgradecimiento` | `FechaAgradecimiento` |
-| `estacionAgradecimiento` | `Estacion` |
-| `nombreEmpleado` | `NombreEmpleado` |
+| `motivoAgradecimiento` | `Motivo` |
+| `fechaAgradecimiento` | `FechaEpisodio` |
+| `lugarAgradecimiento` | `Lugar` |
+| `estacionAgradecimientoDetalle` / `estacionAgradecimiento` | `Estacion` |
+| `trenAgradecimiento` | `Tren` |
+| `dirigidoAgradecimiento` | `DirigidoA` |
+| `variosColectivos` | `Colectivos` |
+| `nombreEmpleado` | `NumIdentificacionPersonaTrabajad` |
 | `descripcionAgradecimiento` | `Descripcion` |
 
 ### Objetos perdidos
@@ -218,6 +225,10 @@ Columnas internas relevantes observadas:
 | Fecha | Lista / area | Problema | Estado | Resolucion / siguiente accion |
 | --- | --- | --- | --- | --- |
 | 2026-06-29 | Azure Functions v4 | `context.log.error` no existe y provocaba `500` vacio. | Solucionado | Usar `context.error(...)`; tests adaptados al runtime real. |
+| 2026-06-29 | Sugerencias | `Estacion`, `OtraUbicacion`, `TipoDeTitulo` y `NumTituloViaje` no se rellenaban desde el prototipo. | Solucionado | Mapear `lugarSugerencia`, `otroLugarSugerencia`, `tipoTituloSugerencia` y `numeracionTituloSugerencia` a las columnas reales. |
+| 2026-06-29 | Agradecimientos | Varios campos llegaban al payload pero no a SharePoint por nombres internos incorrectos. | Solucionado | Mapear a `Motivo`, `FechaEpisodio`, `Lugar`, `Estacion`, `Tren`, `DirigidoA`, `Colectivos` y `NumIdentificacionPersonaTrabajad`. |
+| 2026-06-29 | Formulario prototipo | El modal mostraba una referencia local `ATT-*` en lugar del token real de la API. | Solucionado | El modal usa `response.token` devuelto por `crearSolicitud`. |
+| 2026-06-29 | Sugerencias | La API rechazaba payloads reales del prototipo si no incluian `areaSugerencia` y `tituloSugerencia`. | Solucionado | El contrato obligatorio pasa a `lugarSugerencia` + `descripcionSugerencia`; los campos antiguos quedan como derivados opcionales. |
 | 2026-06-29 | `Sugerencias` | `NombreCompleto` no existe en la lista. | Solucionado | Filtrar campos contra columnas reales antes del `POST` a Graph. |
 | 2026-06-29 | `Sugerencias` | Varios campos comunes no existen en la lista (`TokenConsulta`, `TipoFormulario`, `TipoSolicitud`, `FechaCreacion`, `RecibirPostal`, `PayloadJson`, etc.). | Detectado | La Function los omite y avisa con warning; decidir si se crean columnas o se dejan fuera. |
 | 2026-06-29 | `Sugerencias` | `DNI` no es valor admitido en `TipoDeDocumento`. | Solucionado | Normalizar `DNI` a `NIF`. |
