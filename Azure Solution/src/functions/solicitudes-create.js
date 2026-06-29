@@ -41,10 +41,11 @@ app.http("crearSolicitud", {
     try {
       accessToken = await getGraphAccessToken();
     } catch (error) {
-      context.log.error("crearSolicitud - error autenticando con Microsoft Graph:", error.message);
+      context.error("crearSolicitud - error autenticando con Microsoft Graph:", error.message);
       return jsonResponse(500, {
         ok: false,
         error: "Error de autenticacion con Microsoft Graph.",
+        diagnostics: buildDiagnostics(error),
       });
     }
 
@@ -58,10 +59,11 @@ app.http("crearSolicitud", {
         context
       );
     } catch (error) {
-      context.log.error("crearSolicitud - error creando item SharePoint:", error.message, error.response?.data);
+      context.error("crearSolicitud - error creando item SharePoint:", error.message, error.response?.data);
       return jsonResponse(500, {
         ok: false,
         error: "Error al registrar la solicitud en SharePoint.",
+        diagnostics: buildDiagnostics(error),
       });
     }
 
@@ -89,5 +91,15 @@ function jsonResponse(status, body) {
       "Cache-Control": "no-store",
     },
     body: JSON.stringify(body),
+  };
+}
+
+function buildDiagnostics(error) {
+  if (process.env.DEBUG_ERRORS !== "true") return undefined;
+
+  return {
+    message: error.message,
+    status: error.response?.status,
+    data: error.response?.data,
   };
 }
