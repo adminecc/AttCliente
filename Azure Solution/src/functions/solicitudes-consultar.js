@@ -51,7 +51,7 @@ app.http("consultarSolicitud", {
     try {
       accessToken = await getGraphAccessToken();
     } catch (error) {
-      context.log.error("consultarSolicitud - error autenticando con Microsoft Graph:", error.message);
+      context.error("consultarSolicitud - error autenticando con Microsoft Graph:", error.message);
       return jsonResponse(500, {
         error: "Error de autenticacion con Microsoft Graph.",
       });
@@ -68,7 +68,7 @@ app.http("consultarSolicitud", {
         context
       );
     } catch (error) {
-      context.log.error("consultarSolicitud - error consultando SharePoint:", error.message, error.response?.data);
+      context.error("consultarSolicitud - error consultando SharePoint:", error.message, error.response?.data);
       return jsonResponse(500, {
         error: "Error al consultar la solicitud en SharePoint.",
       });

@@ -30,7 +30,6 @@ const FORM_TYPES = {
       listUrl: "https://metromalaga.sharepoint.com/sites/ConectaDEV/Lists/ConsultaInformacion/AllItems.aspx",
     },
     requiredFields: [
-      "descripcionCortaConsulta",
       "descripcionDetalladaConsulta",
     ],
   },
@@ -146,6 +145,7 @@ const PUBLIC_SHAREPOINT_FIELDS = [
   "TipoDocumento",
   "NumeroDocumento",
   "Email",
+  "CorreoElectronico",
   "Telefono",
   "TokenConsulta",
   "TipoFormulario",

@@ -2,10 +2,23 @@ const axios = require("axios");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const { getConfig, assertGraphConfig, getSiteIdForType } = require("./config");
-const { PUBLIC_SHAREPOINT_FIELDS } = require("./form-contract");
 
 const GRAPH_BASE_URL = "https://graph.microsoft.com/v1.0";
 const listIdCache = new Map();
+const listColumnsCache = new Map();
+
+const TITLE_TYPE_VALUES = {
+  "monedero-metro-malaga": "Monedero Metro Malaga",
+  "billete-ocasional": "Ocasional Metro de Malaga",
+  "masmetro": "Tarjeta MasMetro",
+  "tarjeta-consorcio": "Tarjeta Monedero Consorcio de Transportes de Andalucia",
+  "tarjeta-consorcio-joven": "Tarjeta Consorcio de Transportes de Andalucia Joven",
+  "tarjeta-consorcio-familia-numerosa": "Tarjeta Consorcio de Transportes de Andalucia Familia Numerosa",
+  "validacion-emv-fisica": "Validacion con sistema EMV (Tarjeta de Credito/Debito fisica no registrada)",
+  "validacion-emv-movil": "Validacion con sistema EMV movil (Tarjeta de Credito/Debito con NFC movil no registrada)",
+  "pago-emv-movil": "Validacion con sistema EMV movil (Tarjeta de Credito/Debito con NFC movil no registrada)",
+  "metropay": "Validacion con ABT (Tarjeta de Credito/Debito registrada en MetroPay)",
+};
 
 const FIELD_MAP = {
   clasificacion: "Clasificacion",
@@ -21,15 +34,15 @@ const FIELD_MAP = {
   importe_reclamado_1: "ImporteReclamado",
   descripcionDetallada: "Descripcion",
 
-  descripcionCortaConsulta: "DescripcionCorta",
   descripcionDetalladaConsulta: "Descripcion",
   tipologiaConsulta: "Tipologia",
   subtipologiaConsulta: "Subtipologia",
-  lugarConsulta: "LugarIncidencia",
+  lugarConsulta: "Estacion",
   trenConsulta: "TrenIncidencia",
-  otroLugarConsulta: "OtroLugarIncidencia",
+  otroLugarConsulta: "OtraUbicacion",
   tipoInstalacionConsulta: "TipoInstalacion",
-  tipoTituloConsulta: "TipoTitulo",
+  tipoTituloConsulta: "TipoDeTitulo",
+  numeracionTituloConsulta: "NumTituloViaje",
 
   areaSugerencia: "AreaSugerencia",
   estacionSugerencia: "Estacion",
@@ -128,9 +141,12 @@ function buildCertificateTokenParams(config, tokenUrl) {
 async function createListItem(accessToken, type, fields, config = getConfig(), context) {
   const target = await resolveSharePointTarget(accessToken, type, config, context);
   const url = `${GRAPH_BASE_URL}/sites/${encodeURIComponent(target.siteId)}/lists/${encodeURIComponent(target.listId)}/items`;
+  const writableColumns = await resolveWritableColumnNames(accessToken, target, context);
+  const filteredFields = filterKnownFields(fields, writableColumns, context, target);
+
   context?.log?.(`createListItem - POST ${url}`);
 
-  const response = await axios.post(url, { fields }, {
+  const response = await axios.post(url, { fields: filteredFields }, {
     headers: graphHeaders(accessToken),
     timeout: 15000,
   });
@@ -140,22 +156,55 @@ async function createListItem(accessToken, type, fields, config = getConfig(), c
 
 async function findListItemByEmailAndToken(accessToken, type, email, token, config = getConfig(), context) {
   const target = await resolveSharePointTarget(accessToken, type, config, context);
-  const filter = `fields/Email eq '${escapeOData(email)}' and fields/TokenConsulta eq '${escapeOData(token)}'`;
-  const select = encodeURIComponent(PUBLIC_SHAREPOINT_FIELDS.join(","));
+  const readableColumns = await resolveColumnNames(accessToken, target, context);
+  const emailField = readableColumns.has("CorreoElectronico") ? "CorreoElectronico" : "Email";
+  const tokenField = "Title";
+  const filter = `fields/${emailField} eq '${escapeOData(email)}' and fields/${tokenField} eq '${escapeOData(token)}'`;
   const url =
     `${GRAPH_BASE_URL}/sites/${encodeURIComponent(target.siteId)}/lists/${encodeURIComponent(target.listId)}/items` +
-    `?$expand=fields($select=${select})` +
+    "?$expand=fields" +
     `&$filter=${encodeURIComponent(filter)}` +
     "&$top=1";
 
   context?.log?.(`findListItemByEmailAndToken - GET ${url}`);
+
+  try {
+    const response = await axios.get(url, {
+      headers: graphHeaders(accessToken, {
+        Prefer: "HonorNonIndexedQueriesWarningMayFailRandomly",
+      }),
+      timeout: 15000,
+    });
+
+    return response.data?.value?.[0] || null;
+  } catch (error) {
+    warn(
+      context,
+      `findListItemByEmailAndToken - filtro Graph no disponible, usando busqueda local: ${error.message}`
+    );
+    return findListItemByEmailAndTokenFallback(accessToken, target, emailField, email, token, context);
+  }
+}
+
+async function findListItemByEmailAndTokenFallback(accessToken, target, emailField, email, token, context) {
+  const url =
+    `${GRAPH_BASE_URL}/sites/${encodeURIComponent(target.siteId)}/lists/${encodeURIComponent(target.listId)}/items` +
+    "?$expand=fields" +
+    "&$orderby=createdDateTime desc" +
+    "&$top=200";
+
+  context?.log?.(`findListItemByEmailAndTokenFallback - GET ${url}`);
 
   const response = await axios.get(url, {
     headers: graphHeaders(accessToken),
     timeout: 15000,
   });
 
-  return response.data?.value?.[0] || null;
+  return (response.data?.value || []).find((item) => {
+    const fields = item.fields || {};
+    return normalizeComparable(fields.Title) === normalizeComparable(token)
+      && normalizeComparable(fields[emailField]) === normalizeComparable(email);
+  }) || null;
 }
 
 async function getListItemAttachments(accessToken, type, itemId, config = getConfig(), context) {
@@ -208,32 +257,114 @@ async function getListItemTimeline(accessToken, type, itemId, config = getConfig
 
 function buildSharePointFields(payload, type, token, createdAt) {
   const fields = {
-    Title: buildTitle(payload, type),
+    Title: token,
     Nombre: payload.nombre || "",
     Apellidos: payload.apellidos || "",
-    NombreCompleto: payload.nombreCompleto || "",
-    TipoDocumento: payload.tipoDocumento || "",
-    NumeroDocumento: payload.numeroDocumento || "",
-    Email: payload.email || "",
+    TipoDeDocumento: payload.tipoDocumento || "",
+    NumeroDeDocumento: payload.numeroDocumento || "",
+    CorreoElectronico: payload.email || "",
     Telefono: payload.telefono || "",
     Nacionalidad: payload.nacionalidad || "",
     TokenConsulta: token,
     TipoFormulario: type.formValue,
     TipoSolicitud: type.key,
-    Estado: "Recibida",
+    EstadoCliente: "En tramite",
     FechaCreacion: createdAt,
     RecibirPostal: payload.recibirPostal === true || payload.recibirPostal === "on",
-    DireccionContacto: buildPostalAddress(payload),
+    Direccion: payload.viaContacto || "",
+    Numero: payload.numContacto || "",
+    Escalera: payload.escContacto || "",
+    Piso: payload.pisoContacto || "",
+    Puerta: payload.puerContacto || "",
+    CP: payload.cpContacto || "",
+    Localidad: payload.municipioContacto || "",
+    Provincia: payload.provinciaContacto || "",
     PayloadJson: JSON.stringify(payload),
   };
 
   for (const [payloadField, sharePointField] of Object.entries(FIELD_MAP)) {
     if (payload[payloadField] !== undefined && payload[payloadField] !== "") {
-      fields[sharePointField] = payload[payloadField];
+      fields[sharePointField] = transformSharePointValue(sharePointField, payload[payloadField]);
     }
   }
 
   return fields;
+}
+
+async function resolveWritableColumnNames(accessToken, target, context) {
+  const cacheKey = `${target.siteId}|${target.listId}|columns`;
+  if (listColumnsCache.has(cacheKey)) {
+    return listColumnsCache.get(cacheKey);
+  }
+
+  const url = `${GRAPH_BASE_URL}/sites/${encodeURIComponent(target.siteId)}/lists/${encodeURIComponent(target.listId)}/columns?$select=name,hidden,readOnly`;
+  context?.log?.(`resolveWritableColumnNames - GET ${url}`);
+
+  const response = await axios.get(url, {
+    headers: graphHeaders(accessToken),
+    timeout: 15000,
+  });
+
+  const columns = new Set(
+    (response.data?.value || [])
+      .filter((column) => !column.hidden && column.readOnly !== true)
+      .map((column) => column.name)
+  );
+
+  listColumnsCache.set(cacheKey, columns);
+  return columns;
+}
+
+async function resolveColumnNames(accessToken, target, context) {
+  const writableColumns = await resolveWritableColumnNames(accessToken, target, context);
+  return new Set([...writableColumns, "Title"]);
+}
+
+function filterKnownFields(fields, writableColumns, context, target) {
+  const filtered = {};
+  const omitted = [];
+
+  for (const [name, value] of Object.entries(fields)) {
+    if (isEmptySharePointValue(value)) {
+      continue;
+    }
+
+    if (writableColumns.has(name)) {
+      filtered[name] = value;
+    } else {
+      omitted.push(name);
+    }
+  }
+
+  if (omitted.length > 0) {
+    warn(
+      context,
+      `filterKnownFields - campos omitidos porque no existen en la lista ${target?.listName || "desconocida"}: ${omitted.join(", ")}`
+    );
+  }
+
+  return filtered;
+}
+
+function warn(context, message) {
+  if (typeof context?.warn === "function") {
+    context.warn(message);
+    return;
+  }
+
+  context?.log?.(`WARNING: ${message}`);
+}
+
+function isEmptySharePointValue(value) {
+  return value === undefined || value === null || value === "";
+}
+
+function transformSharePointValue(sharePointField, value) {
+  if (sharePointField === "TipoDeTitulo") {
+    return TITLE_TYPE_VALUES[value] || value;
+  }
+
+  return value;
 }
 
 function buildSolicitudResponse(item, listName, attachments = [], timeline = []) {
@@ -242,13 +373,13 @@ function buildSolicitudResponse(item, listName, attachments = [], timeline = [])
   return {
     id: item.id,
     lista: listName,
-    token: fields.TokenConsulta || "",
+    token: fields.Title || fields.TokenConsulta || "",
     estado: fields.Estado || "",
     tipoFormulario: fields.TipoFormulario || "",
     tipoSolicitud: fields.TipoSolicitud || "",
     titulo: fields.Title || "",
     nombreCompleto: fields.NombreCompleto || "",
-    email: fields.Email || "",
+    email: fields.CorreoElectronico || fields.Email || "",
     telefono: fields.Telefono || "",
     fechaCreacion: fields.FechaCreacion || "",
     descripcion: fields.Descripcion || "",
@@ -321,12 +452,6 @@ function normalizeSharePointUrl(url) {
     .toLowerCase();
 }
 
-function buildTitle(payload, type) {
-  const date = new Date().toLocaleDateString("es-ES");
-  const name = payload.nombre || "Solicitante";
-  return `${type.label} - ${name} - ${date}`;
-}
-
 function buildPostalAddress(payload) {
   if (!(payload.recibirPostal === true || payload.recibirPostal === "on")) return "";
 
@@ -342,16 +467,21 @@ function buildPostalAddress(payload) {
   ].filter(Boolean).join(", ");
 }
 
-function graphHeaders(accessToken) {
+function graphHeaders(accessToken, extraHeaders = {}) {
   return {
     Authorization: `Bearer ${accessToken}`,
     "Content-Type": "application/json",
     Accept: "application/json",
+    ...extraHeaders,
   };
 }
 
 function escapeOData(value) {
   return String(value).replace(/'/g, "''");
+}
+
+function normalizeComparable(value) {
+  return String(value || "").trim().toLowerCase();
 }
 
 function hexThumbprintToBase64Url(thumbprintHex) {

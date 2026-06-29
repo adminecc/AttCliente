@@ -43,9 +43,9 @@ function loadFunction(fileName) {
 function createContext() {
   const entries = [];
   const log = (...args) => entries.push({ level: "info", message: args.join(" ") });
-  log.error = (...args) => entries.push({ level: "error", message: args.join(" ") });
-  log.warn = (...args) => entries.push({ level: "warn", message: args.join(" ") });
-  return { log, entries };
+  const error = (...args) => entries.push({ level: "error", message: args.join(" ") });
+  const warn = (...args) => entries.push({ level: "warn", message: args.join(" ") });
+  return { log, error, warn, entries };
 }
 
 function requestWithJson(payload) {
@@ -107,6 +107,8 @@ async function main() {
   loadFunction("src/functions/token-generate.js");
   const { FORM_TYPES } = require("../src/shared/form-contract");
   const { assertGraphConfig } = require("../src/shared/config");
+  const { buildSharePointFields } = require("../src/shared/sharepoint");
+  const { validateSolicitudPayload } = require("../src/shared/validation");
 
   const tests = [
     runTest("crearSolicitud rechaza payload incompleto con contrato real", async () => {
@@ -164,6 +166,57 @@ async function main() {
 
       assert(response.status === 400, `Se esperaba 400 y llego ${response.status}.`);
       assert(String(body.error || "").includes("tipoFormulario"), "Se esperaba mensaje de tipoFormulario invalido.");
+    }),
+
+    runTest("SharePoint guarda el token en Title como numero de solicitud", async () => {
+      const fields = buildSharePointFields(
+        {
+          tipoFormulario: "sugerencias",
+          nombre: "Maria",
+          apellidos: "Lopez",
+          tipoDocumento: "NIF",
+          numeroDocumento: "12345678Z",
+          email: "maria.lopez@example.com",
+          telefono: "600123456",
+          consentimiento: true,
+          descripcionSugerencia: "Texto de prueba.",
+        },
+        FORM_TYPES.SUGERENCIAS,
+        "SUG-2026-ABCDEFGH",
+        "2026-06-29T08:00:00.000Z"
+      );
+
+      assert(fields.Title === "SUG-2026-ABCDEFGH", "Title debe contener el token de solicitud.");
+      assert(fields.EstadoCliente === "En tramite", "EstadoCliente inicial debe ser En tramite.");
+    }),
+
+    runTest("consultas no exige descripcion corta y mapea titulo de viaje", async () => {
+      const payload = {
+        tipoFormulario: "consultas",
+        nombre: "Maria",
+        apellidos: "Lopez",
+        tipoDocumento: "NIF",
+        numeroDocumento: "12345678Z",
+        email: "maria.lopez@example.com",
+        confirmEmail: "maria.lopez@example.com",
+        telefono: "600123456",
+        consentimiento: true,
+        tipoTituloConsulta: "tarjeta-consorcio",
+        numeracionTituloConsulta: "12345678900",
+        descripcionDetalladaConsulta: "Necesito informacion sobre mi titulo de viaje.",
+      };
+      const validation = validateSolicitudPayload(payload);
+      const fields = buildSharePointFields(
+        validation.payload,
+        FORM_TYPES.CONSULTAS,
+        "CON-2026-ABCDEFGH",
+        "2026-06-29T08:00:00.000Z"
+      );
+
+      assert(validation.valid, `No se esperaban errores de validacion: ${validation.errors.join(", ")}.`);
+      assert(fields.TipoDeTitulo === "Tarjeta Monedero Consorcio de Transportes de Andalucia", "Se esperaba TipoDeTitulo normalizado.");
+      assert(fields.NumTituloViaje === "12345678900", "Se esperaba NumTituloViaje.");
+      assert(fields.Descripcion === "Necesito informacion sobre mi titulo de viaje.", "Se esperaba Descripcion desde descripcionDetalladaConsulta.");
     }),
 
     runTest("consultarSolicitud exige email y token", async () => {

@@ -30,22 +30,24 @@ Azure Solution/
 
 ## Endpoints
 
-| Metodo | Ruta | Uso |
-|---|---|---|
-| `POST` | `/api/solicitudes/crear` | Valida el payload, genera token y crea item en SharePoint. |
-| `POST` | `/api/solicitudes/consultar` | Consulta una solicitud por `email` + `token`. |
-| `POST` | `/api/solicitudes/generartoken` | Genera un token para pruebas. |
+
+| Metodo | Ruta                            | Uso                                                        |
+| ------ | ------------------------------- | ---------------------------------------------------------- |
+| `POST` | `/api/solicitudes/crear`        | Valida el payload, genera token y crea item en SharePoint. |
+| `POST` | `/api/solicitudes/consultar`    | Consulta una solicitud por`email` + `token`.               |
+| `POST` | `/api/solicitudes/generartoken` | Genera un token para pruebas.                              |
 
 ## Mapeo Real De SharePoint
 
-| tipoFormulario | Site | Lista |
-|---|---|---|
-| `reclamaciones` | `https://metromalaga.sharepoint.com/sites/ConectaDEV` | `ReclamacionesQuejas` |
-| `sugerencias` | `https://metromalaga.sharepoint.com/sites/ConectaDEV` | `Sugerencias` |
-| `agradecimientos` | `https://metromalaga.sharepoint.com/sites/ConectaDEV` | `Agradecimientos` |
-| `objetos` | `https://metromalaga.sharepoint.com/sites/ConectaDEV` | `Objetos Perdidos NUEVA` |
-| `consultas` | `https://metromalaga.sharepoint.com/sites/ConectaDEV` | `ConsultaInformacion` |
-| `tarjetas` | `https://metromalaga.sharepoint.com/sites/TarjetaMasMetro` | `ClientesTarjetaMetro` |
+
+| tipoFormulario    | Site                                                       | Lista                    |
+| ----------------- | ---------------------------------------------------------- | ------------------------ |
+| `reclamaciones`   | `https://metromalaga.sharepoint.com/sites/ConectaDEV`      | `ReclamacionesQuejas`    |
+| `sugerencias`     | `https://metromalaga.sharepoint.com/sites/ConectaDEV`      | `Sugerencias`            |
+| `agradecimientos` | `https://metromalaga.sharepoint.com/sites/ConectaDEV`      | `Agradecimientos`        |
+| `objetos`         | `https://metromalaga.sharepoint.com/sites/ConectaDEV`      | `Objetos Perdidos NUEVA` |
+| `consultas`       | `https://metromalaga.sharepoint.com/sites/ConectaDEV`      | `ConsultaInformacion`    |
+| `tarjetas`        | `https://metromalaga.sharepoint.com/sites/TarjetaMasMetro` | `ClientesTarjetaMetro`   |
 
 El mapeo vive en `src/shared/form-contract.js`. Las llamadas a Graph resuelven el `siteId` con:
 
@@ -201,6 +203,14 @@ func azure functionapp publish metroattFn
 ```
 
 Probar en nube:
+
+```powershell
+Invoke-RestMethod `
+  -Method Post `
+  -Uri "https://metroattfn-e0gucabgedacccey.spaincentral-01.azurewebsites.net/api/solicitudes/generartoken" `
+  -ContentType "application/json"`
+  -Body '{"tipoFormulario":"reclamaciones"}'
+```
 
 ```powershell
 Invoke-RestMethod `
