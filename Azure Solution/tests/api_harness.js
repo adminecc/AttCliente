@@ -241,20 +241,20 @@ async function main() {
 
     runTest("parseSolicitudRequest usa fallback multipart si formData falla", async () => {
       const { payload, files } = await createModule.parseSolicitudRequest(requestWithRawMultipart({
-        tipoFormulario: "tarjetas",
-        NombreCliente: "Luis",
+        tipoFormulario: "objetos",
+        Nombre: "Luis",
       }, [{
-        fieldName: "signature_interesado_0",
-        name: "firma.png",
-        type: "image/png",
-        content: "png-data",
+        fieldName: "file_fotoObjeto_0",
+        name: "objeto.jpg",
+        type: "image/jpeg",
+        content: "jpg-data",
       }]));
 
-      assert(payload.tipoFormulario === "tarjetas", "Se esperaba payload desde fallback multipart.");
+      assert(payload.tipoFormulario === "objetos", "Se esperaba payload desde fallback multipart.");
       assert(files.length === 1, `Se esperaba 1 archivo y llegaron ${files.length}.`);
-      assert(files[0].fieldName === "signature_interesado_0", "Se esperaba fieldName de firma.");
-      assert(files[0].fileName === "firma.png", "Se esperaba nombre de firma.");
-      assert(files[0].content.toString("utf8") === "png-data", "Se esperaba contenido de firma.");
+      assert(files[0].fieldName === "file_fotoObjeto_0", "Se esperaba fieldName de archivo.");
+      assert(files[0].fileName === "objeto.jpg", "Se esperaba nombre de archivo.");
+      assert(files[0].content.toString("utf8") === "jpg-data", "Se esperaba contenido de archivo.");
     }),
 
 
@@ -545,7 +545,7 @@ async function main() {
       assert(fields.DescripcionConsulta === "Texto de prueba.", "Se esperaba conservar campos no lookup.");
     }),
 
-    runTest("DAB del prototipo se normaliza al titulo lookup", async () => {
+    runTest("DAB del prototipo conserva el nombre enviado", async () => {
       const fields = buildSharePointFields(
         {
           tipoFormulario: "reclamaciones",
@@ -567,7 +567,28 @@ async function main() {
         "2026-06-29T08:00:00.000Z"
       );
 
-      assert(fields.DAB === "DAB 101", `Se esperaba DAB 101 y llego ${fields.DAB}.`);
+      assert(fields.DAB === "ATZ-DAB-101", `Se esperaba ATZ-DAB-101 y llego ${fields.DAB}.`);
+    }),
+
+    runTest("Firma de tarjetas se guarda como data URL", async () => {
+      const fields = buildSharePointFields(
+        {
+          tipoFormulario: "tarjetas",
+          NombreCliente: "Luis",
+          ApellidoCliente1: "Martin",
+          DNICliente: "87654321Q",
+          EmailCliente: "luis.martin@example.com",
+          TelefonoCliente1: "677112233",
+          MetodoNotificacion: "email",
+          Firma: "data:image/png;base64,AAAABBBB",
+          consentimiento: true,
+        },
+        FORM_TYPES.TARJETAS_METRO,
+        "TAR-2026-ABCDEFGH",
+        "2026-06-29T08:00:00.000Z"
+      );
+
+      assert(fields.Firma === "data:image/png;base64,AAAABBBB", "La firma debe conservar el data URL completo.");
     }),
 
     runTest("consultarSolicitud exige email y token", async () => {

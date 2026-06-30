@@ -664,10 +664,6 @@ function transformSharePointValue(sharePointField, value, type) {
     return INSTALLATION_TYPE_VALUES[value] || value;
   }
 
-  if (sharePointField === "DAB") {
-    return normalizeDabCode(value);
-  }
-
   if (sharePointField === "Motivo") {
     return THANKS_REASON_VALUES[value] || value;
   }
@@ -691,11 +687,6 @@ function transformSharePointValue(sharePointField, value, type) {
   }
 
   return value;
-}
-
-function normalizeDabCode(value) {
-  const match = /^([A-Z]{2,4}-)?DAB-(\d+)$/i.exec(String(value || "").trim());
-  return match ? `DAB ${match[2]}` : value;
 }
 
 function buildSolicitudResponse(item, listName, attachments = [], timeline = []) {

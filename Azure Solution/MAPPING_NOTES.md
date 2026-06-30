@@ -64,7 +64,7 @@ Este documento recoge el contrato entre el formulario prototipo, la Azure Functi
 | `Lugar` | Choice de ubicacion normalizado desde slug. Obligatorio. |
 | `TipoDeTitulo` | Choice normalizado desde slug si aplica. |
 | `NBilleteTitulo` | Numero de billete/titulo. |
-| `DAB` | Lookup. La API normaliza codigos del prototipo (`ATZ-DAB-101` -> `DAB 101`) y resuelve `DABLookupId` si el valor existe en la lista auxiliar. |
+| `DAB` | Lookup. La API conserva el nombre/codigo recibido del formulario y lo resuelve como lookup si coincide con la lista auxiliar. |
 | `PuntoDeVenta` | Choice de estacion/punto de venta si aplica. |
 | `TipoDeInstalacion` | Choice normalizado (`dab` -> `DAB`) cuando aplica. |
 | `NClienteNTarjCredito` | Identificador auxiliar para MetroPay/tarjeta cuando aplica. |
@@ -73,7 +73,7 @@ Este documento recoge el contrato entre el formulario prototipo, la Azure Functi
 | `Observaciones` | Detalles auxiliares no estructurados. |
 
 La API convierte campos lookup a `CampoLookupId`. Si el payload trae un numero, lo usa como ID; si trae texto, busca el valor en la lista auxiliar por `Title`.
-Pendiente: `DAB` tiene valores duplicados por estacion en su lista auxiliar; ahora se resuelve por titulo y falta desambiguar con `EstacionLookupId`. Tambien falta validar catalogos reales para `Tipologia`, `Subtipologia`, `EstadoDeLaResolucion` y otros lookups que aun no tienen campo visible en el prototipo.
+Pendiente: `DAB` conserva el codigo del formulario; si se quiere resolver como lookup, el valor debe coincidir con la lista auxiliar o hay que anadir una regla explicita de correspondencia por estacion. Tambien falta validar catalogos reales para `Tipologia`, `Subtipologia`, `EstadoDeLaResolucion` y otros lookups que aun no tienen campo visible en el prototipo.
 
 ## Objetos Perdidos NUEVA
 
@@ -97,17 +97,17 @@ Pendiente: `DAB` tiene valores duplicados por estacion en su lista auxiliar; aho
 | `NombreCliente`, `ApellidoCliente1`, `ApellidoCliente2`, `DNICliente`, `EmailCliente`, `TelefonoCliente1`, `TelefonoCliente2` | Datos del cliente. |
 | `NombreRep`, `ApellidoRep1`, `ApellidoRep2`, `DNIRep`, `EmailRep`, `TelefonoRep1`, `TelefonoRep2` | Representante si aplica. |
 | `MetodoNotificacion` | Choice normalizado (`email` -> `Correo`, `impreso` -> `Impresion`). |
-| `Firma` | Nombre del archivo de firma subido como adjunto nativo del item. |
+| `Firma` | Data URL/base64 de la firma (`data:image/png;base64,...`) guardado en la columna de texto. |
 | `Title` | Token generado por API aunque la columna no sea requerida. |
 
 ## Adjuntos y firma
 
 - El endpoint `POST /api/solicitudes/crear` acepta JSON puro o `multipart/form-data`.
 - En multipart, el campo `payload` contiene el JSON y los campos de archivo se suben despues de crear el item.
-- La firma de Tarjetas +Metro se envia como `signature_interesado_0` y se adjunta al item con nombre `firma-tarjeta-metro.png`.
-- La columna `Firma` de `ClientesTarjetaMetro` guarda el nombre del archivo de firma.
+- La firma de Tarjetas +Metro se envia en el payload como texto base64/data URL en la columna `Firma`.
+- La firma no fuerza `multipart/form-data`; solo los adjuntos reales usan multipart.
 - Si SharePoint REST rechaza un archivo, la solicitud queda creada y la respuesta incluye `warnings`.
-- Prueba real 2026-06-29: la Function recibe multipart y crea el item, pero la subida de firma devolvio `401`; falta revisar permiso/admin consent de SharePoint REST para la app registrada.
+- Prueba real 2026-06-29: la Function recibe multipart y crea el item, pero la subida de adjuntos devolvio `401`; falta revisar permiso/admin consent de SharePoint REST para la app registrada.
 
 ## Problemas detectados
 
@@ -119,5 +119,7 @@ Pendiente: `DAB` tiene valores duplicados por estacion en su lista auxiliar; aho
 | 2026-06-29 | Formulario prototipo | El modal mostraba referencia local `ATT-*`. | Solucionado | El modal usa `response.token`. |
 | 2026-06-29 | Diagnostico SharePoint | Eran dificiles de detectar errores de tipo/formato. | Solucionado | Warnings preventivos y `diagnostics.sharePoint`. |
 | 2026-06-29 | Contrato API | Habia dependencia de `FIELD_MAP` y nombres prototipo. | En curso | API y prototipo migrados a nombres directos; lookup resolver generico implementado; quedan pendientes catalogos/controles de `Tipologia` y `Subtipologia`. |
-| 2026-06-29 | Adjuntos / firma | El prototipo declaraba multipart pero enviaba JSON. | Codigo preparado / permiso pendiente | El prototipo envia `FormData` cuando hay binarios y la API intenta subir adjuntos por SharePoint REST. Prueba real: item `1372`, token `TAR-2026-UYCZGF22`, adjunto rechazado con `401`. |
+| 2026-06-29 | Adjuntos | El prototipo declaraba multipart pero enviaba JSON. | Codigo preparado / permiso pendiente | El prototipo envia `FormData` cuando hay binarios y la API intenta subir adjuntos por SharePoint REST. Prueba real: item `1372`, token `TAR-2026-UYCZGF22`, adjunto rechazado con `401`. |
 | 2026-06-29 | Tarjetas +Metro | Registros de prueba de adjuntos/firma. | Solucionado | Borrados items `1372` y `1374` en `ClientesTarjetaMetro` con Graph (`204`). |
+| 2026-06-30 | Tarjetas +Metro | La firma se estaba guardando como nombre de archivo y no como contenido base64. | Solucionado | La firma vuelve a enviarse en `Firma` como `data:image/png;base64,...`. Prueba real: item `1378`, token `TAR-2026-GNS673TD`, `Firma` leida como data URL; item borrado tras validar. |
+| 2026-06-30 | Objetos Perdidos NUEVA | La foto llega a la Function pero no se adjunta al item. | Permiso pendiente | Prueba real: item `8005`, token `OBJ-2026-T23CN5GW`, `AttachmentFiles` devuelve `401`. Revisar permiso/admin consent de SharePoint REST para la app registrada; item borrado tras validar. |

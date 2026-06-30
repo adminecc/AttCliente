@@ -247,7 +247,8 @@
       "type": "string"
     },
     "Firma": {
-      "type": "string"
+      "type": "string",
+      "description": "Firma de Tarjetas +Metro como data URL base64, por ejemplo data:image/png;base64,..."
     }
   },
   "allOf": [

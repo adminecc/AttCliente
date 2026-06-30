@@ -2,7 +2,7 @@
 
 Contrato vigente para `POST /api/solicitudes/crear`.
 
-Los campos enviados a la API deben usar los nombres internos de SharePoint (`field_internal_name_for_create`). `tipoFormulario` se mantiene como campo de control para enrutar la solicitud a la lista correcta. `consentimiento`, `confirmEmail`, `recibirPostal`, adjuntos y firmas son campos de control del formulario/API y no se guardan directamente como columnas salvo que exista una columna equivalente.
+Los campos enviados a la API deben usar los nombres internos de SharePoint (`field_internal_name_for_create`). `tipoFormulario` se mantiene como campo de control para enrutar la solicitud a la lista correcta. `consentimiento`, `confirmEmail`, `recibirPostal` y adjuntos son campos de control del formulario/API y no se guardan directamente como columnas salvo que exista una columna equivalente. En Tarjetas +Metro, `Firma` es una columna real y se envia como `data:image/png;base64,...`.
 
 ## Campos comunes ConectaDEV
 

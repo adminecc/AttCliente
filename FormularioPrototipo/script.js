@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalOverlay = document.getElementById('modalOverlay');
     const modalClose = document.getElementById('modalClose');
     const modalReference = document.getElementById('modalReference');
+    const modalWarnings = document.getElementById('modalWarnings');
 
     // Botones
     const btnLimpiar = document.getElementById('btnLimpiar');
@@ -591,8 +592,17 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Muestra el modal de confirmación
      */
-    function mostrarModal(referencia = generarReferencia()) {
+    function mostrarModal(referencia = generarReferencia(), warnings = []) {
         modalReference.textContent = referencia;
+        if (modalWarnings) {
+            if (Array.isArray(warnings) && warnings.length > 0) {
+                modalWarnings.textContent = `Aviso: ${warnings.join(' ')}`;
+                modalWarnings.classList.remove('hidden');
+            } else {
+                modalWarnings.textContent = '';
+                modalWarnings.classList.add('hidden');
+            }
+        }
         modalOverlay.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
@@ -789,9 +799,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // 5. Adjuntos y Firmas en formato estructurado (referenciando el multipart)
+        // 5. Adjuntos en formato estructurado (referenciando el multipart)
         const attachments = [];
-        const signatures = [];
 
         // Archivos adjuntos
         const fileInputs = form.querySelectorAll('.file-input');
@@ -813,18 +822,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
-
-        // Firma (solo para tarjetas si está visible)
-        const signatureCanvas = document.getElementById('signature-canvas');
-        const signatureData = document.getElementById('signature-data');
-        if (signatureData && signatureData.value && !esElementoOculto(signatureCanvas)) {
-            signatures.push({
-                fieldId: "signature-data",
-                contentType: "image/png",
-                storageMode: "multipart",
-                multipartFieldName: "signature_interesado_0"
-            });
-        }
 
         // 6. Consentimientos
         const consents = [];
@@ -881,7 +878,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 direccionEnvio: direccionEnvio
             },
             values: values,
-            signatures: signatures,
             attachments: attachments,
             consents: consents,
             metadata: {
@@ -1034,7 +1030,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (tipoFormularioActual === 'tarjetas') {
-            const firmaAdjunta = payloadUnificado.signatures?.length ? 'firma-tarjeta-metro.png' : null;
+            const firmaDataUrl = document.getElementById('signature-data')?.value || null;
+            if (firmaDataUrl && !firmaDataUrl.startsWith('data:image/')) {
+                console.warn('[Metro API] Firma de Tarjetas con formato inesperado; se esperaba data:image/... base64.', {
+                    firmaPreview: firmaDataUrl.slice(0, 40)
+                });
+            }
             return {
                 tipoFormulario: tipoFormularioActual,
                 Title: null,
@@ -1046,20 +1047,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 confirmEmail: applicant.email,
                 TelefonoCliente1: applicant.telefono,
                 MetodoNotificacion: values.medioNotificacionTarjeta,
-                Firma: firmaAdjunta,
-                signatures: payloadUnificado.signatures,
+                Firma: firmaDataUrl,
                 attachments: payloadUnificado.attachments,
                 consentimiento: payloadApi.consentimiento,
             };
         }
-
-        payloadApi.signatures = payloadUnificado.signatures;
         payloadApi.attachments = payloadUnificado.attachments;
         return payloadApi;
     }
 
     function tieneBinariosParaApi(payloadUnificado) {
-        return Boolean(payloadUnificado.attachments?.length || payloadUnificado.signatures?.length);
+        return Boolean(payloadUnificado.attachments?.length);
     }
 
     function crearRequestApi(payloadApi, payloadUnificado) {
@@ -1083,32 +1081,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        const signatureData = document.getElementById('signature-data');
-        if (signatureData?.value) {
-            const signatureBlob = dataUrlToBlob(signatureData.value);
-            if (signatureBlob) {
-                formData.append('signature_interesado_0', signatureBlob, 'firma-tarjeta-metro.png');
-            }
-        }
-
         return {
             body: formData,
         };
-    }
-
-    function dataUrlToBlob(dataUrl) {
-        const match = /^data:([^;,]+)?(;base64)?,(.*)$/.exec(dataUrl || '');
-        if (!match) return null;
-
-        const contentType = match[1] || 'application/octet-stream';
-        const isBase64 = Boolean(match[2]);
-        const rawData = isBase64 ? atob(match[3]) : decodeURIComponent(match[3]);
-        const bytes = new Uint8Array(rawData.length);
-        for (let i = 0; i < rawData.length; i++) {
-            bytes[i] = rawData.charCodeAt(i);
-        }
-
-        return new Blob([bytes], { type: contentType });
     }
 
     function registrarLogApi(entry) {
@@ -1190,7 +1165,10 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const payload = generarPayloadFormulario();
                 const resultado = await enviarSolicitudApi(payload);
-                mostrarModal(resultado.token || resultado.solicitudId || resultado.id || 'Solicitud registrada');
+                mostrarModal(
+                    resultado.token || resultado.solicitudId || resultado.id || 'Solicitud registrada',
+                    resultado.warnings || []
+                );
             } catch (errorEnvio) {
                 console.error('Error enviando la solicitud a la API:', errorEnvio);
                 alert(`No se pudo enviar la solicitud: ${errorEnvio.message}`);

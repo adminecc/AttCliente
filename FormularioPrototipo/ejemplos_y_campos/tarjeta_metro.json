@@ -14,7 +14,7 @@
   "DNIRep": "76543210M",
   "EmailRep": "sofia.gomez@example.com",
   "TelefonoRep1": "655443322",
-  "Firma": "Firma capturada en formulario",
+  "Firma": "data:image/png;base64,iVBORw0KGgoAAA...",
   "consentimiento": true,
   "datosCorrectos": true
 }
