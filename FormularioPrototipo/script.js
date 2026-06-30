@@ -730,6 +730,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function fileMatchesAccept(file, accept) {
+        const rules = String(accept || '').split(',').map(rule => rule.trim().toLowerCase()).filter(Boolean);
+        if (rules.length === 0) return true;
+
+        const fileName = String(file.name || '').toLowerCase();
+        const fileType = String(file.type || '').toLowerCase();
+
+        return rules.some(rule => {
+            if (rule.startsWith('.')) return fileName.endsWith(rule);
+            if (rule.endsWith('/*')) return fileType.startsWith(rule.slice(0, -1));
+            return fileType === rule;
+        });
+    }
+
+    function addFilesToInput(input, incomingFiles) {
+        const acceptedFiles = Array.from(incomingFiles || [])
+            .filter(file => fileMatchesAccept(file, input.accept));
+        if (acceptedFiles.length === 0) return;
+
+        const dataTransfer = new DataTransfer();
+        const currentFiles = input.multiple ? Array.from(input.files || []) : [];
+        [...currentFiles, ...acceptedFiles].forEach(file => dataTransfer.items.add(file));
+
+        input.files = input.multiple
+            ? dataTransfer.files
+            : (() => {
+                const single = new DataTransfer();
+                single.items.add(acceptedFiles[0]);
+                return single.files;
+            })();
+        renderSelectedFiles(input);
+    }
+
     function formatFileSize(bytes) {
         const size = Number(bytes) || 0;
         if (size >= 1024 * 1024) return `${(size / (1024 * 1024)).toFixed(1)} MB`;
@@ -758,6 +791,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fileInputs.forEach(input => {
         input.addEventListener('change', () => renderSelectedFiles(input));
+
+        const fileUpload = input.closest('.file-upload');
+        if (!fileUpload) return;
+
+        fileUpload.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUpload.classList.add('is-dragover');
+        });
+
+        fileUpload.addEventListener('dragleave', (e) => {
+            if (!fileUpload.contains(e.relatedTarget)) {
+                fileUpload.classList.remove('is-dragover');
+            }
+        });
+
+        fileUpload.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUpload.classList.remove('is-dragover');
+            addFilesToInput(input, e.dataTransfer?.files);
+        });
     });
 
     document.addEventListener('click', (e) => {
