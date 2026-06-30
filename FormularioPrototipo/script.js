@@ -4,7 +4,8 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    const API_CREATE_ENDPOINT = 'https://metroattfn-e0gucabgedacccey.spaincentral-01.azurewebsites.net/api/solicitudes/crear';
+    const API_BASE_URL = 'https://metroattfn-e0gucabgedacccey.spaincentral-01.azurewebsites.net';
+    const API_CREATE_ENDPOINT = `${API_BASE_URL}/api/solicitudes/crear`;
     const API_LOG_STORAGE_KEY = 'metroApiLogs';
 
     // ============================================
