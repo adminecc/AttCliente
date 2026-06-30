@@ -4,9 +4,11 @@ const crypto = require("crypto");
 const { getConfig, assertGraphConfig, getSiteIdForType } = require("./config");
 
 const GRAPH_BASE_URL = "https://graph.microsoft.com/v1.0";
+const ATTACHMENT_LIBRARY_NAME = "DocumentosAdjuntos";
 const listIdCache = new Map();
 const listColumnsCache = new Map();
 const lookupItemsCache = new Map();
+const documentLibraryCache = new Map();
 
 const TITLE_TYPE_VALUES = {
   "monedero-metro-malaga": "Monedero Metro Málaga",
@@ -318,14 +320,51 @@ async function findListItemByEmailAndToken(accessToken, type, email, token, conf
       timeout: 15000,
     });
 
-    return response.data?.value?.[0] || null;
+    const item = response.data?.value?.[0] || null;
+    if (item) {
+      return item;
+    }
+
+    warn(
+      context,
+      `findListItemByEmailAndToken - filtro Graph sin resultados en ${target.listName}, usando busqueda local.`
+    );
+    return findListItemByEmailAndTokenFallbackOrDocumentFolder(
+      accessToken,
+      target,
+      emailField,
+      email,
+      token,
+      context
+    );
   } catch (error) {
     warn(
       context,
       `findListItemByEmailAndToken - filtro Graph no disponible, usando busqueda local: ${error.message}`
     );
-    return findListItemByEmailAndTokenFallback(accessToken, target, emailField, email, token, context);
+    return findListItemByEmailAndTokenFallbackOrDocumentFolder(
+      accessToken,
+      target,
+      emailField,
+      email,
+      token,
+      context
+    );
   }
+}
+
+async function findListItemByEmailAndTokenFallbackOrDocumentFolder(accessToken, target, emailField, email, token, context) {
+  try {
+    const item = await findListItemByEmailAndTokenFallback(accessToken, target, emailField, email, token, context);
+    if (item) return item;
+  } catch (error) {
+    warn(
+      context,
+      `findListItemByEmailAndTokenFallback - busqueda local no disponible: ${error.response?.data?.error?.message || error.message}`
+    );
+  }
+
+  return findListItemByDocumentFolder(accessToken, target, emailField, email, token, context);
 }
 
 async function findListItemByEmailAndTokenFallback(accessToken, target, emailField, email, token, context) {
@@ -349,27 +388,118 @@ async function findListItemByEmailAndTokenFallback(accessToken, target, emailFie
   }) || null;
 }
 
-async function getListItemAttachments(accessToken, type, itemId, config = getConfig(), context) {
+async function findListItemByDocumentFolder(accessToken, target, emailField, email, token, context) {
+  const library = await resolveDocumentLibraryTarget(accessToken, target.siteId, context);
+  const folderName = sanitizeDocumentLibraryFolderName(token);
+  const folder = await getDriveItemByPath(accessToken, target.siteId, library.driveId, folderName, context);
+  if (!folder?.id) {
+    return null;
+  }
+
+  const fieldsUrl =
+    `${GRAPH_BASE_URL}/sites/${encodeURIComponent(target.siteId)}/drives/${encodeURIComponent(library.driveId)}` +
+    `/items/${encodeURIComponent(folder.id)}/listItem/fields`;
+  context?.log?.(`findListItemByDocumentFolder - GET ${fieldsUrl}`);
+
+  const fieldsResponse = await axios.get(fieldsUrl, {
+    headers: graphHeaders(accessToken),
+    timeout: 15000,
+  });
+
+  const itemId = fieldsResponse.data?.IDRef;
+  if (!itemId) {
+    warn(context, `findListItemByDocumentFolder - carpeta ${folderName} sin IDRef.`);
+    return null;
+  }
+
+  const itemUrl =
+    `${GRAPH_BASE_URL}/sites/${encodeURIComponent(target.siteId)}/lists/${encodeURIComponent(target.listId)}` +
+    `/items/${encodeURIComponent(itemId)}?$expand=fields`;
+  context?.log?.(`findListItemByDocumentFolder - GET ${itemUrl}`);
+
+  const itemResponse = await axios.get(itemUrl, {
+    headers: graphHeaders(accessToken),
+    timeout: 15000,
+  });
+
+  const fields = itemResponse.data?.fields || {};
+  if (
+    normalizeComparable(fields.Title) === normalizeComparable(token)
+    && normalizeComparable(fields[emailField]) === normalizeComparable(email)
+  ) {
+    return itemResponse.data;
+  }
+
+  warn(context, `findListItemByDocumentFolder - IDRef encontrado pero no coincide email/token para ${folderName}.`);
+  return null;
+}
+
+async function getListItemAttachments(accessToken, type, itemId, config = getConfig(), context, referenceToken = itemId) {
   const target = await resolveSharePointTarget(accessToken, type, config, context);
-  const url = `${GRAPH_BASE_URL}/sites/${encodeURIComponent(target.siteId)}/lists/${encodeURIComponent(target.listId)}/items/${itemId}/driveItem/children`;
+  const token = String(referenceToken || "").trim();
+  if (!token) return [];
+
+  const library = await resolveDocumentLibraryTarget(accessToken, target.siteId, context);
+  const filterValue = isNumberLike(token) ? String(Number(token)) : `'${escapeOData(token)}'`;
+  const filter = `fields/IDRef eq ${filterValue}`;
+  const url =
+    `${GRAPH_BASE_URL}/sites/${encodeURIComponent(target.siteId)}/lists/${encodeURIComponent(library.listId)}/items` +
+    "?$expand=fields,driveItem" +
+    `&$filter=${encodeURIComponent(filter)}` +
+    "&$top=200";
   context?.log?.(`getListItemAttachments - GET ${url}`);
 
   try {
     const response = await axios.get(url, {
-      headers: graphHeaders(accessToken),
+      headers: graphHeaders(accessToken, {
+        Prefer: "HonorNonIndexedQueriesWarningMayFailRandomly",
+      }),
       timeout: 15000,
     });
 
-    return (response.data?.value || []).map((file) => ({
+    const attachments = mapDocumentLibraryAttachments(response.data?.value || []);
+    if (attachments.length > 0) {
+      return attachments;
+    }
+
+    warn(
+      context,
+      `getListItemAttachments - filtro Graph sin resultados para IDRef=${token}, usando busqueda local.`
+    );
+    return getListItemAttachmentsFallback(accessToken, target.siteId, library.listId, token, context);
+  } catch {
+    return getListItemAttachmentsFallback(accessToken, target.siteId, library.listId, token, context);
+  }
+}
+
+async function getListItemAttachmentsFallback(accessToken, siteId, libraryListId, referenceToken, context) {
+  const url =
+    `${GRAPH_BASE_URL}/sites/${encodeURIComponent(siteId)}/lists/${encodeURIComponent(libraryListId)}/items` +
+    "?$expand=fields,driveItem" +
+    "&$top=200";
+  context?.log?.(`getListItemAttachmentsFallback - GET ${url}`);
+
+  const response = await axios.get(url, {
+    headers: graphHeaders(accessToken),
+    timeout: 15000,
+  });
+
+  return mapDocumentLibraryAttachments((response.data?.value || []).filter((item) => (
+    normalizeComparable(item.fields?.IDRef) === normalizeComparable(referenceToken)
+  )));
+}
+
+function mapDocumentLibraryAttachments(items) {
+  return items
+    .map((item) => item.driveItem || {})
+    .filter((driveItem) => driveItem.file)
+    .map((file) => ({
       nombre: file.name,
       tipo: file.file?.mimeType || "",
       tamanioBytes: file.size || 0,
       urlDescarga: file["@microsoft.graph.downloadUrl"] || "",
       webUrl: file.webUrl || "",
     }));
-  } catch {
-    return [];
-  }
 }
 
 async function getListItemTimeline(accessToken, type, itemId, config = getConfig(), context) {
@@ -420,19 +550,42 @@ function buildSharePointFields(payload, type, token, createdAt) {
   return fields;
 }
 
-async function uploadListItemAttachments(accessToken, type, itemId, files = [], config = getConfig(), context) {
+async function uploadListItemAttachments(accessToken, type, itemId, files = [], config = getConfig(), context, referenceToken = itemId) {
   if (!Array.isArray(files) || files.length === 0) {
     return { uploaded: [], warnings: [] };
   }
 
   const target = await resolveSharePointTarget(accessToken, type, config, context);
-  const sharePointToken = await getSharePointAccessToken(target.siteUrl, config);
+  const library = await resolveDocumentLibraryTarget(accessToken, target.siteId, context);
+  const folderName = sanitizeDocumentLibraryFolderName(referenceToken || itemId);
+  const referenceId = String(referenceToken || itemId);
+  const folder = await ensureDocumentLibraryFolder(accessToken, target.siteId, library.driveId, folderName, context);
+  context?.log?.(
+    `uploadListItemAttachments - biblioteca=${ATTACHMENT_LIBRARY_NAME} carpeta='${folderName}' item=${itemId} token=${referenceToken} archivos=${files.length}`
+  );
   const uploaded = [];
   const warnings = [];
 
+  await updateDocumentLibraryItemFields(accessToken, target.siteId, library.driveId, folder.id, {
+    IDRef: referenceToken,
+    Visible: true,
+  }, context);
+
   for (const file of files) {
     try {
-      uploaded.push(await uploadListItemAttachment(sharePointToken, target, itemId, file, context));
+      const plan = buildDocumentLibraryAttachmentPlan({ referenceToken, referenceId, file, folderName });
+      const driveItem = await uploadDocumentLibraryFile(accessToken, target.siteId, library.driveId, plan, file, context);
+      await updateDocumentLibraryItemFields(accessToken, target.siteId, library.driveId, driveItem.id, plan.fields, context);
+      uploaded.push({
+        nombre: plan.fileName,
+        tipo: file.contentType || "application/octet-stream",
+        tamanioBytes: file.sizeBytes || file.content?.length || 0,
+        fieldName: file.fieldName || "",
+        carpeta: folderName,
+        idRef: plan.fields.IDRef,
+        visible: plan.fields.Visible,
+        webUrl: driveItem.webUrl || "",
+      });
     } catch (error) {
       const message = `${file.fileName || file.fieldName || "archivo"}: ${formatAttachmentUploadError(error)}`;
       warnings.push(message);
@@ -448,39 +601,135 @@ function formatAttachmentUploadError(error) {
   const detail = error.response?.data?.error?.message?.value
     || error.response?.data?.error?.message
     || error.message;
+  const headers = error.response?.headers || {};
+  const requestId = headers.sprequestguid
+    || headers["sprequestguid"]
+    || headers["request-id"]
+    || headers["x-ms-request-id"];
+  const authenticate = headers["www-authenticate"] || headers["WWW-Authenticate"];
+
+  const parts = [];
+  if (status) parts.push(`HTTP ${status}`);
+  if (detail) parts.push(String(detail));
+  if (requestId) parts.push(`sprequestguid=${requestId}`);
+  if (authenticate) parts.push(`WWW-Authenticate=${String(authenticate).slice(0, 500)}`);
 
   if (status === 401 || status === 403) {
-    return `${detail}. Revisar permisos/admin consent de SharePoint REST para la app registrada.`;
+    parts.push("Revisar audiencia del token, roles SharePoint y admin consent para la app registrada.");
   }
 
-  return detail;
+  return parts.join(" | ") || "Error desconocido subiendo adjunto.";
 }
 
-async function uploadListItemAttachment(sharePointToken, target, itemId, file, context) {
-  const fileName = sanitizeAttachmentFileName(file.fileName || `${file.fieldName || "adjunto"}.bin`);
-  const url =
-    `${normalizeSiteUrl(target.siteUrl)}/_api/web/lists/getbytitle('${escapeSharePointRestString(target.listName)}')` +
-    `/items(${encodeURIComponent(itemId)})/AttachmentFiles/add(FileName='${escapeSharePointRestString(fileName)}')`;
+function buildDocumentLibraryAttachmentPlan({ referenceToken, referenceId, file, folderName }) {
+  const safeFolderName = sanitizeDocumentLibraryFolderName(folderName || referenceToken || "sin-referencia");
+  const fileName = sanitizeDocumentLibraryFileName(file?.fileName || `${file?.fieldName || "documento"}.bin`);
 
-  context?.log?.(`uploadListItemAttachment - POST ${url}`);
+  return {
+    folderName: safeFolderName,
+    fileName,
+    fields: {
+      IDRef: String(referenceToken || referenceId || ""),
+      Visible: true,
+    },
+  };
+}
 
-  const response = await axios.post(url, file.content, {
+async function resolveDocumentLibraryTarget(accessToken, siteId, context) {
+  const cacheKey = `${siteId}|${ATTACHMENT_LIBRARY_NAME}`;
+  if (documentLibraryCache.has(cacheKey)) {
+    return documentLibraryCache.get(cacheKey);
+  }
+
+  const list = await resolveListByName(accessToken, siteId, ATTACHMENT_LIBRARY_NAME, context);
+  const driveUrl = `${GRAPH_BASE_URL}/sites/${encodeURIComponent(siteId)}/lists/${encodeURIComponent(list.id)}/drive`;
+  context?.log?.(`resolveDocumentLibraryTarget - GET ${driveUrl}`);
+
+  const driveResponse = await axios.get(driveUrl, {
+    headers: graphHeaders(accessToken),
+    timeout: 15000,
+  });
+
+  const target = {
+    listId: list.id,
+    listName: list.displayName || list.name || ATTACHMENT_LIBRARY_NAME,
+    driveId: driveResponse.data?.id,
+  };
+
+  if (!target.driveId) {
+    throw new Error(`La biblioteca ${ATTACHMENT_LIBRARY_NAME} no tiene drive asociado.`);
+  }
+
+  documentLibraryCache.set(cacheKey, target);
+  return target;
+}
+
+async function ensureDocumentLibraryFolder(accessToken, siteId, driveId, folderName, context) {
+  const existing = await getDriveItemByPath(accessToken, siteId, driveId, folderName, context);
+  if (existing?.id) {
+    return existing;
+  }
+
+  const url = `${GRAPH_BASE_URL}/sites/${encodeURIComponent(siteId)}/drives/${encodeURIComponent(driveId)}/root/children`;
+  context?.log?.(`ensureDocumentLibraryFolder - POST ${url}`);
+
+  const response = await axios.post(url, {
+    name: folderName,
+    folder: {},
+    "@microsoft.graph.conflictBehavior": "fail",
+  }, {
+    headers: graphHeaders(accessToken),
+    timeout: 15000,
+  });
+
+  return response.data;
+}
+
+async function getDriveItemByPath(accessToken, siteId, driveId, itemPath, context) {
+  const url = `${GRAPH_BASE_URL}/sites/${encodeURIComponent(siteId)}/drives/${encodeURIComponent(driveId)}/root:/${encodeGraphPath(itemPath)}`;
+  context?.log?.(`getDriveItemByPath - GET ${url}`);
+
+  try {
+    const response = await axios.get(url, {
+      headers: graphHeaders(accessToken),
+      timeout: 15000,
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response?.status === 404) return null;
+    throw error;
+  }
+}
+
+async function uploadDocumentLibraryFile(accessToken, siteId, driveId, plan, file, context) {
+  const itemPath = `${plan.folderName}/${plan.fileName}`;
+  const url = `${GRAPH_BASE_URL}/sites/${encodeURIComponent(siteId)}/drives/${encodeURIComponent(driveId)}/root:/${encodeGraphPath(itemPath)}:/content`;
+  context?.log?.(
+    `uploadDocumentLibraryFile - PUT ${url} bytes=${file.sizeBytes || file.content?.length || 0} tipo=${file.contentType || "application/octet-stream"}`
+  );
+
+  const response = await axios.put(url, file.content, {
     headers: {
-      Authorization: `Bearer ${sharePointToken}`,
-      Accept: "application/json;odata=nometadata",
+      Authorization: `Bearer ${accessToken}`,
       "Content-Type": file.contentType || "application/octet-stream",
     },
     maxBodyLength: Infinity,
     timeout: 30000,
   });
 
-  return {
-    nombre: fileName,
-    tipo: file.contentType || "application/octet-stream",
-    tamanioBytes: file.sizeBytes || file.content?.length || 0,
-    fieldName: file.fieldName || "",
-    url: response.data?.ServerRelativeUrl || response.data?.serverRelativeUrl || "",
-  };
+  return response.data;
+}
+
+async function updateDocumentLibraryItemFields(accessToken, siteId, driveId, driveItemId, fields, context) {
+  const url =
+    `${GRAPH_BASE_URL}/sites/${encodeURIComponent(siteId)}/drives/${encodeURIComponent(driveId)}` +
+    `/items/${encodeURIComponent(driveItemId)}/listItem/fields`;
+  context?.log?.(`updateDocumentLibraryItemFields - PATCH ${url} campos=${Object.keys(fields).join(",")}`);
+
+  await axios.patch(url, fields, {
+    headers: graphHeaders(accessToken),
+    timeout: 15000,
+  });
 }
 
 function shouldCopyPayloadField(name, value) {
@@ -758,6 +1007,30 @@ async function resolveListId(accessToken, siteId, sharePointTarget, context) {
   return match.id;
 }
 
+async function resolveListByName(accessToken, siteId, listName, context) {
+  const cacheKey = `${siteId}|name:${listName}`;
+  if (listIdCache.has(cacheKey)) {
+    return listIdCache.get(cacheKey);
+  }
+
+  const url = `${GRAPH_BASE_URL}/sites/${encodeURIComponent(siteId)}/lists?$select=id,name,displayName,webUrl`;
+  context?.log?.(`resolveListByName - GET ${url}`);
+
+  const response = await axios.get(url, {
+    headers: graphHeaders(accessToken),
+    timeout: 15000,
+  });
+
+  const lists = response.data?.value || [];
+  const match = lists.find((list) => list.displayName === listName || list.name === listName);
+  if (!match?.id) {
+    throw new Error(`No se encontro la biblioteca SharePoint '${listName}'.`);
+  }
+
+  listIdCache.set(cacheKey, match);
+  return match;
+}
+
 function listMatchesTarget(list, sharePointTarget) {
   const expectedUrl = normalizeSharePointUrl(sharePointTarget.listUrl);
   const actualUrl = normalizeSharePointUrl(list.webUrl);
@@ -800,6 +1073,30 @@ function graphHeaders(accessToken, extraHeaders = {}) {
   };
 }
 
+function encodeGraphPath(pathValue) {
+  return String(pathValue || "")
+    .split("/")
+    .filter(Boolean)
+    .map((segment) => encodeURIComponent(segment))
+    .join("/");
+}
+
+function sanitizeDocumentLibraryFolderName(name) {
+  return String(name || "sin-referencia")
+    .replace(/[~"#%&*:<>?/\\{|}\x00-\x1F]/g, "_")
+    .trim()
+    .slice(0, 128)
+    || "sin-referencia";
+}
+
+function sanitizeDocumentLibraryFileName(name) {
+  return String(name || "documento.bin")
+    .replace(/[~"#%&*:<>?/\\{|}\x00-\x1F]/g, "_")
+    .trim()
+    .slice(0, 128)
+    || "documento.bin";
+}
+
 function normalizeSiteUrl(siteUrl) {
   return String(siteUrl || "").replace(/\/$/, "");
 }
@@ -812,6 +1109,25 @@ function sanitizeAttachmentFileName(fileName) {
 
 function escapeSharePointRestString(value) {
   return String(value || "").replace(/'/g, "''");
+}
+
+function decodeJwtPayload(token) {
+  try {
+    const payload = String(token || "").split(".")[1];
+    if (!payload) return {};
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+    return JSON.parse(Buffer.from(padded, "base64").toString("utf8"));
+  } catch {
+    return {};
+  }
+}
+
+function formatTokenRoles(payload) {
+  if (Array.isArray(payload?.roles)) return payload.roles.join(",");
+  if (payload?.roles) return String(payload.roles);
+  if (payload?.scp) return `scp:${payload.scp}`;
+  return "sin roles/scp";
 }
 
 function escapeOData(value) {
@@ -857,6 +1173,8 @@ module.exports = {
   getSharePointAccessToken,
   createListItem,
   uploadListItemAttachments,
+  formatAttachmentUploadError,
+  buildDocumentLibraryAttachmentPlan,
   prepareLookupFieldWrites,
   findListItemByEmailAndToken,
   getListItemAttachments,

@@ -103,11 +103,12 @@ Pendiente: `DAB` conserva el codigo del formulario; si se quiere resolver como l
 ## Adjuntos y firma
 
 - El endpoint `POST /api/solicitudes/crear` acepta JSON puro o `multipart/form-data`.
-- En multipart, el campo `payload` contiene el JSON y los campos de archivo se suben despues de crear el item.
+- En multipart, el campo `payload` contiene el JSON y los campos de archivo se suben despues de crear el item a la biblioteca `DocumentosAdjuntos` de `ConectaDEV`.
+- La carpeta se llama como el token de solicitud (`REC-*`, `OBJ-*`, etc.).
+- Cada documento guarda `IDRef` con el token de solicitud y `Visible = true`.
 - La firma de Tarjetas +Metro se envia en el payload como texto base64/data URL en la columna `Firma`.
 - La firma no fuerza `multipart/form-data`; solo los adjuntos reales usan multipart.
-- Si SharePoint REST rechaza un archivo, la solicitud queda creada y la respuesta incluye `warnings`.
-- Prueba real 2026-06-29: la Function recibe multipart y crea el item, pero la subida de adjuntos devolvio `401`; falta revisar permiso/admin consent de SharePoint REST para la app registrada.
+- Si la biblioteca rechaza un archivo, la solicitud queda creada y la respuesta incluye `warnings`.
 
 ## Problemas detectados
 
@@ -119,7 +120,10 @@ Pendiente: `DAB` conserva el codigo del formulario; si se quiere resolver como l
 | 2026-06-29 | Formulario prototipo | El modal mostraba referencia local `ATT-*`. | Solucionado | El modal usa `response.token`. |
 | 2026-06-29 | Diagnostico SharePoint | Eran dificiles de detectar errores de tipo/formato. | Solucionado | Warnings preventivos y `diagnostics.sharePoint`. |
 | 2026-06-29 | Contrato API | Habia dependencia de `FIELD_MAP` y nombres prototipo. | En curso | API y prototipo migrados a nombres directos; lookup resolver generico implementado; quedan pendientes catalogos/controles de `Tipologia` y `Subtipologia`. |
-| 2026-06-29 | Adjuntos | El prototipo declaraba multipart pero enviaba JSON. | Codigo preparado / permiso pendiente | El prototipo envia `FormData` cuando hay binarios y la API intenta subir adjuntos por SharePoint REST. Prueba real: item `1372`, token `TAR-2026-UYCZGF22`, adjunto rechazado con `401`. |
+| 2026-06-29 | Adjuntos | El prototipo declaraba multipart pero enviaba JSON. | Solucionado | El prototipo envia `FormData` cuando hay binarios y la API sube los archivos a `DocumentosAdjuntos`. |
 | 2026-06-29 | Tarjetas +Metro | Registros de prueba de adjuntos/firma. | Solucionado | Borrados items `1372` y `1374` en `ClientesTarjetaMetro` con Graph (`204`). |
 | 2026-06-30 | Tarjetas +Metro | La firma se estaba guardando como nombre de archivo y no como contenido base64. | Solucionado | La firma vuelve a enviarse en `Firma` como `data:image/png;base64,...`. Prueba real: item `1378`, token `TAR-2026-GNS673TD`, `Firma` leida como data URL; item borrado tras validar. |
-| 2026-06-30 | Objetos Perdidos NUEVA | La foto llega a la Function pero no se adjunta al item. | Permiso pendiente | Prueba real: item `8005`, token `OBJ-2026-T23CN5GW`, `AttachmentFiles` devuelve `401`. Revisar permiso/admin consent de SharePoint REST para la app registrada; item borrado tras validar. |
+| 2026-06-30 | Objetos Perdidos NUEVA | La foto llega a la Function pero no se adjunta al item. | Diagnosticado | Prueba real: item `8005`, token `OBJ-2026-T23CN5GW`, `AttachmentFiles` devuelve `401`. El diagnostico ampliado confirma rechazo de token app-only en SharePoint REST; item borrado tras validar. |
+| 2026-06-30 | Adjuntos nativos SharePoint | SharePoint REST rechaza el token app-only aunque incluya `Sites.FullControl.All`. | Bloqueado por endpoint | Prueba real en Objetos y Reclamaciones: la Function recibe los archivos, pero `AttachmentFiles/add` devuelve `401 Unsupported app only token`. Graph tampoco permite `driveItem` en listas no documentales. Siguiente opcion: usar biblioteca documental/columna URL o flujo delegado/Power Automate para adjuntar nativamente. |
+| 2026-06-30 | DocumentosAdjuntos | Subida alternativa a biblioteca documental. | Solucionado | Prueba real OK en Objetos y Reclamaciones: carpeta por token, archivo subido, `IDRef` con token de solicitud y `Visible=true`; warnings vacios. |
+| 2026-06-30 | Consulta de Objetos Perdidos | Graph devuelve cero resultados al filtrar por campos y el fallback por lista supera el umbral de vista. | En revision | Con `IDRef` como token ya no se usa como referencia numerica al item origen. |
