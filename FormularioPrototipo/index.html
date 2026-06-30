@@ -1301,12 +1301,13 @@
                             <div class="form-group full-width">
                                 <label for="fotoObjeto" class="label">Foto del objeto (si la tiene)</label>
                                 <div class="file-upload">
-                                    <input type="file" id="fotoObjeto" name="fotoObjeto" class="file-input" accept=".jpg,.jpeg,.png">
+                                    <input type="file" id="fotoObjeto" name="fotoObjeto" class="file-input" multiple accept=".jpg,.jpeg,.png">
                                     <label for="fotoObjeto" class="file-label">
                                         <span class="file-icon">📷</span>
-                                        <span class="file-text">Adjuntar fotografía</span>
-                                        <span class="file-hint">JPG o PNG (máx. 5MB)</span>
+                                        <span class="file-text">Arrastra fotografías aquí o haz clic para seleccionar</span>
+                                        <span class="file-hint">JPG o PNG (máx. 5MB por archivo)</span>
                                     </label>
+                                    <div id="fileListObjeto" class="file-list"></div>
                                 </div>
                             </div>
                         </div>
