@@ -203,7 +203,12 @@ async function main() {
   loadFunction("src/functions/token-generate.js");
   const { FORM_TYPES } = require("../src/shared/form-contract");
   const { assertGraphConfig } = require("../src/shared/config");
-  const { buildSharePointFields, buildFieldCompatibilityWarnings, prepareLookupFieldWrites } = require("../src/shared/sharepoint");
+  const {
+    buildSharePointFields,
+    buildFieldCompatibilityWarnings,
+    prepareLookupFieldWrites,
+    formatAttachmentUploadError,
+  } = require("../src/shared/sharepoint");
   const { validateSolicitudPayload } = require("../src/shared/validation");
 
   const tests = [
@@ -589,6 +594,52 @@ async function main() {
       );
 
       assert(fields.Firma === "data:image/png;base64,AAAABBBB", "La firma debe conservar el data URL completo.");
+    }),
+
+    runTest("diagnostico de adjuntos incluye detalle REST de SharePoint", async () => {
+      const detail = formatAttachmentUploadError({
+        message: "Request failed with status code 401",
+        response: {
+          status: 401,
+          headers: {
+            "www-authenticate": "Bearer realm=\"tenant\", client_id=\"00000003-0000-0ff1-ce00-000000000000\"",
+            "sprequestguid": "11111111-2222-3333-4444-555555555555",
+          },
+          data: {
+            error: {
+              message: {
+                value: "Access denied",
+              },
+            },
+          },
+        },
+      });
+
+      assert(detail.includes("HTTP 401"), "Se esperaba estado HTTP.");
+      assert(detail.includes("sprequestguid=11111111-2222-3333-4444-555555555555"), "Se esperaba request id de SharePoint.");
+      assert(detail.includes("WWW-Authenticate"), "Se esperaba cabecera WWW-Authenticate.");
+      assert(detail.includes("Access denied"), "Se esperaba mensaje REST.");
+    }),
+
+    runTest("biblioteca documental usa token como carpeta e IDRef", async () => {
+      const {
+        buildDocumentLibraryAttachmentPlan,
+      } = require("../src/shared/sharepoint");
+      const plan = buildDocumentLibraryAttachmentPlan({
+        referenceToken: "REC-2026-A/B:C",
+        referenceId: "123",
+        file: {
+          fieldName: "file_adjuntos_0",
+          fileName: "informe: prueba?.pdf",
+          contentType: "application/pdf",
+          sizeBytes: 1234,
+        },
+      });
+
+      assert(plan.folderName === "REC-2026-A_B_C", `Carpeta inesperada: ${plan.folderName}.`);
+      assert(plan.fileName === "informe_ prueba_.pdf", `Archivo inesperado: ${plan.fileName}.`);
+      assert(plan.fields.IDRef === "REC-2026-A/B:C", "IDRef debe guardar el token de solicitud.");
+      assert(plan.fields.Visible === true, "Visible debe marcarse a true.");
     }),
 
     runTest("consultarSolicitud exige email y token", async () => {

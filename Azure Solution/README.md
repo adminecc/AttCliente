@@ -255,25 +255,26 @@ file_adjuntos_0: documento.pdf
 file_fotoObjeto_0: objeto.jpg
 ```
 
-Despues de crear el item, la Function intenta subir los archivos como adjuntos nativos de la lista SharePoint mediante REST:
+Despues de crear el item, la Function sube los archivos a la biblioteca documental `DocumentosAdjuntos` del sitio `ConectaDEV`:
 
 ```text
-POST /_api/web/lists/getbytitle('Lista')/items(ID)/AttachmentFiles/add(FileName='archivo.pdf')
+DocumentosAdjuntos/
+  REC-2026-ABCDEFGH/
+    documento.pdf
+  OBJ-2026-ABCDEFGH/
+    objeto.jpg
 ```
+
+La carpeta usa el token de solicitud (`Title`). Cada archivo conserva su nombre original saneado para SharePoint y se etiqueta con:
+
+- `IDRef`: token de solicitud, por ejemplo `REC-2026-XXXXXXXX`.
+- `Visible`: `true`.
 
 Si la solicitud se crea pero falla algun adjunto, la respuesta sigue siendo `201` e incluye `warnings`. Asi no se pierde una solicitud valida por un problema documental.
 
-Permiso a revisar: ademas de Microsoft Graph, la app registrada debe poder obtener token para `https://metromalaga.sharepoint.com/.default` y escribir en las listas con SharePoint REST. Si la subida de adjuntos devuelve `401/403`, normalmente falta permiso/admin consent de SharePoint para esa app. El item se crea igualmente y la respuesta incluye el aviso en `warnings`.
+Permiso necesario: Microsoft Graph debe poder escribir en el sitio `ConectaDEV` y en la biblioteca `DocumentosAdjuntos`. La app actual usa permisos de aplicacion Graph para crear items/listas y subir contenido a la biblioteca.
 
-Para habilitarlo:
+Nota tecnica:
 
-1. En Microsoft Entra ID, abre la app registrada que usa `AZURE_CLIENT_ID`.
-2. En `API permissions`, agrega permisos de aplicacion para SharePoint.
-3. Opcion amplia: `Sites.FullControl.All` sobre el recurso SharePoint y `Grant admin consent`.
-4. Opcion limitada recomendada: usar permisos seleccionados (`Sites.Selected` / permisos seleccionados de SharePoint) y conceder acceso de escritura o control a los sitios `ConectaDEV` y `TarjetaMasMetro`.
-5. Reintentar una solicitud con adjunto o fotografia. Si funciona, la respuesta tendra `adjuntos` con el archivo subido y `warnings: []`.
-
-Referencias Microsoft:
-
-- SharePoint app-only sin usuario requiere consentimiento de aplicacion sobre el recurso SharePoint para permisos como `Sites.FullControl.All`.
-- Los permisos seleccionados permiten limitar el acceso de la app a sitios/listas concretos en vez de abrir todo el tenant.
+- Se descarto `AttachmentFiles/add` sobre la lista porque SharePoint REST devuelve `401 Unsupported app only token` con esta app-only.
+- Graph no permite `driveItem` en listas normales, solo en bibliotecas documentales.

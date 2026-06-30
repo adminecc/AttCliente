@@ -21,6 +21,14 @@ app.http("crearSolicitud", {
       const parsedRequest = await parseSolicitudRequest(request);
       body = parsedRequest.payload;
       files = parsedRequest.files;
+      context.log(
+        `crearSolicitud - payload recibido tipo=${body?.tipoFormulario || "desconocido"} adjuntos=${files.length}`
+      );
+      files.forEach((file, index) => {
+        context.log(
+          `crearSolicitud - adjunto[${index}] field=${file.fieldName || ""} nombre='${file.fileName || ""}' tipo=${file.contentType || ""} bytes=${file.sizeBytes || file.content?.length || 0}`
+        );
+      });
     } catch (error) {
       return jsonResponse(400, {
         ok: false,
@@ -81,7 +89,8 @@ app.http("crearSolicitud", {
           createdItem.id,
           files,
           undefined,
-          context
+          context,
+          token
         );
         uploadedAttachments.push(...uploadResult.uploaded);
         attachmentWarnings.push(...uploadResult.warnings);
@@ -104,10 +113,22 @@ app.http("crearSolicitud", {
       email: validation.payload.CorreoElectronico || validation.payload.EmailCliente,
       adjuntos: uploadedAttachments,
       warnings: attachmentWarnings,
+      debug: {
+        adjuntosRecibidos: describeFilesForDebug(files),
+      },
       mensaje: "Solicitud registrada correctamente. Se enviara el token de consulta al correo indicado.",
     });
   },
 });
+
+function describeFilesForDebug(files = []) {
+  return files.map((file) => ({
+    fieldName: file.fieldName || "",
+    fileName: file.fileName || "",
+    contentType: file.contentType || "",
+    sizeBytes: file.sizeBytes || file.content?.length || 0,
+  }));
+}
 
 async function parseSolicitudRequest(request) {
   const contentType = getRequestHeader(request, "content-type");

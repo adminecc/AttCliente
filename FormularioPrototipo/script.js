@@ -538,6 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (fileList) fileList.innerHTML = '';
         const fileListConsultas = document.getElementById('fileListConsultas');
         if (fileListConsultas) fileListConsultas.innerHTML = '';
+        limpiarListasArchivos();
 
         // Resetear contador de caracteres
         if (charCount) charCount.textContent = '0';
@@ -694,6 +695,88 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
+    function ensureFileList(input) {
+        const fileUpload = input.closest('.file-upload');
+        if (!fileUpload) return null;
+
+        let fileListContainer = fileUpload.querySelector('.file-list');
+        if (!fileListContainer) {
+            fileListContainer = document.createElement('div');
+            fileListContainer.className = 'file-list';
+            fileUpload.appendChild(fileListContainer);
+        }
+
+        return fileListContainer;
+    }
+
+    function renderSelectedFiles(input) {
+        const fileListContainer = ensureFileList(input);
+        if (!fileListContainer) return;
+
+        const files = Array.from(input.files || []);
+        fileListContainer.innerHTML = '';
+        fileListContainer.hidden = files.length === 0;
+
+        files.forEach((file, index) => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.innerHTML = `
+                <span class="file-item-name">${escapeHtml(file.name)}</span>
+                <span class="file-item-size">${formatFileSize(file.size)}</span>
+                <button type="button" class="file-item-remove" data-index="${index}" title="Eliminar archivo" aria-label="Eliminar ${escapeHtml(file.name)}">Eliminar</button>
+            `;
+            fileListContainer.appendChild(fileItem);
+        });
+    }
+
+    function formatFileSize(bytes) {
+        const size = Number(bytes) || 0;
+        if (size >= 1024 * 1024) return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+        return `${(size / 1024).toFixed(1)} KB`;
+    }
+
+    function escapeHtml(value) {
+        return String(value || '').replace(/[&<>"']/g, (char) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;',
+        }[char]));
+    }
+
+    function limpiarListasArchivos() {
+        form.querySelectorAll('.file-list').forEach((fileList) => {
+            fileList.innerHTML = '';
+            fileList.hidden = true;
+        });
+        form.querySelectorAll('.file-input').forEach((input) => {
+            input.value = '';
+        });
+    }
+
+    fileInputs.forEach(input => {
+        input.addEventListener('change', () => renderSelectedFiles(input));
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.classList.contains('file-item-remove')) return;
+
+        e.stopImmediatePropagation();
+        const fileUpload = e.target.closest('.file-upload');
+        const input = fileUpload?.querySelector('.file-input');
+        if (!input) return;
+
+        const removeIndex = Number(e.target.dataset.index);
+        const dataTransfer = new DataTransfer();
+        Array.from(input.files || []).forEach((file, index) => {
+            if (index !== removeIndex) dataTransfer.items.add(file);
+        });
+
+        input.files = dataTransfer.files;
+        renderSelectedFiles(input);
+    }, true);
 
     /**
      * Comprueba si un elemento está oculto en el DOM o dentro de un contenedor oculto.
