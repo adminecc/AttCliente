@@ -13,7 +13,7 @@ function validateSolicitudPayload(rawPayload) {
     errors.push("tipoFormulario");
   }
 
-  for (const field of COMMON_REQUIRED_FIELDS) {
+  for (const field of type?.commonRequiredFields || COMMON_REQUIRED_FIELDS) {
     if (isMissing(payload[field])) {
       errors.push(field);
     }
@@ -35,19 +35,23 @@ function validateSolicitudPayload(rawPayload) {
     }
   }
 
-  if (payload.email && !isEmail(payload.email)) {
-    errors.push("email");
+  const email = payload.CorreoElectronico || payload.EmailCliente;
+  const confirmEmail = payload.confirmEmail;
+  const telefono = payload.Telefono || payload.TelefonoCliente1;
+
+  if (email && !isEmail(email)) {
+    errors.push(payload.EmailCliente ? "EmailCliente" : "CorreoElectronico");
   }
 
-  if (payload.confirmEmail && payload.email !== payload.confirmEmail) {
+  if (confirmEmail && email !== confirmEmail) {
     errors.push("confirmEmail");
   }
 
-  if (payload.telefono && !isSpanishPhone(payload.telefono)) {
-    errors.push("telefono");
+  if (telefono && !isSpanishPhone(telefono)) {
+    errors.push(payload.TelefonoCliente1 ? "TelefonoCliente1" : "Telefono");
   }
 
-  for (const field of ["fechaIncidencia", "fechaPerdida", "fechaNacimiento", "fechaAgradecimiento"]) {
+  for (const field of ["FechaYHoraConsulta", "FechaPerdida", "FechaEpisodio"]) {
     if (payload[field] && !isValidDateNotFuture(payload[field])) {
       errors.push(field);
     }
@@ -55,7 +59,10 @@ function validateSolicitudPayload(rawPayload) {
 
   payload.tipoFormulario = type?.formValue || payload.tipoFormulario;
   payload.listaDestino = type?.key || payload.listaDestino;
-  payload.nombreCompleto = [payload.nombre, payload.apellidos].filter(Boolean).join(" ").trim();
+  payload.nombreCompleto = [
+    payload.Nombre || payload.NombreCliente,
+    payload.Apellidos || [payload.ApellidoCliente1, payload.ApellidoCliente2].filter(Boolean).join(" "),
+  ].filter(Boolean).join(" ").trim();
 
   return {
     valid: errors.length === 0,

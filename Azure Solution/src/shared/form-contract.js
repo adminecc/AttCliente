@@ -11,11 +11,10 @@ const FORM_TYPES = {
       listUrl: "https://metromalaga.sharepoint.com/sites/ConectaDEV/Lists/ReclamacionesQuejas/AllItems.aspx",
     },
     requiredFields: [
-      "clasificacion",
-      "fechaIncidencia",
-      "tipologia",
-      "lugarIncidencia",
-      "descripcionDetallada",
+      "Clasificacion",
+      "FechaYHoraConsulta",
+      "Lugar",
+      "DescripcionConsulta",
     ],
   },
   CONSULTAS: {
@@ -30,7 +29,7 @@ const FORM_TYPES = {
       listUrl: "https://metromalaga.sharepoint.com/sites/ConectaDEV/Lists/ConsultaInformacion/AllItems.aspx",
     },
     requiredFields: [
-      "descripcionDetalladaConsulta",
+      "Descripcion",
     ],
   },
   SUGERENCIAS: {
@@ -45,9 +44,8 @@ const FORM_TYPES = {
       listUrl: "https://metromalaga.sharepoint.com/sites/ConectaDEV/Lists/Sugerencias/AllItems.aspx",
     },
     requiredFields: [
-      "areaSugerencia",
-      "tituloSugerencia",
-      "descripcionSugerencia",
+      "Estacion",
+      "Descripcion",
     ],
   },
   AGRADECIMIENTOS: {
@@ -62,8 +60,8 @@ const FORM_TYPES = {
       listUrl: "https://metromalaga.sharepoint.com/sites/ConectaDEV/Lists/Agradecimientos/AllItems.aspx",
     },
     requiredFields: [
-      "motivoAgradecimiento",
-      "descripcionAgradecimiento",
+      "Motivo",
+      "Descripcion",
     ],
   },
   OBJETOS_PERDIDOS: {
@@ -78,11 +76,10 @@ const FORM_TYPES = {
       listUrl: "https://metromalaga.sharepoint.com/sites/ConectaDEV/Lists/Objetos%20Perdidos%20NUEVA/AllItems.aspx",
     },
     requiredFields: [
-      "fechaPerdida",
-      "lineaMetroObjetos",
-      "dondePerdidoObjetos",
-      "nombreObjetoObjetos",
-      "descripcionObjeto",
+      "FechaPerdida",
+      "Localizacion",
+      "TipoObjeto",
+      "Descripcion",
     ],
   },
   TARJETAS_METRO: {
@@ -96,15 +93,16 @@ const FORM_TYPES = {
       listName: "ClientesTarjetaMetro",
       listUrl: "https://metromalaga.sharepoint.com/sites/TarjetaMasMetro/Lists/ClientesTarjetaMetro/AllItems.aspx",
     },
+    commonRequiredFields: [
+      "NombreCliente",
+      "ApellidoCliente1",
+      "DNICliente",
+      "EmailCliente",
+      "TelefonoCliente1",
+      "consentimiento",
+    ],
     requiredFields: [
-      "motivoTarjeta",
-      "tipoTarjeta",
-      "fechaNacimiento",
-      "direccionCompleta",
-      "codigoPostal",
-      "municipio",
-      "provincia",
-      "puntoRecogida",
+      "MetodoNotificacion",
     ],
   },
 };
@@ -121,37 +119,40 @@ const TYPE_ALIASES = Object.values(FORM_TYPES).reduce((aliases, type) => {
 });
 
 const COMMON_REQUIRED_FIELDS = [
-  "nombre",
-  "apellidos",
-  "tipoDocumento",
-  "numeroDocumento",
-  "email",
-  "telefono",
+  "Nombre",
+  "Apellidos",
+  "TipoDeDocumento",
+  "NumeroDeDocumento",
+  "CorreoElectronico",
+  "Telefono",
   "consentimiento",
 ];
 
 const POSTAL_REQUIRED_FIELDS = [
-  "viaContacto",
-  "cpContacto",
-  "municipioContacto",
-  "provinciaContacto",
+  "Direccion",
+  "CP",
+  "Localidad",
+  "Provincia",
 ];
 
 const PUBLIC_SHAREPOINT_FIELDS = [
   "Title",
   "Nombre",
   "Apellidos",
-  "NombreCompleto",
-  "TipoDocumento",
-  "NumeroDocumento",
-  "Email",
+  "TipoDeDocumento",
+  "NumeroDeDocumento",
   "CorreoElectronico",
   "Telefono",
-  "TokenConsulta",
-  "TipoFormulario",
+  "NombreCliente",
+  "ApellidoCliente1",
+  "ApellidoCliente2",
+  "DNICliente",
+  "EmailCliente",
+  "TelefonoCliente1",
+  "EstadoCliente",
   "Estado",
-  "FechaCreacion",
   "Descripcion",
+  "DescripcionConsulta",
   "RespuestaOrganizacion",
   "FechaRespuesta",
 ];

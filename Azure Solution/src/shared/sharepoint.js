@@ -6,86 +6,139 @@ const { getConfig, assertGraphConfig, getSiteIdForType } = require("./config");
 const GRAPH_BASE_URL = "https://graph.microsoft.com/v1.0";
 const listIdCache = new Map();
 const listColumnsCache = new Map();
+const lookupItemsCache = new Map();
 
 const TITLE_TYPE_VALUES = {
-  "monedero-metro-malaga": "Monedero Metro Malaga",
-  "billete-ocasional": "Ocasional Metro de Malaga",
-  "masmetro": "Tarjeta MasMetro",
-  "tarjeta-consorcio": "Tarjeta Monedero Consorcio de Transportes de Andalucia",
-  "tarjeta-consorcio-joven": "Tarjeta Consorcio de Transportes de Andalucia Joven",
-  "tarjeta-consorcio-familia-numerosa": "Tarjeta Consorcio de Transportes de Andalucia Familia Numerosa",
-  "validacion-emv-fisica": "Validacion con sistema EMV (Tarjeta de Credito/Debito fisica no registrada)",
-  "validacion-emv-movil": "Validacion con sistema EMV movil (Tarjeta de Credito/Debito con NFC movil no registrada)",
-  "pago-emv-movil": "Validacion con sistema EMV movil (Tarjeta de Credito/Debito con NFC movil no registrada)",
-  "metropay": "Validacion con ABT (Tarjeta de Credito/Debito registrada en MetroPay)",
+  "monedero-metro-malaga": "Monedero Metro Málaga",
+  "billete-ocasional": "Ocasional Metro de Málaga",
+  "masmetro": "Tarjeta MásMetro",
+  "tarjeta-consorcio": "Tarjeta Monedero Consorcio de Transportes de Andalucía",
+  "tarjeta-consorcio-joven": "Tarjeta Consorcio de Transportes de Andalucía Joven",
+  "tarjeta-consorcio-familia-numerosa": "Tarjeta Consorcio de Transportes de Andalucía Familia Numerosa",
+  "validacion-emv-fisica": "Validación con sistema EMV (Tarjeta de Crédito/Débito física no registrada)",
+  "validacion-emv-movil": "Validación con sistema EMV móvil (Tarjeta de Crédito/Débito con NFC móvil no registrada)",
+  "pago-emv-movil": "Validación con sistema EMV móvil (Tarjeta de Crédito/Débito con NFC móvil no registrada)",
+  "metropay": "Validación con ABT (Tarjeta de Crédito/Débito registrada en MetroPay)",
 };
 
-const FIELD_MAP = {
-  clasificacion: "Clasificacion",
-  fechaIncidencia: "FechaIncidencia",
-  horaIncidencia: "HoraIncidencia",
-  tipologia: "Tipologia",
-  subtipologia: "Subtipologia",
-  lugarIncidencia: "LugarIncidencia",
-  trenIncidencia: "TrenIncidencia",
-  otroLugarIncidencia: "OtroLugarIncidencia",
-  tipoInstalacion: "TipoInstalacion",
-  tipoTitulo: "TipoTitulo",
-  importe_reclamado_1: "ImporteReclamado",
-  descripcionDetallada: "Descripcion",
-
-  descripcionDetalladaConsulta: "Descripcion",
-  tipologiaConsulta: "Tipologia",
-  subtipologiaConsulta: "Subtipologia",
-  lugarConsulta: "Estacion",
-  trenConsulta: "TrenIncidencia",
-  otroLugarConsulta: "OtraUbicacion",
-  tipoInstalacionConsulta: "TipoInstalacion",
-  tipoTituloConsulta: "TipoDeTitulo",
-  numeracionTituloConsulta: "NumTituloViaje",
-
-  areaSugerencia: "AreaSugerencia",
-  estacionSugerencia: "Estacion",
-  tituloSugerencia: "TituloSugerencia",
-  descripcionSugerencia: "Descripcion",
-
-  motivoAgradecimiento: "MotivoAgradecimiento",
-  fechaAgradecimiento: "FechaAgradecimiento",
-  estacionAgradecimiento: "Estacion",
-  nombreEmpleado: "NombreEmpleado",
-  descripcionAgradecimiento: "Descripcion",
-
-  fechaPerdida: "FechaPerdida",
-  horaPerdida: "HoraPerdida",
-  lineaMetroObjetos: "LineaMetro",
-  dondePerdidoObjetos: "LugarPerdida",
-  estacionPerdidaObjetos: "EstacionPerdida",
-  numeroTrenObjetos: "NumeroTren",
-  estacionOrigenObjetos: "EstacionOrigen",
-  estacionDestinoObjetos: "EstacionDestino",
-  nombreObjetoObjetos: "NombreObjeto",
-  colorObjetoObjetos: "ColorObjeto",
-  distintivoObjetoObjetos: "DistintivoObjeto",
-  descripcionObjeto: "Descripcion",
-
-  motivoTarjeta: "MotivoTarjeta",
-  tipoTarjeta: "TipoTarjeta",
-  fechaNacimiento: "FechaNacimiento",
-  genero: "Genero",
-  direccionCompleta: "DireccionCompleta",
-  codigoPostal: "CodigoPostal",
-  municipio: "Municipio",
-  provincia: "Provincia",
-  puntoRecogida: "PuntoRecogida",
+const LOCATION_VALUES = {
+  general: "General / Ninguna específica",
+  "l1-gral": "Cualquiera de Línea 1",
+  "l2-gral": "Cualquiera de Línea 2",
+  "linea-1": "Cualquiera de Línea 1",
+  "linea-2": "Cualquiera de Línea 2",
+  "guadalmedina-l1": "Guadalmedina",
+  "guadalmedina-l2": "Guadalmedina",
+  atarazanas: "Atarazanas",
+  "andalucia-tech": "Andalucía Tech",
+  carranque: "Carranque",
+  barbarela: "Barbarela",
+  "el-clinico": "El Clínico",
+  "la-union": "La Unión",
+  universidad: "Universidad",
+  "ciudad-justicia": "Ciudad de la Justicia",
+  "el-consul": "El Cónsul",
+  "el-perchel-l1": "El Perchel",
+  "el-perchel-l2": "El Perchel",
+  paraninfo: "Paraninfo",
+  "portada-alta": "Portada Alta",
+  "la-luz-la-paz": "La Luz - La Paz",
+  "la-isla": "La Isla",
+  "puerta-blanca": "Puerta Blanca",
+  "princesa-huelin": "Princesa - Huelin",
+  "el-torcal": "El Torcal",
+  "palacio-deportes": "Palacio de los Deportes",
+  tren: "Interior del tren",
+  otro: "Otra ubicación",
+  "otra-ubicacion": "Otra ubicación",
 };
+
+const OPERATION_LOCATION_VALUES = {
+  ...LOCATION_VALUES,
+  tren: "Unidad-Tren",
+  estacion: "General / Ninguna específica",
+  desconocido: "",
+};
+
+const THANKS_REASON_VALUES = {
+  "atencion-personal": "Atención del personal",
+  "resolucion-incidencia": "Resolución de incidencia",
+  "mejora-servicio": "Mejora del servicio",
+  "estado-instalaciones": "Estado de instalaciones",
+  "informacion-proporcionada": "Información proporcionada",
+  "actuacion-seguridad": "Actuación de seguridad",
+  "accesibilidad": "Asistencia sobre accesibilidad",
+  "objeto-perdido": "Ayuda para recuperar un objeto",
+  otros: "Otros",
+};
+
+const THANKS_PLACE_VALUES = {
+  estacion: "Una estación",
+  tren: "Un tren",
+  oac: "Oficina de Atención al Cliente",
+};
+
+const THANKS_TARGET_VALUES = {
+  "personal-metro": "Personal de Metro de Málaga",
+  "personal-estacion": "Personal de Metro de Málaga",
+  "personal-tren": "Personal de Metro de Málaga",
+  seguridad: "Personal de Vigilancia (Seguridad)",
+  limpieza: "Personal de Metro de Málaga",
+  mantenimiento: "Personal de Metro de Málaga",
+  "personal-oac": "Personal de la Oficina de Atención al Cliente",
+  varios: "Quiero agradecer a varios colectivos (indique cuáles)",
+  general: "Es un agradecimiento general sobre el servicio",
+};
+
+const CLASSIFICATION_VALUES = {
+  reclamacion: "Reclamación",
+  queja: "Queja",
+  sugerencia: "Sugerencia",
+  agradecimiento: "Agradecimiento",
+};
+
+const INSTALLATION_TYPE_VALUES = {
+  dab: "DAB",
+  torno: "Torno",
+  tren: "Tren",
+};
+
+const NOTIFICATION_METHOD_VALUES = {
+  email: "Correo",
+  impreso: "Impresión",
+};
+
+const CONTROL_PAYLOAD_FIELDS = new Set([
+  "tipoFormulario",
+  "listaDestino",
+  "confirmEmail",
+  "consentimiento",
+  "datosCorrectos",
+  "recibirPostal",
+  "attachments",
+  "signatures",
+  "metadata",
+  "nombreCompleto",
+]);
 
 async function getGraphAccessToken(config = getConfig()) {
   assertGraphConfig(config);
 
+  return requestAccessToken(config, "https://graph.microsoft.com/.default");
+}
+
+async function getSharePointAccessToken(siteUrl, config = getConfig()) {
+  assertGraphConfig(config);
+
+  const origin = new URL(siteUrl).origin;
+  return requestAccessToken(config, `${origin}/.default`);
+}
+
+async function requestAccessToken(config, scope) {
   const tokenUrl = `https://login.microsoftonline.com/${config.tenantId}/oauth2/v2.0/token`;
   const params = config.clientSecret
-    ? buildClientSecretTokenParams(config)
-    : buildCertificateTokenParams(config, tokenUrl);
+    ? buildClientSecretTokenParams(config, scope)
+    : buildCertificateTokenParams(config, tokenUrl, scope);
 
   const response = await axios.post(tokenUrl, params.toString(), {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -93,22 +146,22 @@ async function getGraphAccessToken(config = getConfig()) {
   });
 
   if (!response.data?.access_token) {
-    throw new Error("Microsoft Graph no devolvio access_token.");
+    throw new Error("Microsoft no devolvio access_token.");
   }
 
   return response.data.access_token;
 }
 
-function buildClientSecretTokenParams(config) {
+function buildClientSecretTokenParams(config, scope) {
   return new URLSearchParams({
     client_id: config.clientId,
     client_secret: config.clientSecret,
     grant_type: "client_credentials",
-    scope: "https://graph.microsoft.com/.default",
+    scope,
   });
 }
 
-function buildCertificateTokenParams(config, tokenUrl) {
+function buildCertificateTokenParams(config, tokenUrl, scope) {
   const now = Math.floor(Date.now() / 1000);
   const assertionPayload = {
     aud: tokenUrl,
@@ -134,30 +187,119 @@ function buildCertificateTokenParams(config, tokenUrl) {
     client_assertion_type: "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
     client_assertion: clientAssertion,
     grant_type: "client_credentials",
-    scope: "https://graph.microsoft.com/.default",
+    scope,
   });
 }
 
 async function createListItem(accessToken, type, fields, config = getConfig(), context) {
   const target = await resolveSharePointTarget(accessToken, type, config, context);
   const url = `${GRAPH_BASE_URL}/sites/${encodeURIComponent(target.siteId)}/lists/${encodeURIComponent(target.listId)}/items`;
-  const writableColumns = await resolveWritableColumnNames(accessToken, target, context);
-  const filteredFields = filterKnownFields(fields, writableColumns, context, target);
+  const writableColumns = await resolveWritableColumnDefinitions(accessToken, target, context);
+  const lookupReadyFields = await prepareLookupFieldWrites(accessToken, target, fields, writableColumns, context);
+  const filteredFields = filterKnownFields(lookupReadyFields, writableColumns, context, target);
+  const compatibilityWarnings = buildFieldCompatibilityWarnings(filteredFields, writableColumns);
+
+  for (const message of compatibilityWarnings) {
+    warn(context, `createListItem - posible incompatibilidad de tipo en ${target.listName}: ${message}`);
+  }
 
   context?.log?.(`createListItem - POST ${url}`);
+  context?.log?.(`createListItem - campos enviados a ${target.listName}: ${Object.keys(filteredFields).join(", ")}`);
 
-  const response = await axios.post(url, { fields: filteredFields }, {
+  try {
+    const response = await axios.post(url, { fields: filteredFields }, {
+      headers: graphHeaders(accessToken),
+      timeout: 15000,
+    });
+
+    return response.data;
+  } catch (error) {
+    error.sharePointDiagnostics = buildSharePointErrorDiagnostics(error, target, filteredFields, compatibilityWarnings);
+    warn(context, `createListItem - error Graph en ${target.listName}: ${error.sharePointDiagnostics.summary}`);
+    throw error;
+  }
+}
+
+async function prepareLookupFieldWrites(accessToken, target, fields, writableColumns, context) {
+  const prepared = {};
+
+  for (const [name, value] of Object.entries(fields)) {
+    const column = writableColumns.get?.(name);
+    if (!column?.lookup || isEmptySharePointValue(value)) {
+      prepared[name] = value;
+      continue;
+    }
+
+    const lookupId = await resolveLookupId(accessToken, target, column, value, context);
+    if (lookupId !== null) {
+      prepared[`${name}LookupId`] = lookupId;
+    }
+  }
+
+  return prepared;
+}
+
+async function resolveLookupId(accessToken, target, column, value, context) {
+  if (isNumberLike(value)) {
+    return Number(String(value).replace(",", "."));
+  }
+
+  const lookupListId = column.lookup?.listId;
+  const lookupColumnName = column.lookup?.columnName || "Title";
+  if (!lookupListId) {
+    warn(context, `prepareLookupFieldWrites - ${column.name} es lookup pero no indica lista auxiliar.`);
+    return null;
+  }
+
+  const items = await resolveLookupItems(accessToken, target.siteId, lookupListId, context);
+  const expected = normalizeComparable(value);
+  const match = items.find((item) => {
+    const fields = item.fields || {};
+    return normalizeComparable(item.id) === expected
+      || normalizeComparable(fields.id) === expected
+      || normalizeComparable(fields[lookupColumnName]) === expected
+      || normalizeComparable(fields.Title) === expected;
+  });
+
+  if (!match?.id) {
+    warn(context, `prepareLookupFieldWrites - no se encontro valor lookup '${value}' para ${column.name}.`);
+    return null;
+  }
+
+  return Number(match.id);
+}
+
+async function resolveLookupItems(accessToken, siteId, lookupListId, context) {
+  const cacheKey = `${siteId}|${lookupListId}|lookup-items`;
+  if (lookupItemsCache.has(cacheKey)) {
+    return lookupItemsCache.get(cacheKey);
+  }
+
+  const url =
+    `${GRAPH_BASE_URL}/sites/${encodeURIComponent(siteId)}/lists/${encodeURIComponent(lookupListId)}/items` +
+    "?$expand=fields" +
+    "&$top=999";
+
+  context?.log?.(`resolveLookupItems - GET ${url}`);
+
+  const response = await axios.get(url, {
     headers: graphHeaders(accessToken),
     timeout: 15000,
   });
 
-  return response.data;
+  const items = response.data?.value || [];
+  lookupItemsCache.set(cacheKey, items);
+  return items;
 }
 
 async function findListItemByEmailAndToken(accessToken, type, email, token, config = getConfig(), context) {
   const target = await resolveSharePointTarget(accessToken, type, config, context);
   const readableColumns = await resolveColumnNames(accessToken, target, context);
-  const emailField = readableColumns.has("CorreoElectronico") ? "CorreoElectronico" : "Email";
+  const emailField = readableColumns.has("CorreoElectronico")
+    ? "CorreoElectronico"
+    : readableColumns.has("EmailCliente")
+      ? "EmailCliente"
+      : "Email";
   const tokenField = "Title";
   const filter = `fields/${emailField} eq '${escapeOData(email)}' and fields/${tokenField} eq '${escapeOData(token)}'`;
   const url =
@@ -258,46 +400,105 @@ async function getListItemTimeline(accessToken, type, itemId, config = getConfig
 function buildSharePointFields(payload, type, token, createdAt) {
   const fields = {
     Title: token,
-    Nombre: payload.nombre || "",
-    Apellidos: payload.apellidos || "",
-    TipoDeDocumento: payload.tipoDocumento || "",
-    NumeroDeDocumento: payload.numeroDocumento || "",
-    CorreoElectronico: payload.email || "",
-    Telefono: payload.telefono || "",
-    Nacionalidad: payload.nacionalidad || "",
-    TokenConsulta: token,
-    TipoFormulario: type.formValue,
-    TipoSolicitud: type.key,
-    EstadoCliente: "En tramite",
-    FechaCreacion: createdAt,
-    RecibirPostal: payload.recibirPostal === true || payload.recibirPostal === "on",
-    Direccion: payload.viaContacto || "",
-    Numero: payload.numContacto || "",
-    Escalera: payload.escContacto || "",
-    Piso: payload.pisoContacto || "",
-    Puerta: payload.puerContacto || "",
-    CP: payload.cpContacto || "",
-    Localidad: payload.municipioContacto || "",
-    Provincia: payload.provinciaContacto || "",
-    PayloadJson: JSON.stringify(payload),
   };
 
-  for (const [payloadField, sharePointField] of Object.entries(FIELD_MAP)) {
-    if (payload[payloadField] !== undefined && payload[payloadField] !== "") {
-      fields[sharePointField] = transformSharePointValue(sharePointField, payload[payloadField]);
+  if (!["OBJETOS_PERDIDOS", "TARJETAS_METRO"].includes(type.key)) {
+    fields.EstadoCliente = "En trámite";
+  }
+
+  if (type.key === "OBJETOS_PERDIDOS") {
+    fields.Estado = payload.Estado || "Registrado";
+    fields.TipoRegistro = payload.TipoRegistro || "Objeto Perdido Reclamado";
+  }
+
+  for (const [payloadField, value] of Object.entries(payload)) {
+    if (shouldCopyPayloadField(payloadField, value)) {
+      fields[payloadField] = transformSharePointValue(payloadField, value, type);
     }
   }
 
   return fields;
 }
 
+async function uploadListItemAttachments(accessToken, type, itemId, files = [], config = getConfig(), context) {
+  if (!Array.isArray(files) || files.length === 0) {
+    return { uploaded: [], warnings: [] };
+  }
+
+  const target = await resolveSharePointTarget(accessToken, type, config, context);
+  const sharePointToken = await getSharePointAccessToken(target.siteUrl, config);
+  const uploaded = [];
+  const warnings = [];
+
+  for (const file of files) {
+    try {
+      uploaded.push(await uploadListItemAttachment(sharePointToken, target, itemId, file, context));
+    } catch (error) {
+      const message = `${file.fileName || file.fieldName || "archivo"}: ${formatAttachmentUploadError(error)}`;
+      warnings.push(message);
+      warn(context, `uploadListItemAttachments - no se pudo subir ${message}`);
+    }
+  }
+
+  return { uploaded, warnings };
+}
+
+function formatAttachmentUploadError(error) {
+  const status = error.response?.status;
+  const detail = error.response?.data?.error?.message?.value
+    || error.response?.data?.error?.message
+    || error.message;
+
+  if (status === 401 || status === 403) {
+    return `${detail}. Revisar permisos/admin consent de SharePoint REST para la app registrada.`;
+  }
+
+  return detail;
+}
+
+async function uploadListItemAttachment(sharePointToken, target, itemId, file, context) {
+  const fileName = sanitizeAttachmentFileName(file.fileName || `${file.fieldName || "adjunto"}.bin`);
+  const url =
+    `${normalizeSiteUrl(target.siteUrl)}/_api/web/lists/getbytitle('${escapeSharePointRestString(target.listName)}')` +
+    `/items(${encodeURIComponent(itemId)})/AttachmentFiles/add(FileName='${escapeSharePointRestString(fileName)}')`;
+
+  context?.log?.(`uploadListItemAttachment - POST ${url}`);
+
+  const response = await axios.post(url, file.content, {
+    headers: {
+      Authorization: `Bearer ${sharePointToken}`,
+      Accept: "application/json;odata=nometadata",
+      "Content-Type": file.contentType || "application/octet-stream",
+    },
+    maxBodyLength: Infinity,
+    timeout: 30000,
+  });
+
+  return {
+    nombre: fileName,
+    tipo: file.contentType || "application/octet-stream",
+    tamanioBytes: file.sizeBytes || file.content?.length || 0,
+    fieldName: file.fieldName || "",
+    url: response.data?.ServerRelativeUrl || response.data?.serverRelativeUrl || "",
+  };
+}
+
+function shouldCopyPayloadField(name, value) {
+  return !CONTROL_PAYLOAD_FIELDS.has(name) && !isEmptySharePointValue(value);
+}
+
 async function resolveWritableColumnNames(accessToken, target, context) {
+  const columns = await resolveWritableColumnDefinitions(accessToken, target, context);
+  return new Set(columns.keys());
+}
+
+async function resolveWritableColumnDefinitions(accessToken, target, context) {
   const cacheKey = `${target.siteId}|${target.listId}|columns`;
   if (listColumnsCache.has(cacheKey)) {
     return listColumnsCache.get(cacheKey);
   }
 
-  const url = `${GRAPH_BASE_URL}/sites/${encodeURIComponent(target.siteId)}/lists/${encodeURIComponent(target.listId)}/columns?$select=name,hidden,readOnly`;
+  const url = `${GRAPH_BASE_URL}/sites/${encodeURIComponent(target.siteId)}/lists/${encodeURIComponent(target.listId)}/columns`;
   context?.log?.(`resolveWritableColumnNames - GET ${url}`);
 
   const response = await axios.get(url, {
@@ -305,10 +506,10 @@ async function resolveWritableColumnNames(accessToken, target, context) {
     timeout: 15000,
   });
 
-  const columns = new Set(
+  const columns = new Map(
     (response.data?.value || [])
       .filter((column) => !column.hidden && column.readOnly !== true)
-      .map((column) => column.name)
+      .map((column) => [column.name, column])
   );
 
   listColumnsCache.set(cacheKey, columns);
@@ -329,7 +530,7 @@ function filterKnownFields(fields, writableColumns, context, target) {
       continue;
     }
 
-    if (writableColumns.has(name)) {
+    if (writableColumns.has(name) || isLookupIdWriteField(name, writableColumns)) {
       filtered[name] = value;
     } else {
       omitted.push(name);
@@ -346,6 +547,89 @@ function filterKnownFields(fields, writableColumns, context, target) {
   return filtered;
 }
 
+function isLookupIdWriteField(name, writableColumns) {
+  if (!name.endsWith("LookupId")) return false;
+  const baseName = name.slice(0, -"LookupId".length);
+  return Boolean(writableColumns.get?.(baseName)?.lookup);
+}
+
+function buildFieldCompatibilityWarnings(fields, writableColumns) {
+  const warnings = [];
+
+  for (const [name, value] of Object.entries(fields)) {
+    const column = writableColumns.get?.(name);
+    if (!column || isEmptySharePointValue(value)) continue;
+
+    const warning = getFieldCompatibilityWarning(name, value, column);
+    if (warning) warnings.push(warning);
+  }
+
+  return warnings;
+}
+
+function getFieldCompatibilityWarning(name, value, column) {
+  if (column.choice?.choices?.length && !column.choice.choices.includes(value)) {
+    return `${name}: valor '${value}' no aparece entre las opciones configuradas (${column.choice.choices.join(" | ")}).`;
+  }
+
+  if (column.number && !isNumberLike(value)) {
+    return `${name}: se esperaba numero y llega '${value}' (${typeof value}).`;
+  }
+
+  if (column.dateTime && !isDateLike(value)) {
+    return `${name}: se esperaba fecha/hora valida y llega '${value}'.`;
+  }
+
+  if (column.boolean && typeof value !== "boolean") {
+    return `${name}: se esperaba booleano y llega '${value}' (${typeof value}).`;
+  }
+
+  return "";
+}
+
+function isNumberLike(value) {
+  if (typeof value === "number") return Number.isFinite(value);
+  if (typeof value !== "string") return false;
+  const normalized = value.trim().replace(",", ".");
+  return normalized !== "" && Number.isFinite(Number(normalized));
+}
+
+function isDateLike(value) {
+  if (value instanceof Date) return !Number.isNaN(value.getTime());
+  if (typeof value !== "string") return false;
+  return value.trim() !== "" && !Number.isNaN(Date.parse(value));
+}
+
+function buildSharePointErrorDiagnostics(error, target, fields, compatibilityWarnings = []) {
+  const graphError = error.response?.data?.error || error.response?.data || {};
+  const graphMessage = graphError.message || error.message;
+
+  return {
+    summary: `status=${error.response?.status || "sin-status"}; message=${graphMessage}; campos=${Object.keys(fields).join(", ")}`,
+    listName: target?.listName,
+    listUrl: target?.listUrl,
+    status: error.response?.status,
+    graphMessage,
+    graphCode: graphError.code,
+    compatibilityWarnings,
+    fieldSummary: Object.entries(fields).map(([name, value]) => ({
+      name,
+      type: Array.isArray(value) ? "array" : typeof value,
+      preview: previewValue(value),
+    })),
+  };
+}
+
+function previewValue(value) {
+  if (typeof value === "string") {
+    return value.length > 120 ? `${value.slice(0, 117)}...` : value;
+  }
+
+  if (value === null || value === undefined) return value;
+  if (typeof value === "object") return JSON.stringify(value).slice(0, 120);
+  return value;
+}
+
 function warn(context, message) {
   if (typeof context?.warn === "function") {
     context.warn(message);
@@ -359,9 +643,47 @@ function isEmptySharePointValue(value) {
   return value === undefined || value === null || value === "";
 }
 
-function transformSharePointValue(sharePointField, value) {
+function transformSharePointValue(sharePointField, value, type) {
   if (sharePointField === "TipoDeTitulo") {
     return TITLE_TYPE_VALUES[value] || value;
+  }
+
+  if (["Localizacion", "LugarEntrega", "Origen", "Destino", "PuntoDeVenta"].includes(sharePointField)) {
+    return OPERATION_LOCATION_VALUES[value] || value;
+  }
+
+  if (sharePointField === "Estacion") {
+    return LOCATION_VALUES[value] || value;
+  }
+
+  if (sharePointField === "Clasificacion") {
+    return CLASSIFICATION_VALUES[value] || value;
+  }
+
+  if (sharePointField === "TipoDeInstalacion") {
+    return INSTALLATION_TYPE_VALUES[value] || value;
+  }
+
+  if (sharePointField === "Motivo") {
+    return THANKS_REASON_VALUES[value] || value;
+  }
+
+  if (sharePointField === "Lugar") {
+    return type?.key === "AGRADECIMIENTOS"
+      ? THANKS_PLACE_VALUES[value] || value
+      : OPERATION_LOCATION_VALUES[value] || value;
+  }
+
+  if (sharePointField === "DirigidoA") {
+    return THANKS_TARGET_VALUES[value] || value;
+  }
+
+  if (sharePointField === "Tren" && value === "desconocido") {
+    return "No sé qué tren es";
+  }
+
+  if (sharePointField === "MetodoNotificacion") {
+    return NOTIFICATION_METHOD_VALUES[value] || value;
   }
 
   return value;
@@ -373,16 +695,18 @@ function buildSolicitudResponse(item, listName, attachments = [], timeline = [])
   return {
     id: item.id,
     lista: listName,
-    token: fields.Title || fields.TokenConsulta || "",
-    estado: fields.Estado || "",
+    token: fields.Title || "",
+    estado: fields.EstadoCliente || fields.Estado || "",
     tipoFormulario: fields.TipoFormulario || "",
-    tipoSolicitud: fields.TipoSolicitud || "",
+    tipoSolicitud: "",
     titulo: fields.Title || "",
-    nombreCompleto: fields.NombreCompleto || "",
-    email: fields.CorreoElectronico || fields.Email || "",
-    telefono: fields.Telefono || "",
+    nombreCompleto: fields.NombreCliente
+      ? [fields.NombreCliente, fields.ApellidoCliente1, fields.ApellidoCliente2].filter(Boolean).join(" ")
+      : [fields.Nombre, fields.Apellidos].filter(Boolean).join(" "),
+    email: fields.CorreoElectronico || fields.EmailCliente || "",
+    telefono: fields.Telefono || fields.TelefonoCliente1 || "",
     fechaCreacion: fields.FechaCreacion || "",
-    descripcion: fields.Descripcion || "",
+    descripcion: fields.Descripcion || fields.DescripcionConsulta || "",
     respuestaOrganizacion: {
       texto: fields.RespuestaOrganizacion || "",
       fecha: fields.FechaRespuesta || "",
@@ -476,6 +800,20 @@ function graphHeaders(accessToken, extraHeaders = {}) {
   };
 }
 
+function normalizeSiteUrl(siteUrl) {
+  return String(siteUrl || "").replace(/\/$/, "");
+}
+
+function sanitizeAttachmentFileName(fileName) {
+  return String(fileName || "adjunto.bin")
+    .replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
+    .slice(0, 128);
+}
+
+function escapeSharePointRestString(value) {
+  return String(value || "").replace(/'/g, "''");
+}
+
 function escapeOData(value) {
   return String(value).replace(/'/g, "''");
 }
@@ -516,11 +854,15 @@ function normalizePem(rawKey) {
 
 module.exports = {
   getGraphAccessToken,
+  getSharePointAccessToken,
   createListItem,
+  uploadListItemAttachments,
+  prepareLookupFieldWrites,
   findListItemByEmailAndToken,
   getListItemAttachments,
   getListItemTimeline,
   buildSharePointFields,
+  buildFieldCompatibilityWarnings,
   buildSolicitudResponse,
   resolveSharePointTarget,
   hexThumbprintToBase64Url,

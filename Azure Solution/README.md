@@ -152,18 +152,17 @@ Probar creacion:
 ```powershell
 $body = @{
   tipoFormulario = "reclamaciones"
-  nombre = "Maria"
-  apellidos = "Lopez Garcia"
-  tipoDocumento = "NIF"
-  numeroDocumento = "12345678Z"
-  email = "maria@example.com"
+  Nombre = "Maria"
+  Apellidos = "Lopez Garcia"
+  TipoDeDocumento = "NIF"
+  NumeroDeDocumento = "12345678Z"
+  CorreoElectronico = "maria@example.com"
   confirmEmail = "maria@example.com"
-  telefono = "600123456"
-  clasificacion = "reclamacion"
-  fechaIncidencia = "2026-06-01"
-  tipologia = "servicio"
-  lugarIncidencia = "estacion"
-  descripcionDetallada = "El servicio sufrio una interrupcion prolongada y solicito revision del caso."
+  Telefono = "600123456"
+  Clasificacion = "reclamacion"
+  FechaYHoraConsulta = "2026-06-01T10:00:00"
+  Lugar = "estacion"
+  DescripcionConsulta = "El servicio sufrio una interrupcion prolongada y solicito revision del caso."
   consentimiento = $true
 } | ConvertTo-Json
 
@@ -235,13 +234,46 @@ Invoke-RestMethod `
 - Revisa `SHAREPOINT_CONNECTA_SITE_ID` o `SHAREPOINT_TARJETAS_SITE_ID`.
 - Revisa permisos Graph y admin consent.
 - Revisa que la lista existe y que su URL coincide con el mapeo de `src/shared/form-contract.js`.
-- Revisa nombres internos de columnas. Al inicio ayuda tener la columna `PayloadJson` para no perder datos.
+- Revisa nombres internos de columnas con `FormularioPrototipo/ejemplos_y_campos/sharepoint_list_fields.csv`.
 
 ## Adjuntos
 
-Los adjuntos siguen fuera de alcance por ahora. La recomendacion es anadirlos como segundo flujo:
+La API acepta dos formatos en `POST /api/solicitudes/crear`:
 
-1. Crear solicitud JSON.
-2. Recibir `solicitudId` y `token`.
-3. Subir adjuntos a un endpoint separado.
-4. Vincularlos al item de SharePoint.
+1. `application/json`, sin archivos.
+2. `multipart/form-data`, con un campo `payload` que contiene el JSON de la solicitud y uno o varios campos de archivo.
+
+El prototipo usa `multipart/form-data` automaticamente cuando hay documentacion adjunta o fotografias. Si no hay archivos reales, mantiene el envio JSON.
+
+La firma de Tarjetas +Metro no se sube como adjunto nativo. Se guarda en la columna `Firma` como texto `data:image/png;base64,...`, igual que en los ejemplos reales de la lista.
+
+Ejemplo conceptual:
+
+```text
+payload: {"tipoFormulario":"tarjetas","NombreCliente":"...","Firma":"data:image/png;base64,...",...}
+file_adjuntos_0: documento.pdf
+file_fotoObjeto_0: objeto.jpg
+```
+
+Despues de crear el item, la Function intenta subir los archivos como adjuntos nativos de la lista SharePoint mediante REST:
+
+```text
+POST /_api/web/lists/getbytitle('Lista')/items(ID)/AttachmentFiles/add(FileName='archivo.pdf')
+```
+
+Si la solicitud se crea pero falla algun adjunto, la respuesta sigue siendo `201` e incluye `warnings`. Asi no se pierde una solicitud valida por un problema documental.
+
+Permiso a revisar: ademas de Microsoft Graph, la app registrada debe poder obtener token para `https://metromalaga.sharepoint.com/.default` y escribir en las listas con SharePoint REST. Si la subida de adjuntos devuelve `401/403`, normalmente falta permiso/admin consent de SharePoint para esa app. El item se crea igualmente y la respuesta incluye el aviso en `warnings`.
+
+Para habilitarlo:
+
+1. En Microsoft Entra ID, abre la app registrada que usa `AZURE_CLIENT_ID`.
+2. En `API permissions`, agrega permisos de aplicacion para SharePoint.
+3. Opcion amplia: `Sites.FullControl.All` sobre el recurso SharePoint y `Grant admin consent`.
+4. Opcion limitada recomendada: usar permisos seleccionados (`Sites.Selected` / permisos seleccionados de SharePoint) y conceder acceso de escritura o control a los sitios `ConectaDEV` y `TarjetaMasMetro`.
+5. Reintentar una solicitud con adjunto o fotografia. Si funciona, la respuesta tendra `adjuntos` con el archivo subido y `warnings: []`.
+
+Referencias Microsoft:
+
+- SharePoint app-only sin usuario requiere consentimiento de aplicacion sobre el recurso SharePoint para permisos como `Sites.FullControl.All`.
+- Los permisos seleccionados permiten limitar el acceso de la app a sitios/listas concretos en vez de abrir todo el tenant.

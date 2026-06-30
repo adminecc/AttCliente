@@ -1,59 +1,15 @@
 {
-  "tipoFormulario": "CON",
-  "form": {
-    "id": "metro-atencion-cliente-unificado",
-    "version": "1.0.0",
-    "typeCode": "CON",
-    "legacyType": "consultas"
-  },
-  "submission": {
-    "id": "81aadb8a-1d7f-4155-8c2c-f62e6afb8e97",
-    "submittedAt": "2026-06-10T06:20:31.134Z",
-    "source": "wordpress",
-    "sourceSite": "file://",
-    "language": "es-ES"
-  },
-  "applicant": {
-    "nombre": "Prueba",
-    "apellidos": "Pruebez",
-    "tipoDocumento": "NIF",
-    "numeroDocumento": "12345678Z",
-    "email": "prueba@test.com",
-    "telefono": "666666666",
-    "nacionalidad": "ES",
-    "direccionContacto": null
-  },
-  "representative": null,
-  "postalReply": {
-    "enabled": false,
-    "addressMode": "misma",
-    "direccionEnvio": null
-  },
-  "values": {
-    "tipologiaConsulta": "instalaciones",
-    "subtipologiaConsulta": "otros-inst",
-    "tipoTituloConsulta": "pago-emv-movil",
-    "numeracionTituloConsulta": null,
-    "panFisicaPrimeros6Consulta": null,
-    "panFisicaUltimos4Consulta": null,
-    "panMovilFisicaAsocPrimeros6Consulta": "123456",
-    "panMovilFisicaAsocUltimos4Consulta": "9876",
-    "panMovilVirtualPrimeros6Consulta": "123456",
-    "panMovilVirtualUltimos4Consulta": "6543",
-    "descripcionDetalladaConsulta": "Consulto información sobre por qué no hay baños en las estaciones"
-  },
-  "signatures": [],
-  "attachments": [],
-  "consents": [
-    {
-      "id": "consentimiento",
-      "accepted": true,
-      "acceptedAt": "2026-06-10T06:20:31.133Z",
-      "textVersion": "lopd-general-2026-06"
-    }
-  ],
-  "metadata": {
-    "referenceClientSide": "ATT-2026-61527",
-    "notes": "Envío automático de prueba - tipo CON"
-  }
+  "tipoFormulario": "consultas",
+  "Nombre": "Prueba",
+  "Apellidos": "Consulta",
+  "TipoDeDocumento": "NIF",
+  "NumeroDeDocumento": "12345678Z",
+  "CorreoElectronico": "consulta@example.com",
+  "confirmEmail": "consulta@example.com",
+  "Telefono": "612345678",
+  "Nacionalidad": "ESPA?A",
+  "TipoDeTitulo": "pago-emv-movil",
+  "NumTituloViaje": null,
+  "Descripcion": "Consulto informaci?n sobre por qu? no hay ba?os en las estaciones.",
+  "consentimiento": true
 }

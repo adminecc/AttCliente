@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('mainForm');
     const tipoFormulario = document.getElementById('tipoFormulario');
     const formContainer = document.getElementById('formContainer');
-    
+
     // Secciones del formulario
     const secciones = {
         datosPersonales: document.getElementById('datosPersonales'),
@@ -28,15 +28,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         consentimiento: document.getElementById('seccionConsentimiento')
     };
-    
+
     // Modal
     const modalOverlay = document.getElementById('modalOverlay');
     const modalClose = document.getElementById('modalClose');
     const modalReference = document.getElementById('modalReference');
-    
+    const modalWarnings = document.getElementById('modalWarnings');
+
     // Botones
     const btnLimpiar = document.getElementById('btnLimpiar');
-    
+
     // Campos específicos
     const tipologia = document.getElementById('tipologia');
     const subtipologia = document.getElementById('subtipologia');
@@ -52,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const otroLugarSugerencia = document.getElementById('otroLugarSugerencia');
     const descripcionCorta = document.getElementById('descripcionCorta');
     const charCount = document.getElementById('charCount');
-    
+
     // ============================================
     // DATOS DE SUBTIPOLOGÍAS
     // ============================================
@@ -114,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
             { value: 'otro-general', text: 'Otro motivo' }
         ]
     };
-    
+
     // ============================================
     // CONFIGURACIÓN DE SECCIONES POR TIPO
     // ============================================
@@ -144,11 +145,11 @@ document.addEventListener('DOMContentLoaded', () => {
             secciones: ['datosPersonales', 'tarjetas', 'consentimiento']
         }
     };
-    
+
     // ============================================
     // FUNCIONES PRINCIPALES
     // ============================================
-    
+
     /**
      * Muestra las secciones correspondientes al tipo de formulario seleccionado
      */
@@ -157,22 +158,22 @@ document.addEventListener('DOMContentLoaded', () => {
         Object.values(secciones).forEach(seccion => {
             if (seccion) seccion.classList.add('hidden');
         });
-        
+
         if (!tipo || !configuracionTipos[tipo]) {
             formContainer.classList.add('hidden');
             return;
         }
-        
+
         // Mostrar el contenedor principal
         formContainer.classList.remove('hidden');
-        
+
         // Mostrar las secciones correspondientes
         configuracionTipos[tipo].secciones.forEach(nombreSeccion => {
             if (secciones[nombreSeccion]) {
                 secciones[nombreSeccion].classList.remove('hidden');
             }
         });
-        
+
         // Ajustar elementos específicos para tarjeta +Metro
         const txtTituloDatosPersonales = document.getElementById('txtTituloDatosPersonales');
         const disclaimerTarjetas = document.getElementById('disclaimerTarjetas');
@@ -182,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const lopdTextoTarjetas = document.getElementById('lopdTextoTarjetas');
         const recibirPostalNormalContainer = document.getElementById('recibirPostalNormalContainer');
         const recibirPostal = document.getElementById('recibirPostal');
-        
+
         if (tipo === 'tarjetas') {
             if (txtTituloDatosPersonales) txtTituloDatosPersonales.textContent = 'Datos personales del interesado';
             if (disclaimerTarjetas) disclaimerTarjetas.classList.remove('hidden');
@@ -195,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof actualizarVisibilidadEnvio === 'function') {
                 actualizarVisibilidadEnvio();
             }
-            
+
             // Actualizar visibilidad de representante/dirección según el checkbox
             if (typeof actualizarVisibilidadRepresentante === 'function') {
                 actualizarVisibilidadRepresentante();
@@ -220,25 +221,25 @@ document.addEventListener('DOMContentLoaded', () => {
             if (containerFirmaTarjetas) containerFirmaTarjetas.classList.add('hidden');
             if (lopdTextoTarjetas) lopdTextoTarjetas.classList.add('hidden');
             if (recibirPostalNormalContainer) recibirPostalNormalContainer.classList.remove('hidden');
-            
+
             // Si no es tarjetas, restauramos comportamiento normal para representante
             const bloqueRepresentante = document.getElementById('bloqueRepresentante');
             if (bloqueRepresentante) bloqueRepresentante.classList.add('hidden');
-            
+
             // Actualizar visibilidad de envío y de dirección de contacto
             if (typeof actualizarVisibilidadEnvio === 'function') {
                 actualizarVisibilidadEnvio();
             }
         }
-        
+
         // Resetear campos required según la sección
         actualizarCamposRequired(tipo);
         comprobarCamposObligatorios();
-        
+
         // Scroll suave al inicio del formulario
         formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-    
+
     /**
      * Actualiza los campos required según el tipo de formulario
      */
@@ -248,24 +249,24 @@ document.addEventListener('DOMContentLoaded', () => {
         todosLosCampos.forEach(campo => {
             campo.removeAttribute('required');
         });
-        
+
         // Los campos de datos personales siempre son required
         const camposPersonalesRequired = ['tipoDocumento', 'numeroDocumento', 'nombre', 'apellidos', 'email', 'confirmEmail', 'telefono', 'viaContacto', 'numContacto', 'cpContacto', 'municipioContacto', 'provinciaContacto'];
         camposPersonalesRequired.forEach(id => {
             const campo = document.getElementById(id);
             if (campo) campo.setAttribute('required', '');
         });
-        
+
         // Campos específicos por tipo
         const camposEspecificos = {
-            reclamaciones: ['clasificacion', 'canalRecepcion', 'fechaIncidencia', 'tipologia', 'lugarIncidencia', 'descripcionCorta', 'descripcionDetallada'],
-            consultas: ['descripcionCortaConsulta', 'descripcionDetalladaConsulta'],
-            sugerencias: ['areaSugerencia', 'lugarSugerencia', 'descripcionSugerencia'],
+            reclamaciones: ['clasificacion', 'fechaIncidencia', 'lugarIncidencia', 'descripcionDetallada'],
+            consultas: ['descripcionDetalladaConsulta'],
+            sugerencias: ['lugarSugerencia', 'descripcionSugerencia'],
             agradecimientos: ['motivoAgradecimiento', 'dirigidoAgradecimiento', 'descripcionAgradecimiento'],
             objetos: ['fechaPerdida', 'lineaMetroObjetos', 'dondePerdidoObjetos', 'nombreObjetoObjetos', 'descripcionObjeto'],
-            tarjetas: ['motivoTarjeta', 'fechaNacimiento', 'fechaCitaTarjeta', 'horaCitaTarjeta', 'medioNotificacionTarjeta']
+            tarjetas: ['medioNotificacionTarjeta']
         };
-        
+
         if (camposEspecificos[tipo]) {
             camposEspecificos[tipo].forEach(id => {
                 const campo = document.getElementById(id);
@@ -273,13 +274,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }
-    
+
     /**
      * Actualiza las opciones de subtipología según la tipología seleccionada
      */
     function actualizarSubtipologias(tipologiaValue) {
         subtipologia.innerHTML = '<option value="">Seleccione...</option>';
-        
+
         if (tipologiaValue && subtipologias[tipologiaValue]) {
             subtipologias[tipologiaValue].forEach(opcion => {
                 const option = document.createElement('option');
@@ -312,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function actualizarCamposLugarSugerencia(lugarValue) {
         actualizarCamposLugar(lugarValue, grupoTrenSugerencia, trenSugerencia, grupoOtroLugarSugerencia, otroLugarSugerencia);
     }
-    
+
     /**
      * Genera un número de referencia único
      */
@@ -322,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const aleatorio = Math.floor(Math.random() * 90000) + 10000;
         return `ATT-${año}-${aleatorio}`;
     }
-    
+
     /**
      * Valida el formulario antes del envío
      */
@@ -332,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function comprobarCamposObligatorios() {
         const camposRequired = form.querySelectorAll('[required]');
         let todosRellenos = true;
-        
+
         camposRequired.forEach(campo => {
             if (!campo.closest('.hidden')) {
                 if (campo.type === 'checkbox') {
@@ -346,7 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
-        
+
         const btnEnviar = document.getElementById('btnEnviar');
         if (btnEnviar) {
             btnEnviar.disabled = !todosRellenos;
@@ -357,10 +358,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const camposRequired = form.querySelectorAll('[required]');
         let primerError = null;
         let esValido = true;
-        
+
         // Limpiar errores previos
         form.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
-        
+
         camposRequired.forEach(campo => {
             // Solo validar campos visibles
 
@@ -389,14 +390,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
-        
+
         // Validar checkbox de consentimiento
         const consentimiento = document.getElementById('consentimiento');
         if (!consentimiento.checked) {
             esValido = false;
             if (!primerError) primerError = consentimiento;
         }
-        
+
         // Validar email
         const email = document.getElementById('email');
         const confirmEmail = document.getElementById('confirmEmail');
@@ -410,7 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
             esValido = false;
             if (!primerError) primerError = confirmEmail;
         }
-        
+
         // Validar teléfono español (9 dígitos con prefijo opcional)
         const telefono = document.getElementById('telefono');
         if (telefono && telefono.value) {
@@ -452,7 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!primerError) primerError = confirmEmailRep;
             }
         }
-        
+
         // Validar teléfono del representante (si está visible)
         const telefonoRep = document.getElementById('telefonoRep');
         if (telefonoRep && !telefonoRep.closest('.hidden') && telefonoRep.value) {
@@ -478,15 +479,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-        
+
         if (primerError) {
             primerError.focus();
             primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-        
+
         return esValido;
     }
-    
+
     /**
      * Valida formato de email
      */
@@ -494,7 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);
     }
-    
+
     /**
      * Valida formato y letra de DNI/NIE español
      */
@@ -504,7 +505,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!dniNieRegex.test(cleanValue)) {
             return false;
         }
-        
+
         let numberStr = cleanValue.substring(0, 8);
         if (numberStr.startsWith('X')) {
             numberStr = '0' + numberStr.substring(1);
@@ -513,31 +514,31 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (numberStr.startsWith('Z')) {
             numberStr = '2' + numberStr.substring(1);
         }
-        
+
         const number = parseInt(numberStr, 10);
         const letter = cleanValue.charAt(8);
         const validLetters = "TRWAGMYFPDXBNJZSQVHLCKE";
         const expectedLetter = validLetters.charAt(number % 23);
-        
+
         return letter === expectedLetter;
     }
-    
+
     /**
      * Limpia todos los campos del formulario
      */
     function limpiarFormulario() {
         form.reset();
         formContainer.classList.add('hidden');
-        
+
         // Limpiar errores
         form.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
-        
+
         // Limpiar lista de archivos
         const fileList = document.getElementById('fileList');
         if (fileList) fileList.innerHTML = '';
         const fileListConsultas = document.getElementById('fileListConsultas');
         if (fileListConsultas) fileListConsultas.innerHTML = '';
-        
+
         // Resetear contador de caracteres
         if (charCount) charCount.textContent = '0';
         const charCountConsulta = document.getElementById('charCountConsulta');
@@ -549,7 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const recibirPostal = document.getElementById('recibirPostal');
         if (recibirPostal) recibirPostal.checked = false;
         // La visibilidad de la dirección de contacto se actualizará al inicializar el formulario
-        
+
         // Limpiar dirección de envío
         const direccionEnvioSelect = document.getElementById('direccionEnvioSelect');
         if (direccionEnvioSelect) direccionEnvioSelect.value = 'misma';
@@ -560,18 +561,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (grupoTrenConsulta) grupoTrenConsulta.classList.add('hidden');
         const grupoOtroLugarConsulta = document.getElementById('grupoOtroLugarConsulta');
         if (grupoOtroLugarConsulta) grupoOtroLugarConsulta.classList.add('hidden');
-        
+
         // Resetear elementos del representante y firma de +Metro
         const solicitudRepresentante = document.getElementById('solicitudRepresentante');
         if (solicitudRepresentante) solicitudRepresentante.checked = false;
-        
+
         if (typeof limpiarFirma === 'function') {
             limpiarFirma();
         }
         if (typeof actualizarEstadoFirma === 'function') {
             actualizarEstadoFirma();
         }
-        
+
         // Limpiar y ocultar bloques condicionales de títulos de viaje
         if (typeof ocultarYResetearTodosLosBloques === 'function') {
             ocultarYResetearTodosLosBloques();
@@ -588,16 +589,25 @@ document.addEventListener('DOMContentLoaded', () => {
         // Scroll al inicio
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    
+
     /**
      * Muestra el modal de confirmación
      */
-    function mostrarModal(referencia = generarReferencia()) {
+    function mostrarModal(referencia = generarReferencia(), warnings = []) {
         modalReference.textContent = referencia;
+        if (modalWarnings) {
+            if (Array.isArray(warnings) && warnings.length > 0) {
+                modalWarnings.textContent = `Aviso: ${warnings.join(' ')}`;
+                modalWarnings.classList.remove('hidden');
+            } else {
+                modalWarnings.textContent = '';
+                modalWarnings.classList.add('hidden');
+            }
+        }
         modalOverlay.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
-    
+
     /**
      * Cierra el modal y resetea el formulario
      */
@@ -606,16 +616,16 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = '';
         limpiarFormulario();
     }
-    
+
     // ============================================
     // EVENT LISTENERS
     // ============================================
-    
+
     // Cambio de tipo de formulario
     tipoFormulario.addEventListener('change', (e) => {
         mostrarSecciones(e.target.value);
     });
-    
+
     // Cambio de tipología (para reclamaciones)
     if (tipologia) {
         tipologia.addEventListener('change', (e) => {
@@ -635,21 +645,21 @@ document.addEventListener('DOMContentLoaded', () => {
             actualizarCamposLugarSugerencia(e.target.value);
         });
     }
-    
+
     // Contador de caracteres para descripción corta
     if (descripcionCorta) {
         descripcionCorta.addEventListener('input', (e) => {
             charCount.textContent = e.target.value.length;
         });
     }
-    
+
     // Gestión de archivos adjuntos
     const fileInputs = document.querySelectorAll('.file-input');
     fileInputs.forEach(input => {
         input.addEventListener('change', (e) => {
             const files = Array.from(e.target.files);
             const fileListContainer = input.closest('.file-upload').querySelector('.file-list');
-            
+
             if (fileListContainer) {
                 fileListContainer.innerHTML = '';
                 files.forEach((file, index) => {
@@ -667,16 +677,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-    
+
     // Eliminar archivos individuales
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('file-item-remove')) {
             const fileItem = e.target.closest('.file-item');
             const fileUpload = e.target.closest('.file-upload');
             const input = fileUpload.querySelector('.file-input');
-            
+
             fileItem.remove();
-            
+
             // Si no quedan archivos, limpiar el input
             const remainingFiles = fileUpload.querySelectorAll('.file-item');
             if (remainingFiles.length === 0) {
@@ -684,7 +694,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-    
+
     /**
      * Comprueba si un elemento está oculto en el DOM o dentro de un contenedor oculto.
      * Sirve para implementar la opción A (enviar campos condicionales ocultos como null).
@@ -700,8 +710,8 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Genera el payload estructurado completo listo para su envío (o descarga de prueba)
      * unificando las secciones de datos comunes, representante, envío y values por tipo.
-     * 
-     * NOTA: 'referenceClientSide' se envía como null porque la generación del identificador 
+     *
+     * NOTA: 'referenceClientSide' se envía como null porque la generación del identificador
      * de referencia único (ej. ATT-2026-XXXXX) ha sido delegada al backend para mayor robustez.
      */
     function generarPayloadFormulario() {
@@ -742,7 +752,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 3. Obtener respuesta postal
         const recibirPostal = document.getElementById('recibirPostal');
         const postalReplyEnabled = recibirPostal ? recibirPostal.checked : false;
-        
+
         const direccionEnvioSelect = document.getElementById('direccionEnvioSelect');
         const addressMode = (direccionEnvioSelect && !esElementoOculto(direccionEnvioSelect)) ? direccionEnvioSelect.value : 'misma';
 
@@ -769,10 +779,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (campo.type === 'file' || campo.type === 'submit' || campo.type === 'button') {
                     return;
                 }
-                
+
                 // Mapear nombre de campo usando su name o id
                 let nombreCampo = campo.name || campo.id;
-                
+
                 // Opción A: Si el campo está oculto (su contenedor está oculto), se envía como null
                 if (esElementoOculto(campo)) {
                     values[nombreCampo] = null;
@@ -790,9 +800,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // 5. Adjuntos y Firmas en formato estructurado (referenciando el multipart)
+        // 5. Adjuntos en formato estructurado (referenciando el multipart)
         const attachments = [];
-        const signatures = [];
 
         // Archivos adjuntos
         const fileInputs = form.querySelectorAll('.file-input');
@@ -815,18 +824,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Firma (solo para tarjetas si está visible)
-        const signatureCanvas = document.getElementById('signature-canvas');
-        const signatureData = document.getElementById('signature-data');
-        if (signatureData && signatureData.value && !esElementoOculto(signatureCanvas)) {
-            signatures.push({
-                fieldId: "signature-data",
-                contentType: "image/png",
-                storageMode: "multipart",
-                multipartFieldName: "signature_interesado_0"
-            });
-        }
-
         // 6. Consentimientos
         const consents = [];
         const consentimientoCheckbox = document.getElementById('consentimiento');
@@ -838,7 +835,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 textVersion: "lopd-general-2026-06"
             });
         }
-        
+
         const datosCorrectosCheckbox = document.getElementById('datosCorrectos');
         if (datosCorrectosCheckbox && !esElementoOculto(datosCorrectosCheckbox) && datosCorrectosCheckbox.checked) {
             consents.push({
@@ -882,7 +879,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 direccionEnvio: direccionEnvio
             },
             values: values,
-            signatures: signatures,
             attachments: attachments,
             consents: consents,
             metadata: {
@@ -892,104 +888,270 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
+    function primerTextoDisponible(...valores) {
+        return valores.find(valor => typeof valor === 'string' && valor.trim() !== '')?.trim() || null;
+    }
+
+    function normalizarTipoDocumento(tipoDocumento) {
+        return tipoDocumento === 'DNI' ? 'NIF' : tipoDocumento;
+    }
+
+    function normalizarNacionalidad(nacionalidad) {
+        const valores = {
+            ES: 'ESPAÑA',
+            MA: 'MARRUECOS',
+            GB: 'REINO UNIDO',
+            FR: 'FRANCIA',
+            IT: 'ITALIA',
+            DE: 'ALEMANIA',
+            PT: 'PORTUGAL',
+            OTRO: 'OTROS',
+        };
+        return valores[nacionalidad] || nacionalidad;
+    }
+
+    function combinarFechaHora(fecha, hora) {
+        if (!fecha) return null;
+        return `${fecha}T${hora || '00:00'}:00`;
+    }
+
+    function separarApellidos(apellidos) {
+        const partes = String(apellidos || '').trim().split(/\s+/).filter(Boolean);
+        if (partes.length <= 1) {
+            return { primero: partes[0] || '', segundo: '' };
+        }
+        return {
+            primero: partes[0],
+            segundo: partes.slice(1).join(' '),
+        };
+    }
+
+    function crearDescripcionObjeto(values) {
+        return [
+            values.descripcionObjeto,
+            values.colorObjetoObjetos ? `Color: ${values.colorObjetoObjetos}` : '',
+            values.distintivoObjetoObjetos ? `Distintivo: ${values.distintivoObjetoObjetos}` : '',
+        ].filter(Boolean).join('\n');
+    }
+
     function adaptarPayloadParaApi(payloadUnificado) {
         const applicant = payloadUnificado.applicant || {};
+        const direccion = applicant.direccionContacto || {};
         const values = payloadUnificado.values || {};
-        const consents = payloadUnificado.consents || [];
-        const direccionContacto = applicant.direccionContacto || {};
-        const postalReply = payloadUnificado.postalReply || {};
-        const tipo = payloadUnificado.form?.legacyType || tipoFormulario.value;
-        const descripcionSugerencia = values.descripcionSugerencia || '';
+        const apellidosTarjeta = separarApellidos(applicant.apellidos);
+        const tipoFormularioActual = payloadUnificado.form?.legacyType || tipoFormulario.value;
 
         const payloadApi = {
-            tipoFormulario: tipo,
-            nombre: applicant.nombre,
-            apellidos: applicant.apellidos,
-            tipoDocumento: applicant.tipoDocumento === 'DNI' ? 'NIF' : applicant.tipoDocumento,
-            numeroDocumento: applicant.numeroDocumento,
-            email: applicant.email,
+            tipoFormulario: tipoFormularioActual,
+            Nombre: applicant.nombre,
+            Apellidos: applicant.apellidos,
+            TipoDeDocumento: normalizarTipoDocumento(applicant.tipoDocumento),
+            NumeroDeDocumento: applicant.numeroDocumento,
+            CorreoElectronico: applicant.email,
             confirmEmail: applicant.email,
-            telefono: applicant.telefono,
-            nacionalidad: applicant.nacionalidad,
-            consentimiento: consents.some(consent => consent.id === 'consentimiento' && consent.accepted === true),
-            recibirPostal: postalReply.enabled === true,
-            viaContacto: direccionContacto.via,
-            numContacto: direccionContacto.numero,
-            escContacto: direccionContacto.escalera,
-            pisoContacto: direccionContacto.piso,
-            puerContacto: direccionContacto.puerta,
-            cpContacto: direccionContacto.codigoPostal,
-            municipioContacto: direccionContacto.municipio,
-            provinciaContacto: direccionContacto.provincia,
-            ...values,
-            payloadUnificado
+            Telefono: applicant.telefono,
+            Nacionalidad: normalizarNacionalidad(applicant.nacionalidad),
+            Direccion: direccion.via,
+            Numero: direccion.numero,
+            Escalera: direccion.escalera,
+            Piso: direccion.piso,
+            Puerta: direccion.puerta,
+            CP: direccion.codigoPostal,
+            Localidad: direccion.municipio,
+            Provincia: direccion.provincia,
+            recibirPostal: payloadUnificado.postalReply?.enabled === true,
+            consentimiento: payloadUnificado.consents?.some(consent => consent.id === 'consentimiento' && consent.accepted === true) === true,
         };
 
-        if (tipo === 'sugerencias') {
-            payloadApi.areaSugerencia = values.areaSugerencia || values.lugarSugerencia || 'general';
-            payloadApi.tituloSugerencia = values.tituloSugerencia
-                || (descripcionSugerencia ? descripcionSugerencia.substring(0, 100) : 'Sugerencia');
+        if (tipoFormularioActual === 'consultas') {
+            payloadApi.TipoDeTitulo = values.tipoTituloConsulta;
+            payloadApi.NumTituloViaje = values.numeracionTituloConsulta;
+            payloadApi.Descripcion = values.descripcionDetalladaConsulta;
         }
 
+        if (tipoFormularioActual === 'sugerencias') {
+            payloadApi.Estacion = primerTextoDisponible(values.lugarSugerencia, 'general');
+            payloadApi.OtraUbicacion = values.otroLugarSugerencia;
+            payloadApi.TipoDeTitulo = values.tipoTituloSugerencia;
+            payloadApi.NumTituloViaje = values.numeracionTituloSugerencia;
+            payloadApi.Descripcion = values.descripcionSugerencia;
+        }
+
+        if (tipoFormularioActual === 'agradecimientos') {
+            payloadApi.Motivo = values.motivoAgradecimiento;
+            payloadApi.FechaEpisodio = values.fechaAgradecimiento;
+            payloadApi.Lugar = values.lugarAgradecimiento;
+            payloadApi.Estacion = values.estacionAgradecimientoDetalle;
+            payloadApi.Tren = values.trenAgradecimiento;
+            payloadApi.DirigidoA = values.dirigidoAgradecimiento;
+            payloadApi.Colectivos = values.variosColectivos;
+            payloadApi.NumIdentificacionPersonaTrabajad = values.nombreEmpleado;
+            payloadApi.Descripcion = values.descripcionAgradecimiento;
+        }
+
+        if (tipoFormularioActual === 'reclamaciones') {
+            payloadApi.Clasificacion = values.clasificacion;
+            payloadApi.FechaYHoraConsulta = combinarFechaHora(values.fechaIncidencia, values.horaIncidencia);
+            payloadApi.Lugar = values.lugarIncidencia;
+            payloadApi.TipoDeTitulo = values.tipoTitulo;
+            payloadApi.NBilleteTitulo = values.numeracion_titulo_viaje;
+            payloadApi.NClienteNTarjCredito = values.email_usuario_metro_pay;
+            payloadApi.PuntoDeVenta = values.estacion;
+            payloadApi.DAB = values.numero_dab;
+            payloadApi.TipoDeInstalacion = values.numero_dab ? 'dab' : null;
+            payloadApi.ImporteAPagar = values.importe_reclamado_1 || values.importe_reclamado_2 || values.importe_reclamado_3;
+            payloadApi.DescripcionConsulta = values.descripcionDetallada;
+            payloadApi.Observaciones = [
+                values.otroLugarIncidencia ? `Otro lugar: ${values.otroLugarIncidencia}` : '',
+                values.trenIncidencia ? `Tren: ${values.trenIncidencia}` : '',
+                values.punto_venta_recarga ? `Punto venta/recarga: ${values.punto_venta_recarga}` : '',
+                values.tipo_operacion ? `Tipo operacion: ${values.tipo_operacion}` : '',
+                values.modo_pago ? `Modo pago: ${values.modo_pago}` : '',
+                values.numeracion_titulo_recarga ? `Titulo recargado: ${values.numeracion_titulo_recarga}` : '',
+            ].filter(Boolean).join('\n') || null;
+        }
+
+        if (tipoFormularioActual === 'objetos') {
+            payloadApi.FechaPerdida = values.fechaPerdida;
+            payloadApi.Localizacion = values.dondePerdidoObjetos === 'estacion'
+                ? values.estacionPerdidaObjetos
+                : values.dondePerdidoObjetos;
+            payloadApi.NUnidadTren = values.numeroTrenObjetos;
+            payloadApi.TipoObjeto = values.nombreObjetoObjetos;
+            payloadApi.TipoDeTitulo = values.tipoTituloObjetos;
+            payloadApi.NumTituloViaje = values.numeracion_titulo_viaje_objetos;
+            payloadApi.Descripcion = crearDescripcionObjeto(values);
+            payloadApi.Observaciones = [
+                values.horaPerdida ? `Hora aproximada: ${values.horaPerdida}` : '',
+                values.lineaMetroObjetos ? `Linea: ${values.lineaMetroObjetos}` : '',
+                values.estacionPerdidaObjetos ? `Estacion: ${values.estacionPerdidaObjetos}` : '',
+                values.estacionOrigenObjetos ? `Origen: ${values.estacionOrigenObjetos}` : '',
+                values.estacionDestinoObjetos ? `Destino: ${values.estacionDestinoObjetos}` : '',
+            ].filter(Boolean).join('\n') || null;
+        }
+
+        if (tipoFormularioActual === 'tarjetas') {
+            const firmaDataUrl = document.getElementById('signature-data')?.value || null;
+            if (firmaDataUrl && !firmaDataUrl.startsWith('data:image/')) {
+                console.warn('[Metro API] Firma de Tarjetas con formato inesperado; se esperaba data:image/... base64.', {
+                    firmaPreview: firmaDataUrl.slice(0, 40)
+                });
+            }
+            return {
+                tipoFormulario: tipoFormularioActual,
+                Title: null,
+                NombreCliente: applicant.nombre,
+                ApellidoCliente1: apellidosTarjeta.primero,
+                ApellidoCliente2: apellidosTarjeta.segundo,
+                DNICliente: applicant.numeroDocumento,
+                EmailCliente: applicant.email,
+                confirmEmail: applicant.email,
+                TelefonoCliente1: applicant.telefono,
+                MetodoNotificacion: values.medioNotificacionTarjeta,
+                Firma: firmaDataUrl,
+                attachments: payloadUnificado.attachments,
+                consentimiento: payloadApi.consentimiento,
+            };
+        }
+        payloadApi.attachments = payloadUnificado.attachments;
         return payloadApi;
+    }
+
+    function tieneBinariosParaApi(payloadUnificado) {
+        return Boolean(payloadUnificado.attachments?.length);
+    }
+
+    function crearRequestApi(payloadApi, payloadUnificado) {
+        if (!tieneBinariosParaApi(payloadUnificado)) {
+            return {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payloadApi),
+            };
+        }
+
+        const formData = new FormData();
+        formData.append('payload', JSON.stringify(payloadApi));
+
+        const fileInputs = form.querySelectorAll('.file-input');
+        fileInputs.forEach(input => {
+            if (esElementoOculto(input) || !input.files?.length) return;
+            Array.from(input.files).forEach((file, index) => {
+                formData.append(`file_${input.id}_${index}`, file, file.name);
+            });
+        });
+
+        return {
+            body: formData,
+        };
     }
 
     function registrarLogApi(entry) {
         const logEntry = {
             timestamp: new Date().toISOString(),
-            ...entry
+            ...entry,
         };
 
-        try {
-            const currentLogs = JSON.parse(localStorage.getItem(API_LOG_STORAGE_KEY) || '[]');
-            currentLogs.unshift(logEntry);
-            localStorage.setItem(API_LOG_STORAGE_KEY, JSON.stringify(currentLogs.slice(0, 25)));
-        } catch (storageError) {
-            console.warn('No se pudo guardar el log local de API:', storageError);
-        }
-
         console.log('[Metro API]', logEntry);
-    }
 
-    async function enviarSolicitudApi(payloadApi) {
-        const response = await fetch(API_CREATE_ENDPOINT, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payloadApi)
-        });
-
-        const responseText = await response.text();
-        let responseBody;
         try {
-            responseBody = responseText ? JSON.parse(responseText) : {};
-        } catch {
-            responseBody = { raw: responseText };
+            const logs = JSON.parse(localStorage.getItem(API_LOG_STORAGE_KEY) || '[]');
+            logs.push(logEntry);
+            localStorage.setItem(API_LOG_STORAGE_KEY, JSON.stringify(logs.slice(-25)));
+        } catch (error) {
+            console.warn('[Metro API] No se pudo guardar el log local.', error);
         }
-
-        registrarLogApi({
-            endpoint: API_CREATE_ENDPOINT,
-            request: payloadApi,
-            status: response.status,
-            ok: response.ok,
-            response: responseBody
-        });
-
-        if (!response.ok) {
-            const message = responseBody?.error
-                || (Array.isArray(responseBody?.errors) ? responseBody.errors.join(', ') : '')
-                || `Error HTTP ${response.status}`;
-            throw new Error(message);
-        }
-
-        return responseBody;
     }
 
-    // Envio del formulario
+    async function enviarSolicitudApi(payloadUnificado) {
+        const request = adaptarPayloadParaApi(payloadUnificado);
+        const apiRequest = crearRequestApi(request, payloadUnificado);
+
+        try {
+            const response = await fetch(API_CREATE_ENDPOINT, {
+                method: 'POST',
+                ...apiRequest,
+            });
+
+            let responseBody = {};
+            try {
+                responseBody = await response.json();
+            } catch {
+                responseBody = {};
+            }
+
+            registrarLogApi({
+                endpoint: API_CREATE_ENDPOINT,
+                request,
+                status: response.status,
+                ok: response.ok,
+                response: responseBody,
+            });
+
+            if (!response.ok) {
+                const detail = Array.isArray(responseBody.errors) && responseBody.errors.length > 0
+                    ? responseBody.errors.join(', ')
+                    : responseBody.error || `HTTP ${response.status}`;
+                throw new Error(detail);
+            }
+
+            return responseBody;
+        } catch (error) {
+            registrarLogApi({
+                endpoint: API_CREATE_ENDPOINT,
+                ok: false,
+                error: error.message,
+            });
+            throw error;
+        }
+    }
+
+    // Envío del formulario
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        // Asegurar sincronización de dirección si procede
         if (typeof sincronizarDireccionEnvio === 'function') {
             sincronizarDireccionEnvio();
         }
@@ -1002,50 +1164,49 @@ document.addEventListener('DOMContentLoaded', () => {
             btnEnviar.innerHTML = '<span class="btn-icon">...</span> Enviando...';
 
             try {
-                const payloadUnificado = generarPayloadFormulario();
-                const payloadApi = adaptarPayloadParaApi(payloadUnificado);
-                const apiResponse = await enviarSolicitudApi(payloadApi);
-                mostrarModal(apiResponse.token || apiResponse.solicitudId || 'Solicitud registrada');
-            } catch (apiError) {
-                registrarLogApi({
-                    endpoint: API_CREATE_ENDPOINT,
-                    ok: false,
-                    error: apiError.message
-                });
-                alert(`No se pudo enviar la solicitud: ${apiError.message}`);
+                const payload = generarPayloadFormulario();
+                const resultado = await enviarSolicitudApi(payload);
+                mostrarModal(
+                    resultado.token || resultado.solicitudId || resultado.id || 'Solicitud registrada',
+                    resultado.warnings || []
+                );
+            } catch (errorEnvio) {
+                console.error('Error enviando la solicitud a la API:', errorEnvio);
+                alert(`No se pudo enviar la solicitud: ${errorEnvio.message}`);
             } finally {
                 btnEnviar.disabled = false;
                 btnEnviar.innerHTML = '<span class="btn-icon">Enviar</span> Enviar solicitud';
             }
         }
     });
+
     // Botón limpiar
     btnLimpiar.addEventListener('click', () => {
         if (confirm('¿Está seguro de que desea limpiar todos los campos del formulario?')) {
             limpiarFormulario();
         }
     });
-    
+
     // Cerrar modal
     modalClose.addEventListener('click', cerrarModal);
     modalOverlay.addEventListener('click', (e) => {
         if (e.target === modalOverlay) cerrarModal();
     });
-    
+
     // Cerrar modal con Escape
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && !modalOverlay.classList.contains('hidden')) {
             cerrarModal();
         }
     });
-    
+
     // Quitar clase error al escribir
     form.addEventListener('input', (e) => {
         if (e.target.classList.contains('error')) {
             e.target.classList.remove('error');
         }
     });
-    
+
     // Validación en tiempo real del email
     const emailInput = document.getElementById('email');
     if (emailInput) {
@@ -1057,7 +1218,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     // Validación en tiempo real del confirmEmail y bloqueo de paste
     const confirmEmailInput = document.getElementById('confirmEmail');
     if (confirmEmailInput && emailInput) {
@@ -1084,7 +1245,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     // Preview de foto carnet
     const fotoCarnet = document.getElementById('fotoCarnet');
     const fotoPreview = document.getElementById('fotoPreview');
@@ -1100,7 +1261,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     // Establecer fecha máxima en campos de fecha (hoy)
     const today = new Date().toISOString().split('T')[0];
     document.querySelectorAll('input[type="date"]').forEach(input => {
@@ -1118,7 +1279,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const subtipologiaConsulta = document.getElementById('subtipologiaConsulta');
         if (!subtipologiaConsulta) return;
         subtipologiaConsulta.innerHTML = '<option value="">Seleccione...</option>';
-        
+
         if (tipologiaValue && subtipologias[tipologiaValue]) {
             subtipologias[tipologiaValue].forEach(opcion => {
                 const option = document.createElement('option');
@@ -1204,11 +1365,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         bloque.querySelectorAll('.form-grid, .form-group').forEach(subBloque => {
             if (subBloque.id && (
-                subBloque.id.startsWith('bloqueOnline') || 
+                subBloque.id.startsWith('bloqueOnline') ||
                 subBloque.id.startsWith('bloqueIncidenciaRecargaCompra') ||
-                subBloque.id.startsWith('bloqueMaquina') || 
-                subBloque.id.startsWith('bloqueTituloRecargado') || 
-                subBloque.id.startsWith('bloqueDabTarjeta') || 
+                subBloque.id.startsWith('bloqueMaquina') ||
+                subBloque.id.startsWith('bloqueTituloRecargado') ||
+                subBloque.id.startsWith('bloqueDabTarjeta') ||
                 subBloque.id.startsWith('bloqueTarjetaOtras') ||
                 subBloque.id.startsWith('bloqueTituloViajeObjetos') ||
                 subBloque.id.startsWith('bloqueEstacionObjetos') ||
@@ -1550,7 +1711,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tipoTituloObjetos) {
         tipoTituloObjetos.addEventListener('change', (e) => {
             const opcion = e.target.value;
-            
+
             // Ocultar y resetear bloques específicos de Objetos
             if (bloqueTituloViajeObjetos) {
                 resetearBloque(bloqueTituloViajeObjetos);
@@ -1598,7 +1759,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (opcionesFisicas.includes(opcion)) {
                 if (bloqueTituloViajeConsulta) bloqueTituloViajeConsulta.classList.remove('hidden');
             }
-            
+
             comprobarCamposObligatorios();
         });
     }
@@ -1629,7 +1790,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (opcionesFisicas.includes(opcion)) {
                 if (bloqueTituloViajeSugerencia) bloqueTituloViajeSugerencia.classList.remove('hidden');
             }
-            
+
             comprobarCamposObligatorios();
         });
     }
@@ -1659,7 +1820,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (lineaMetroObjetos) {
         lineaMetroObjetos.addEventListener('change', (e) => {
             const linea = e.target.value;
-            
+
             // Si cambia la línea, resetear valores seleccionados de ubicación
             if (estacionPerdidaObjetos) {
                 estacionPerdidaObjetos.value = '';
@@ -1696,7 +1857,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (dondePerdidoObjetos) {
         dondePerdidoObjetos.addEventListener('change', (e) => {
             const opcion = e.target.value;
-            
+
             if (opcion === 'estacion') {
                 if (bloqueEstacionObjetos) bloqueEstacionObjetos.classList.remove('hidden');
                 if (bloqueTrenObjetos) {
@@ -1861,18 +2022,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function actualizarVisibilidadEnvio() {
         if (!recibirPostal || !direccionContactoContainer) return;
-        
+
         const esTarjetas = (tipoFormulario.value === 'tarjetas');
 
         if (esTarjetas) {
             // Para tarjetas: Dirección de contacto y título "Dirección del interesado" siempre visibles
             direccionContactoContainer.classList.remove('hidden');
             if (tituloDireccionContacto) tituloDireccionContacto.classList.remove('hidden');
-            
+
             if (recibirPostal.checked) {
                 // Mostrar selector de dirección de envío
                 if (grupoDireccionEnvioSelect) grupoDireccionEnvioSelect.classList.remove('hidden');
-                
+
                 if (direccionEnvioSelect && direccionEnvioSelect.value === 'misma') {
                     if (direccionEnvioContainer) direccionEnvioContainer.classList.add('hidden');
                     sincronizarDireccionEnvio();
@@ -1891,7 +2052,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (direccionEnvioContainer) direccionEnvioContainer.classList.add('hidden');
             if (tituloDireccionContacto) tituloDireccionContacto.classList.add('hidden');
             limpiarDireccionEnvio();
-            
+
             // La visibilidad de la dirección de contacto depende del check normal
             direccionContactoContainer.classList.toggle('hidden', !recibirPostal.checked);
         }
@@ -2039,7 +2200,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const textareas = document.querySelectorAll('textarea.textarea');
     textareas.forEach(textarea => {
         textarea.setAttribute('maxlength', '2500');
-        
+
         // Crear el span del contador
         const counterSpan = document.createElement('span');
         counterSpan.className = 'char-counter';
@@ -2048,17 +2209,17 @@ document.addEventListener('DOMContentLoaded', () => {
         counterSpan.style.marginTop = '0.25rem';
         counterSpan.style.fontSize = '0.75rem';
         counterSpan.style.color = 'var(--color-gray-500)';
-        
+
         const currentCount = document.createElement('span');
         currentCount.id = 'charCount_' + textarea.id;
         currentCount.textContent = textarea.value.length;
-        
+
         counterSpan.appendChild(currentCount);
         counterSpan.appendChild(document.createTextNode('/2500'));
-        
+
         // Insertar después de la textarea en el DOM
         textarea.parentNode.insertBefore(counterSpan, textarea.nextSibling);
-        
+
         // Escuchar el input para actualizar el valor
         textarea.addEventListener('input', (e) => {
             currentCount.textContent = e.target.value.length;
