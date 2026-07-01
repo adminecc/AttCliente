@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
             consultas: ['descripcionDetalladaConsulta'],
             sugerencias: ['lugarSugerencia', 'descripcionSugerencia'],
             agradecimientos: ['motivoAgradecimiento', 'dirigidoAgradecimiento', 'descripcionAgradecimiento'],
-            objetos: ['fechaPerdida', 'lineaMetroObjetos', 'dondePerdidoObjetos', 'nombreObjetoObjetos', 'descripcionObjeto'],
+            objetos: ['FechaPerdida', 'LineaMetro', 'Localizacion', 'TipoObjeto', 'Descripcion'],
             tarjetas: ['medioNotificacionTarjeta']
         };
 
@@ -1140,21 +1140,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (tipoFormularioActual === 'objetos') {
-            payloadApi.FechaPerdida = values.fechaPerdida;
-            payloadApi.LineaMetro = values.lineaMetroObjetos;
-            payloadApi.Localizacion = values.dondePerdidoObjetos === 'estacion'
-                ? values.estacionPerdidaObjetos
-                : values.dondePerdidoObjetos;
-            payloadApi.EstPerdida = values.estacionPerdidaObjetos;
-            payloadApi.NUnidadTren = values.numeroTrenObjetos;
-            payloadApi.EstOrig = values.estacionOrigenObjetos;
-            payloadApi.EstDest = values.estacionDestinoObjetos;
-            payloadApi.TipoObjeto = values.nombreObjetoObjetos;
-            payloadApi.ColorObj = values.colorObjetoObjetos;
-            payloadApi.DistintivoObj = values.distintivoObjetoObjetos;
-            payloadApi.TipoDeTitulo = values.tipoTituloObjetos;
-            payloadApi.NumTituloViaje = values.numeracion_titulo_viaje_objetos;
-            payloadApi.Descripcion = values.descripcionObjeto;
+            payloadApi.FechaPerdida = values.FechaPerdida;
+            payloadApi.LineaMetro = values.LineaMetro;
+            payloadApi.Localizacion = values.Localizacion === 'estacion'
+                ? values.EstPerdida
+                : values.Localizacion;
+            payloadApi.EstPerdida = values.EstPerdida;
+            payloadApi.NUnidadTren = values.NUnidadTren;
+            payloadApi.EstOrig = values.EstOrig;
+            payloadApi.EstDest = values.EstDest;
+            payloadApi.TipoObjeto = values.TipoObjeto;
+            payloadApi.ColorObj = values.ColorObj;
+            payloadApi.DistintivoObj = values.DistintivoObj;
+            payloadApi.TipoDeTitulo = values.TipoDeTitulo;
+            payloadApi.NumTituloViaje = values.NumTituloViaje;
+            payloadApi.Descripcion = values.Descripcion;
             payloadApi.Observaciones = [
                 values.horaPerdida ? `Hora aproximada: ${values.horaPerdida}` : '',
             ].filter(Boolean).join('\n') || null;
@@ -1835,11 +1835,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // 1. Desplegable tipo de título para Objetos
-    const tipoTituloObjetos = document.getElementById('tipoTituloObjetos');
+    const TipoDeTitulo = document.getElementById('TipoDeTitulo');
     const bloqueTituloViajeObjetos = document.getElementById('bloqueTituloViajeObjetos');
 
-    if (tipoTituloObjetos) {
-        tipoTituloObjetos.addEventListener('change', (e) => {
+    if (TipoDeTitulo) {
+        TipoDeTitulo.addEventListener('change', (e) => {
             const opcion = e.target.value;
 
             // Ocultar y resetear bloques específicos de Objetos
@@ -1926,10 +1926,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 2. Filtrado dinámico de estaciones por línea
-    const lineaMetroObjetos = document.getElementById('lineaMetroObjetos');
-    const estacionPerdidaObjetos = document.getElementById('estacionPerdidaObjetos');
-    const estacionOrigenObjetos = document.getElementById('estacionOrigenObjetos');
-    const estacionDestinoObjetos = document.getElementById('estacionDestinoObjetos');
+    const LineaMetro = document.getElementById('LineaMetro');
+    const EstPerdida = document.getElementById('EstPerdida');
+    const EstOrig = document.getElementById('EstOrig');
+    const EstDest = document.getElementById('EstDest');
 
     function poblarSelectEstaciones(select, lista) {
         if (!select) return;
@@ -1947,45 +1947,45 @@ document.addEventListener('DOMContentLoaded', () => {
         select.innerHTML = '<option value="">Seleccione primero una línea...</option>';
     }
 
-    if (lineaMetroObjetos) {
-        lineaMetroObjetos.addEventListener('change', (e) => {
+    if (LineaMetro) {
+        LineaMetro.addEventListener('change', (e) => {
             const linea = e.target.value;
 
             // Si cambia la línea, resetear valores seleccionados de ubicación
-            if (estacionPerdidaObjetos) {
-                estacionPerdidaObjetos.value = '';
-                estacionPerdidaObjetos.classList.remove('error');
+            if (EstPerdida) {
+                EstPerdida.value = '';
+                EstPerdida.classList.remove('error');
             }
-            if (estacionOrigenObjetos) {
-                estacionOrigenObjetos.value = '';
-                estacionOrigenObjetos.classList.remove('error');
+            if (EstOrig) {
+                EstOrig.value = '';
+                EstOrig.classList.remove('error');
             }
-            if (estacionDestinoObjetos) {
-                estacionDestinoObjetos.value = '';
-                estacionDestinoObjetos.classList.remove('error');
+            if (EstDest) {
+                EstDest.value = '';
+                EstDest.classList.remove('error');
             }
 
             if (linea && estacionesPorLinea[linea]) {
                 const lista = estacionesPorLinea[linea];
-                poblarSelectEstaciones(estacionPerdidaObjetos, lista);
-                poblarSelectEstaciones(estacionOrigenObjetos, lista);
-                poblarSelectEstaciones(estacionDestinoObjetos, lista);
+                poblarSelectEstaciones(EstPerdida, lista);
+                poblarSelectEstaciones(EstOrig, lista);
+                poblarSelectEstaciones(EstDest, lista);
             } else {
-                resetearSelectEstaciones(estacionPerdidaObjetos);
-                resetearSelectEstaciones(estacionOrigenObjetos);
-                resetearSelectEstaciones(estacionDestinoObjetos);
+                resetearSelectEstaciones(EstPerdida);
+                resetearSelectEstaciones(EstOrig);
+                resetearSelectEstaciones(EstDest);
             }
         });
     }
 
     // 3. ¿Dónde lo has perdido? (Estación vs Tren vs No lo sé)
-    const dondePerdidoObjetos = document.getElementById('dondePerdidoObjetos');
+    const Localizacion = document.getElementById('Localizacion');
     const bloqueEstacionObjetos = document.getElementById('bloqueEstacionObjetos');
     const bloqueTrenObjetos = document.getElementById('bloqueTrenObjetos');
     const grupoNumeroTrenObjetos = document.getElementById('grupoNumeroTrenObjetos');
 
-    if (dondePerdidoObjetos) {
-        dondePerdidoObjetos.addEventListener('change', (e) => {
+    if (Localizacion) {
+        Localizacion.addEventListener('change', (e) => {
             const opcion = e.target.value;
 
             if (opcion === 'estacion') {

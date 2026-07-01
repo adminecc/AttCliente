@@ -1195,8 +1195,8 @@
                         </h3>
                         <div class="form-grid" style="margin-bottom: var(--spacing-lg); grid-column: 1 / -1;">
                             <div class="form-group full-width">
-                                <label for="tipoTituloObjetos" class="label">Tipo de título de viaje</label>
-                                <select id="tipoTituloObjetos" name="tipoTituloObjetos" class="select">
+                                <label for="TipoDeTitulo" class="label">Tipo de título de viaje</label>
+                                <select id="TipoDeTitulo" name="TipoDeTitulo" class="select">
                                     <option value="">Seleccione si procede...</option>
                                     <option value="monedero-metro-malaga">Monedero Metro Málaga</option>
                                     <option value="billete-ocasional">Ocasional Metro de Málaga</option>
@@ -1211,8 +1211,8 @@
 
                             <!-- Condicional Bloque 1 (Tarjetas físicas) -->
                             <div id="bloqueTituloViajeObjetos" class="form-group full-width hidden">
-                                <label for="numeracion_titulo_viaje_objetos" class="label">Numeración del título de viaje</label>
-                                <input type="text" id="numeracion_titulo_viaje_objetos" name="numeracion_titulo_viaje_objetos" class="input" required placeholder="Ej: 1000234567">
+                                <label for="NumTituloViaje" class="label">Numeración del título de viaje</label>
+                                <input type="text" id="NumTituloViaje" name="NumTituloViaje" class="input" required placeholder="Ej: 1000234567">
                             </div>
                         </div>
 
@@ -1222,8 +1222,8 @@
                         </h3>
                         <div class="form-grid" style="grid-column: 1 / -1;">
                             <div class="form-group">
-                                <label for="fechaPerdida" class="label required">Fecha de pérdida</label>
-                                <input type="date" id="fechaPerdida" name="fechaPerdida" class="input" required>
+                                <label for="FechaPerdida" class="label required">Fecha de pérdida</label>
+                                <input type="date" id="FechaPerdida" name="FechaPerdida" class="input" required>
                             </div>
                             <div class="form-group">
                                 <label for="horaPerdida" class="label">Hora aproximada</label>
@@ -1232,8 +1232,8 @@
 
                             <!-- Grupo: ¿Dónde lo has perdido? -->
                             <div class="form-group">
-                                <label for="lineaMetroObjetos" class="label required">Línea de metro</label>
-                                <select id="lineaMetroObjetos" name="lineaMetroObjetos" class="select" required>
+                                <label for="LineaMetro" class="label required">Línea de metro</label>
+                                <select id="LineaMetro" name="LineaMetro" class="select" required>
                                     <option value="">Seleccione...</option>
                                     <option value="1">Línea 1</option>
                                     <option value="2">Línea 2</option>
@@ -1241,8 +1241,8 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="dondePerdidoObjetos" class="label required">¿Dónde lo has perdido?</label>
-                                <select id="dondePerdidoObjetos" name="dondePerdidoObjetos" class="select" required>
+                                <label for="Localizacion" class="label required">¿Dónde lo has perdido?</label>
+                                <select id="Localizacion" name="Localizacion" class="select" required>
                                     <option value="">Seleccione...</option>
                                     <option value="estacion">En una estación</option>
                                     <option value="tren">En un tren</option>
@@ -1252,8 +1252,8 @@
 
                             <!-- Sub-bloque: En una estación -->
                             <div id="bloqueEstacionObjetos" class="form-group full-width hidden">
-                                <label for="estacionPerdidaObjetos" class="label required">¿Lo has perdido en una estación?</label>
-                                <select id="estacionPerdidaObjetos" name="estacionPerdidaObjetos" class="select" required>
+                                <label for="EstPerdida" class="label required">¿Lo has perdido en una estación?</label>
+                                <select id="EstPerdida" name="EstPerdida" class="select" required>
                                     <option value="">Seleccione primero una línea...</option>
                                 </select>
                             </div>
@@ -1261,18 +1261,18 @@
                             <!-- Sub-bloque: En un tren -->
                             <div id="bloqueTrenObjetos" class="form-grid full-width hidden" style="grid-column: 1 / -1; gap: var(--spacing-md);">
                                 <div class="form-group full-width" id="grupoNumeroTrenObjetos">
-                                    <label for="numeroTrenObjetos" class="label">Si conoce la numeración del tren, indíquela</label>
-                                    <input type="text" id="numeroTrenObjetos" name="numeroTrenObjetos" class="input" placeholder="Ej: 4182, Tren 4..." maxlength="20">
+                                    <label for="NUnidadTren" class="label">Si conoce la numeración del tren, indíquela</label>
+                                    <input type="text" id="NUnidadTren" name="NUnidadTren" class="input" placeholder="Ej: 4182, Tren 4..." maxlength="20">
                                 </div>
                                 <div class="form-group">
-                                    <label for="estacionOrigenObjetos" class="label required">Estación de origen de tu viaje</label>
-                                    <select id="estacionOrigenObjetos" name="estacionOrigenObjetos" class="select" required>
+                                    <label for="EstOrig" class="label required">Estación de origen de tu viaje</label>
+                                    <select id="EstOrig" name="EstOrig" class="select" required>
                                         <option value="">Seleccione primero una línea...</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="estacionDestinoObjetos" class="label required">Estación de destino de tu viaje</label>
-                                    <select id="estacionDestinoObjetos" name="estacionDestinoObjetos" class="select" required>
+                                    <label for="EstDest" class="label required">Estación de destino de tu viaje</label>
+                                    <select id="EstDest" name="EstDest" class="select" required>
                                         <option value="">Seleccione primero una línea...</option>
                                     </select>
                                 </div>
@@ -1282,21 +1282,21 @@
                             <div class="form-group full-width" style="margin-top: var(--spacing-sm);"></div>
                             
                             <div class="form-group">
-                                <label for="nombreObjetoObjetos" class="label required">¿Qué objeto es?</label>
-                                <input type="text" id="nombreObjetoObjetos" name="nombreObjetoObjetos" class="input" required placeholder="Ej: Móvil, Llaves, Mochila">
+                                <label for="TipoObjeto" class="label required">¿Qué objeto es?</label>
+                                <input type="text" id="TipoObjeto" name="TipoObjeto" class="input" required placeholder="Ej: Móvil, Llaves, Mochila">
                             </div>
                             <div class="form-group">
-                                <label for="colorObjetoObjetos" class="label">Color</label>
-                                <input type="text" id="colorObjetoObjetos" name="colorObjetoObjetos" class="input" placeholder="Ej: Negro, Azul marino">
+                                <label for="ColorObj" class="label">Color</label>
+                                <input type="text" id="ColorObj" name="ColorObj" class="input" placeholder="Ej: Negro, Azul marino">
                             </div>
                             <div class="form-group full-width">
-                                <label for="distintivoObjetoObjetos" class="label">¿Tiene algún distintivo que nos ayude a identificarlo?</label>
-                                <input type="text" id="distintivoObjetoObjetos" name="distintivoObjetoObjetos" class="input" placeholder="Ej: Llavero de oso, pegatina roja, pantalla rota">
+                                <label for="DistintivoObj" class="label">¿Tiene algún distintivo que nos ayude a identificarlo?</label>
+                                <input type="text" id="DistintivoObj" name="DistintivoObj" class="input" placeholder="Ej: Llavero de oso, pegatina roja, pantalla rota">
                             </div>
 
                             <div class="form-group full-width">
-                                <label for="descripcionObjeto" class="label required">Descripción del objeto</label>
-                                <textarea id="descripcionObjeto" name="descripcionObjeto" class="textarea" required placeholder="Describa el objeto con el mayor detalle posible: tipo de artículo, marca, modelo, dimensiones, contenido, lugar de la estación o del tren en el que lo has perdido." rows="4"></textarea>
+                                <label for="Descripcion" class="label required">Descripción del objeto</label>
+                                <textarea id="Descripcion" name="Descripcion" class="textarea" required placeholder="Describa el objeto con el mayor detalle posible: tipo de artículo, marca, modelo, dimensiones, contenido, lugar de la estación o del tren en el que lo has perdido." rows="4"></textarea>
                             </div>
                             <div class="form-group full-width">
                                 <label for="fotoObjeto" class="label">Foto del objeto (si la tiene)</label>

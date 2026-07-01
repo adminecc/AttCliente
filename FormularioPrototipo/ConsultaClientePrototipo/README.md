@@ -102,4 +102,4 @@ Provisionalmente, cada elemento de `data/sample-cases.js` sigue esta forma:
 
 ## Sustitución por API real
 
-Aun estamos pendientes de desarrollar la api para la consulta por lo que podría haber ligeras variaciones. Comentamos en cuanto esté lista.
+Aun estamos pendientes de desarrollar la API para la consulta por lo que podría haber ligeras variaciones. Comentamos en cuanto esté lista.

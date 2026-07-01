@@ -111,5 +111,3 @@ Para la implementación del formulario en produccion con el comportamiento actua
 - `ejemplos_y_campos/campos_referencia.md`
 - `ejemplos_y_campos/unified-payload-schema.json`
 - `ejemplos_y_campos/sharepoint_list_fields_reducido.csv`
-
-Tambien puede ser util incluir `ejemplos_y_campos/sharepoint_list_fields.csv` si el equipo necesita auditar campos de listas no cerradas o columnas tecnicas de SharePoint, pero no es imprescindible para construir el formulario con el contrato actual.
