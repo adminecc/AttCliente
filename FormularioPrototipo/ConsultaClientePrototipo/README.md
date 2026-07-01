@@ -65,9 +65,13 @@ El prototipo incluye ejemplos de tipos habituales:
 
 La interfaz asigna una etiqueta compacta por familia de archivo: PDF, imagen, hoja de cálculo/CSV, documento, comprimido, código/HTML, texto y archivo genérico. Está hecho así para que el prototipo no dependa de librerías externas; en producción el desarrollador puede sustituir esas etiquetas por la librería de iconos que prefiera.
 
+Los adjuntos deben mostrarse con iconos que, en este prototipo están simplificados, pero se espera que sean algo más acordes a los diferentes tipos de archivos.
+
+Se espera también que al pulsar en los archivos el navegador actúe por defecto como él decida, ya sea descargándolos si no tiene ninguna aplicación para abrirlos, o abriéndolos y mostrándolos si es capaz, aunque estaría bien tener el botón de descargarlos directamente por si el navegador en algún caso no diera la opción de forma nativa.
+
 ## Modelo de datos del prototipo
 
-Cada elemento de `data/sample-cases.js` sigue esta forma:
+Provisionalmente, cada elemento de `data/sample-cases.js` sigue esta forma:
 
 ```json
 {
@@ -98,87 +102,4 @@ Cada elemento de `data/sample-cases.js` sigue esta forma:
 
 ## Sustitución por API real
 
-El prototipo no incluye mock API. El flujo real puede resolverse con un único endpoint de consulta verificada.
-
-### Consultar expediente
-
-```http
-POST /api/public/cases/status
-Content-Type: application/json
-```
-
-Petición:
-
-```json
-{
-  "caseId": "ATT-2026-41001",
-  "verificationValue": "reclamacion.demo@correo.test"
-}
-```
-
-Respuesta correcta:
-
-```json
-{
-  "caseId": "ATT-2026-41001",
-  "type": "Reclamaciones y quejas",
-  "status": "En trámite",
-  "submittedAt": "2026-06-03",
-  "updatedAt": "2026-06-18",
-  "resolutionSummary": "La reclamación está siendo revisada por el área responsable.",
-  "nextStep": "Recibirá una notificación cuando se incorpore una respuesta al expediente.",
-  "attachments": [
-    {
-      "id": "acuse-reclamacion",
-      "name": "Acuse de recibo de reclamación",
-      "mimeType": "application/pdf",
-      "size": "5 KB",
-      "url": "/api/public/cases/ATT-2026-41001/attachments/acuse-reclamacion"
-    }
-  ]
-}
-```
-
-Respuesta si el caso no existe o el dato de confirmación no coincide:
-
-```json
-{
-  "error": "CASE_NOT_FOUND_OR_VERIFICATION_FAILED",
-  "message": "No se ha encontrado una solicitud que coincida con el identificador y el dato de confirmación."
-}
-```
-
-El error debe ser genérico para no revelar si existe el número de caso o si el dato personal es incorrecto.
-
-### Abrir adjunto
-
-```http
-GET /api/public/cases/ATT-2026-41001/attachments/acuse-reclamacion
-```
-
-Respuesta:
-
-```http
-HTTP/1.1 200 OK
-Content-Type: application/pdf
-Content-Disposition: inline; filename="acuse-reclamacion.pdf"
-```
-
-El uso de `Content-Disposition: inline` permite que el navegador intente abrir el archivo. Si no existe visor compatible, el navegador aplicará su comportamiento por defecto, normalmente descargar o preguntar.
-
-La API debe traer solo los adjuntos asociados al número de caso verificado. En el contrato actual, esos adjuntos se buscan en la biblioteca `DocumentosAdjuntos` usando la referencia `IDRef = ID numerico del item origen`; no se leen desde los adjuntos nativos del item de SharePoint.
-
-## Reglas de seguridad para producción
-
-- No devolver datos personales al navegador.
-- No indicar si un email o teléfono concreto existe en otros expedientes.
-- Usar un error genérico para caso inexistente y verificación fallida.
-- Limitar intentos de consulta por caso e IP.
-- Registrar auditoría de consultas y descargas.
-- Usar HTTPS.
-- Validar que cada descarga pertenece al caso verificado.
-- Evitar exponer rutas internas de almacenamiento en las URLs públicas.
-
-## Nota sobre el prototipo sin servidor
-
-Para que el prototipo pueda abrirse con doble clic, los datos de muestra se cargan como un script (`data/sample-cases.js`) en vez de como JSON mediante `fetch`. La API real sustituirá ese archivo por las llamadas documentadas arriba.
+Aun estamos pendientes de desarrollar la api para la consulta por lo que podría haber ligeras variaciones. Comentamos en cuanto esté lista.
