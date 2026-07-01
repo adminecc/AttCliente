@@ -1062,14 +1062,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    function crearDescripcionObjeto(values) {
-        return [
-            values.descripcionObjeto,
-            values.colorObjetoObjetos ? `Color: ${values.colorObjetoObjetos}` : '',
-            values.distintivoObjetoObjetos ? `Distintivo: ${values.distintivoObjetoObjetos}` : '',
-        ].filter(Boolean).join('\n');
-    }
-
     function adaptarPayloadParaApi(payloadUnificado) {
         const applicant = payloadUnificado.applicant || {};
         const direccion = applicant.direccionContacto || {};
@@ -1149,20 +1141,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (tipoFormularioActual === 'objetos') {
             payloadApi.FechaPerdida = values.fechaPerdida;
+            payloadApi.LineaMetro = values.lineaMetroObjetos;
             payloadApi.Localizacion = values.dondePerdidoObjetos === 'estacion'
                 ? values.estacionPerdidaObjetos
                 : values.dondePerdidoObjetos;
+            payloadApi.EstPerdida = values.estacionPerdidaObjetos;
             payloadApi.NUnidadTren = values.numeroTrenObjetos;
+            payloadApi.EstOrig = values.estacionOrigenObjetos;
+            payloadApi.EstDest = values.estacionDestinoObjetos;
             payloadApi.TipoObjeto = values.nombreObjetoObjetos;
+            payloadApi.ColorObj = values.colorObjetoObjetos;
+            payloadApi.DistintivoObj = values.distintivoObjetoObjetos;
             payloadApi.TipoDeTitulo = values.tipoTituloObjetos;
             payloadApi.NumTituloViaje = values.numeracion_titulo_viaje_objetos;
-            payloadApi.Descripcion = crearDescripcionObjeto(values);
+            payloadApi.Descripcion = values.descripcionObjeto;
             payloadApi.Observaciones = [
                 values.horaPerdida ? `Hora aproximada: ${values.horaPerdida}` : '',
-                values.lineaMetroObjetos ? `Linea: ${values.lineaMetroObjetos}` : '',
-                values.estacionPerdidaObjetos ? `Estacion: ${values.estacionPerdidaObjetos}` : '',
-                values.estacionOrigenObjetos ? `Origen: ${values.estacionOrigenObjetos}` : '',
-                values.estacionDestinoObjetos ? `Destino: ${values.estacionDestinoObjetos}` : '',
             ].filter(Boolean).join('\n') || null;
         }
 

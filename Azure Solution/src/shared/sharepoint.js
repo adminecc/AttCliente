@@ -902,7 +902,7 @@ function transformSharePointValue(sharePointField, value, type) {
     return OPERATION_LOCATION_VALUES[value] || value;
   }
 
-  if (sharePointField === "Estacion") {
+  if (["Estacion", "EstPerdida", "EstOrig", "EstDest"].includes(sharePointField)) {
     return LOCATION_VALUES[value] || value;
   }
 

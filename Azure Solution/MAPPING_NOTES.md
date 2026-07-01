@@ -80,15 +80,19 @@ Pendiente: `DAB` conserva el codigo del formulario; si se quiere resolver como l
 | Campo | Uso |
 | --- | --- |
 | `FechaPerdida` | Fecha del extravio. Obligatorio. |
+| `LineaMetro` | Linea en la que se perdio el objeto. Obligatorio. |
 | `Localizacion` | Choice normalizado desde slug/estacion. Obligatorio. |
+| `EstPerdida` | Estacion donde se perdio el objeto, si aplica. |
 | `NUnidadTren` | Numero/unidad de tren si aplica. |
+| `EstOrig` | Estacion de origen del viaje, si aplica. |
+| `EstDest` | Estacion de destino del viaje, si aplica. |
 | `TipoObjeto` | Tipo de objeto. Obligatorio. |
+| `ColorObj` | Color del objeto. |
+| `DistintivoObj` | Distintivo o marca identificativa. |
 | `TipoDeTitulo` | Choice normalizado desde slug si aplica. |
 | `NumTituloViaje` | Numeracion del titulo. |
 | `Descripcion` | Descripcion principal obligatoria. |
-| `Observaciones` | Hora, linea, origen/destino u otros detalles. |
-| `Estado` | Por defecto `Registrado`. |
-| `TipoRegistro` | Por defecto `Objeto Perdido Reclamado`. |
+| `Observaciones` | Detalles auxiliares no estructurados, por ahora hora aproximada. |
 
 ## ClientesTarjetaMetro
 

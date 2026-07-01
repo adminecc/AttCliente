@@ -11,10 +11,15 @@
   "TipoDeTitulo": "monedero-metro-malaga",
   "NumTituloViaje": "1000234567",
   "FechaPerdida": "2026-06-08",
+  "LineaMetro": "1",
   "Localizacion": "tren",
   "NUnidadTren": "UT-3010",
+  "EstOrig": "atarazanas",
+  "EstDest": "universidad",
   "TipoObjeto": "Mochila",
+  "ColorObj": "Negro",
+  "DistintivoObj": "Llavero rojo",
   "Descripcion": "Mochila negra con documentacion y llavero rojo.",
-  "Observaciones": "Hora aproximada: 14:30\nOrigen: Atarazanas\nDestino: Universidad",
+  "Observaciones": "Hora aproximada: 14:30",
   "consentimiento": true
 }

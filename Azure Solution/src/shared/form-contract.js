@@ -77,6 +77,7 @@ const FORM_TYPES = {
     },
     requiredFields: [
       "FechaPerdida",
+      "LineaMetro",
       "Localizacion",
       "TipoObjeto",
       "Descripcion",

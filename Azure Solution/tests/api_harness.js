@@ -453,9 +453,14 @@ async function main() {
         Telefono: "600123456",
         consentimiento: true,
         FechaPerdida: "2026-06-29",
+        LineaMetro: "1",
         Localizacion: "tren",
         NUnidadTren: "UT-3010",
+        EstOrig: "atarazanas",
+        EstDest: "universidad",
         TipoObjeto: "Mochila",
+        ColorObj: "Negro",
+        DistintivoObj: "Llavero rojo",
         Descripcion: "Mochila negra con documentacion.",
       };
       const validation = validateSolicitudPayload(payload);
@@ -464,9 +469,11 @@ async function main() {
       assert(validation.valid, `No se esperaban errores de validacion: ${validation.errors.join(", ")}.`);
       assert(fields.Title === "OBJ-2026-ABCDEFGH", "Title debe contener el token de solicitud.");
       assert(fields.Localizacion === "Unidad-Tren", "Se esperaba Localizacion normalizada.");
-      assert(fields.Estado === "Registrado", "Se esperaba Estado por defecto.");
-      assert(fields.TipoRegistro === "Objeto Perdido Reclamado", "Se esperaba TipoRegistro por defecto.");
+      assert(fields.EstOrig === "Atarazanas", "Se esperaba EstOrig normalizado.");
+      assert(fields.EstDest === "Universidad", "Se esperaba EstDest normalizado.");
       assert(fields.TipoObjeto === "Mochila", "Se esperaba TipoObjeto directo.");
+      assert(fields.ColorObj === "Negro", "Se esperaba ColorObj directo.");
+      assert(fields.DistintivoObj === "Llavero rojo", "Se esperaba DistintivoObj directo.");
     }),
 
     runTest("tarjetas usa nombres directos de ClientesTarjetaMetro", async () => {

@@ -19,9 +19,13 @@
   "TipoDeTitulo": "tarjeta-consorcio",
   "NumTituloViaje": "12345678900",
   "FechaPerdida": "2026-06-09",
+  "LineaMetro": "2",
   "Localizacion": "palacio-deportes",
+  "EstPerdida": "palacio-deportes",
   "TipoObjeto": "Paraguas",
-  "Descripcion": "Paraguas rojo olvidado en el banco del anden direccion Guadalmedina. Color: rojo. Distintivo: mango de madera.",
-  "Observaciones": "Hora aproximada: 10:15\nLinea: 2",
+  "ColorObj": "Rojo",
+  "DistintivoObj": "Mango de madera",
+  "Descripcion": "Paraguas rojo olvidado en el banco del anden direccion Guadalmedina.",
+  "Observaciones": "Hora aproximada: 10:15",
   "consentimiento": true
 }

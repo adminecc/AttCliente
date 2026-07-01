@@ -169,6 +169,12 @@
     "FechaPerdida": {
       "type": "string"
     },
+    "LineaMetro": {
+      "type": "string"
+    },
+    "EstPerdida": {
+      "type": "string"
+    },
     "TipoObjeto": {
       "type": "string",
       "maxLength": 255
@@ -177,15 +183,21 @@
       "type": "string",
       "maxLength": 255
     },
-    "NCirculacion": {
+    "EstOrig": {
       "type": "string",
       "maxLength": 255
     },
-    "TipoRegistro": {
-      "type": "string"
+    "EstDest": {
+      "type": "string",
+      "maxLength": 255
     },
-    "Estado": {
-      "type": "string"
+    "ColorObj": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "DistintivoObj": {
+      "type": "string",
+      "maxLength": 255
     },
     "NombreCliente": {
       "type": "string",
@@ -396,6 +408,7 @@
           "CorreoElectronico",
           "Telefono",
           "FechaPerdida",
+          "LineaMetro",
           "Localizacion",
           "TipoObjeto",
           "Descripcion"
