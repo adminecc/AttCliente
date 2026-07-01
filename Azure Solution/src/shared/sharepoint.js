@@ -558,7 +558,7 @@ async function uploadListItemAttachments(accessToken, type, itemId, files = [], 
   const target = await resolveSharePointTarget(accessToken, type, config, context);
   const library = await resolveDocumentLibraryTarget(accessToken, target.siteId, context);
   const folderName = sanitizeDocumentLibraryFolderName(referenceToken || itemId);
-  const referenceId = String(referenceToken || itemId);
+  const referenceId = Number(itemId);
   const folder = await ensureDocumentLibraryFolder(accessToken, target.siteId, library.driveId, folderName, context);
   context?.log?.(
     `uploadListItemAttachments - biblioteca=${ATTACHMENT_LIBRARY_NAME} carpeta='${folderName}' item=${itemId} token=${referenceToken} archivos=${files.length}`
@@ -567,7 +567,7 @@ async function uploadListItemAttachments(accessToken, type, itemId, files = [], 
   const warnings = [];
 
   await updateDocumentLibraryItemFields(accessToken, target.siteId, library.driveId, folder.id, {
-    IDRef: referenceToken,
+    IDRef: referenceId,
     Visible: true,
   }, context);
 
@@ -624,12 +624,13 @@ function formatAttachmentUploadError(error) {
 function buildDocumentLibraryAttachmentPlan({ referenceToken, referenceId, file, folderName }) {
   const safeFolderName = sanitizeDocumentLibraryFolderName(folderName || referenceToken || "sin-referencia");
   const fileName = sanitizeDocumentLibraryFileName(file?.fileName || `${file?.fieldName || "documento"}.bin`);
+  const numericReferenceId = Number(referenceId);
 
   return {
     folderName: safeFolderName,
     fileName,
     fields: {
-      IDRef: String(referenceToken || referenceId || ""),
+      IDRef: Number.isFinite(numericReferenceId) ? numericReferenceId : null,
       Visible: true,
     },
   };

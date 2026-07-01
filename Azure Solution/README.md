@@ -34,7 +34,7 @@ Azure Solution/
 | Metodo | Ruta                            | Uso                                                        |
 | ------ | ------------------------------- | ---------------------------------------------------------- |
 | `POST` | `/api/solicitudes/crear`        | Valida el payload, genera token y crea item en SharePoint. |
-| `POST` | `/api/solicitudes/consultar`    | Consulta una solicitud por`email` + `token`.               |
+| `POST` | `/api/solicitudes/consultar`    | Consulta una solicitud por `email` + `token`.              |
 | `POST` | `/api/solicitudes/generartoken` | Genera un token para pruebas.                              |
 
 ## Mapeo Real De SharePoint
@@ -245,6 +245,8 @@ La API acepta dos formatos en `POST /api/solicitudes/crear`:
 
 El prototipo usa `multipart/form-data` automaticamente cuando hay documentacion adjunta o fotografias. Si no hay archivos reales, mantiene el envio JSON.
 
+En el formulario prototipo, los campos de reclamaciones/quejas (`adjuntos`) y objetos perdidos (`fotoObjeto`) admiten seleccion multiple y arrastrar archivos directamente sobre el area de subida. Los archivos seleccionados se muestran antes del envio y pueden eliminarse individualmente.
+
 La firma de Tarjetas +Metro no se sube como adjunto nativo. Se guarda en la columna `Firma` como texto `data:image/png;base64,...`, igual que en los ejemplos reales de la lista.
 
 Ejemplo conceptual:
@@ -252,7 +254,9 @@ Ejemplo conceptual:
 ```text
 payload: {"tipoFormulario":"tarjetas","NombreCliente":"...","Firma":"data:image/png;base64,...",...}
 file_adjuntos_0: documento.pdf
+file_adjuntos_1: captura.png
 file_fotoObjeto_0: objeto.jpg
+file_fotoObjeto_1: etiqueta.png
 ```
 
 Despues de crear el item, la Function sube los archivos a la biblioteca documental `DocumentosAdjuntos` del sitio `ConectaDEV`:
@@ -267,8 +271,10 @@ DocumentosAdjuntos/
 
 La carpeta usa el token de solicitud (`Title`). Cada archivo conserva su nombre original saneado para SharePoint y se etiqueta con:
 
-- `IDRef`: token de solicitud, por ejemplo `REC-2026-XXXXXXXX`.
+- `IDRef`: ID numerico del item creado en la lista origen, por ejemplo `8014`.
 - `Visible`: `true`.
+
+La lectura de adjuntos debe hacerse sobre `DocumentosAdjuntos`, filtrando por `IDRef = item.id`. No se usan los adjuntos nativos de las listas (`AttachmentFiles`) ni `driveItem` sobre items de listas normales.
 
 Si la solicitud se crea pero falla algun adjunto, la respuesta sigue siendo `201` e incluye `warnings`. Asi no se pierde una solicitud valida por un problema documental.
 
@@ -278,3 +284,4 @@ Nota tecnica:
 
 - Se descarto `AttachmentFiles/add` sobre la lista porque SharePoint REST devuelve `401 Unsupported app only token` con esta app-only.
 - Graph no permite `driveItem` en listas normales, solo en bibliotecas documentales.
+- En listas grandes como `Objetos Perdidos NUEVA`, Graph puede devolver cero resultados al filtrar por campos aunque el item exista. Si existe carpeta documental por token, la API puede leer su `IDRef` y recuperar el item origen por ID; para solicitudes sin adjuntos puede hacer falta un indice SharePoint o una estrategia especifica de consulta.

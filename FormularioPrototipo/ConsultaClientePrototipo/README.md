@@ -166,7 +166,7 @@ Content-Disposition: inline; filename="acuse-reclamacion.pdf"
 
 El uso de `Content-Disposition: inline` permite que el navegador intente abrir el archivo. Si no existe visor compatible, el navegador aplicará su comportamiento por defecto, normalmente descargar o preguntar.
 
-La API debe traer solo los adjuntos asociados al número de caso verificado.
+La API debe traer solo los adjuntos asociados al número de caso verificado. En el contrato actual, esos adjuntos se buscan en la biblioteca `DocumentosAdjuntos` usando la referencia `IDRef = ID numerico del item origen`; no se leen desde los adjuntos nativos del item de SharePoint.
 
 ## Reglas de seguridad para producción
 

@@ -105,10 +105,12 @@ Pendiente: `DAB` conserva el codigo del formulario; si se quiere resolver como l
 - El endpoint `POST /api/solicitudes/crear` acepta JSON puro o `multipart/form-data`.
 - En multipart, el campo `payload` contiene el JSON y los campos de archivo se suben despues de crear el item a la biblioteca `DocumentosAdjuntos` de `ConectaDEV`.
 - La carpeta se llama como el token de solicitud (`REC-*`, `OBJ-*`, etc.).
-- Cada documento guarda `IDRef` con el token de solicitud y `Visible = true`.
+- Cada documento guarda `IDRef` con el ID numerico del item origen y `Visible = true`.
+- Reclamaciones/quejas y objetos perdidos permiten seleccionar varios archivos y arrastrarlos sobre la zona de subida del prototipo.
 - La firma de Tarjetas +Metro se envia en el payload como texto base64/data URL en la columna `Firma`.
 - La firma no fuerza `multipart/form-data`; solo los adjuntos reales usan multipart.
 - Si la biblioteca rechaza un archivo, la solicitud queda creada y la respuesta incluye `warnings`.
+- Los adjuntos consultables deben recuperarse filtrando `DocumentosAdjuntos` por `IDRef = item.id`. No se deben buscar como adjuntos nativos del item de lista.
 
 ## Problemas detectados
 
@@ -125,5 +127,6 @@ Pendiente: `DAB` conserva el codigo del formulario; si se quiere resolver como l
 | 2026-06-30 | Tarjetas +Metro | La firma se estaba guardando como nombre de archivo y no como contenido base64. | Solucionado | La firma vuelve a enviarse en `Firma` como `data:image/png;base64,...`. Prueba real: item `1378`, token `TAR-2026-GNS673TD`, `Firma` leida como data URL; item borrado tras validar. |
 | 2026-06-30 | Objetos Perdidos NUEVA | La foto llega a la Function pero no se adjunta al item. | Diagnosticado | Prueba real: item `8005`, token `OBJ-2026-T23CN5GW`, `AttachmentFiles` devuelve `401`. El diagnostico ampliado confirma rechazo de token app-only en SharePoint REST; item borrado tras validar. |
 | 2026-06-30 | Adjuntos nativos SharePoint | SharePoint REST rechaza el token app-only aunque incluya `Sites.FullControl.All`. | Bloqueado por endpoint | Prueba real en Objetos y Reclamaciones: la Function recibe los archivos, pero `AttachmentFiles/add` devuelve `401 Unsupported app only token`. Graph tampoco permite `driveItem` en listas no documentales. Siguiente opcion: usar biblioteca documental/columna URL o flujo delegado/Power Automate para adjuntar nativamente. |
-| 2026-06-30 | DocumentosAdjuntos | Subida alternativa a biblioteca documental. | Solucionado | Prueba real OK en Objetos y Reclamaciones: carpeta por token, archivo subido, `IDRef` con token de solicitud y `Visible=true`; warnings vacios. |
-| 2026-06-30 | Consulta de Objetos Perdidos | Graph devuelve cero resultados al filtrar por campos y el fallback por lista supera el umbral de vista. | En revision | Con `IDRef` como token ya no se usa como referencia numerica al item origen. |
+| 2026-06-30 | DocumentosAdjuntos | Subida alternativa a biblioteca documental. | Solucionado | Carpeta por token, archivo subido, `IDRef` con ID numerico del item origen y `Visible=true`. Este ID permite recuperar el item origen por `getById` si hace falta. |
+| 2026-06-30 | Consulta de Objetos Perdidos | Graph devuelve cero resultados al filtrar por campos y el fallback por lista supera el umbral de vista. | Solucionado parcial | Si existe carpeta documental por token, la API puede leer `DocumentosAdjuntos/{token}.IDRef`, recuperar el item por ID y validar email/token. Para solicitudes sin adjuntos puede hacer falta indice SharePoint o estrategia especifica por lista grande. |
+| 2026-07-01 | Formulario prototipo | Adjuntos de reclamaciones/quejas y objetos perdidos debian aceptar multiples archivos y drag & drop. | Solucionado | Inputs `adjuntos` y `fotoObjeto` aceptan seleccion multiple; el prototipo permite arrastrar archivos, acumula seleccion y muestra lista editable antes de enviar. |

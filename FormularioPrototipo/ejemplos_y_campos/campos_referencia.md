@@ -2,7 +2,7 @@
 
 Contrato vigente para `POST /api/solicitudes/crear`.
 
-Los campos enviados a la API deben usar los nombres internos de SharePoint (`field_internal_name_for_create`). `tipoFormulario` se mantiene como campo de control para enrutar la solicitud a la lista correcta. `consentimiento`, `confirmEmail`, `recibirPostal` y adjuntos son campos de control del formulario/API y no se guardan directamente como columnas salvo que exista una columna equivalente. En Tarjetas +Metro, `Firma` es una columna real y se envia como `data:image/png;base64,...`.
+Los campos enviados a la API deben usar los nombres internos de SharePoint (`field_internal_name_for_create`). `tipoFormulario` se mantiene como campo de control para enrutar la solicitud a la lista correcta. `consentimiento`, `confirmEmail`, `recibirPostal` y adjuntos son campos de control del formulario/API y no se guardan directamente como columnas de la lista origen salvo que exista una columna equivalente. En Tarjetas +Metro, `Firma` es una columna real y se envia como `data:image/png;base64,...`.
 
 ## Campos comunes ConectaDEV
 
@@ -62,3 +62,13 @@ Obligatorio API: `NombreCliente`, `ApellidoCliente1`, `DNICliente`, `EmailClient
 ## Normalizacion de valores
 
 La API sigue normalizando slugs del formulario a choices de SharePoint. Por ejemplo: `tarjeta-consorcio` -> `Tarjeta Monedero Consorcio de Transportes de Andalucia`, `general` -> `General / Ninguna especifica`, `atencion-personal` -> `Atencion del personal`.
+
+## Adjuntos y firma
+
+- Los adjuntos reales se envian como `multipart/form-data`; el JSON viaja en el campo `payload`.
+- Reclamaciones/quejas usa campos multipart `file_adjuntos_0`, `file_adjuntos_1`, etc.
+- Objetos perdidos usa campos multipart `file_fotoObjeto_0`, `file_fotoObjeto_1`, etc.
+- En el prototipo ambos controles admiten seleccion multiple y arrastrar archivos.
+- La API sube esos archivos a `DocumentosAdjuntos/{Title}/nombre-original-saneado`.
+- En `DocumentosAdjuntos`, `IDRef` guarda el ID numerico del item origen y `Visible` queda en `true`.
+- La firma de Tarjetas +Metro no es adjunto: se guarda en `Firma` como data URL/base64.

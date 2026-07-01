@@ -249,6 +249,33 @@
     "Firma": {
       "type": "string",
       "description": "Firma de Tarjetas +Metro como data URL base64, por ejemplo data:image/png;base64,..."
+    },
+    "attachments": {
+      "type": "array",
+      "description": "Metadatos de archivos seleccionados en el prototipo. Los binarios reales viajan como multipart/form-data y se guardan en DocumentosAdjuntos con IDRef igual al ID numerico del item origen.",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "fieldId": {
+            "type": "string",
+            "description": "ID del input de archivo, por ejemplo adjuntos o fotoObjeto."
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "sizeBytes": {
+            "type": "number"
+          },
+          "multipartFieldName": {
+            "type": "string",
+            "description": "Nombre esperado del campo multipart, por ejemplo file_adjuntos_0."
+          }
+        }
+      }
     }
   },
   "allOf": [

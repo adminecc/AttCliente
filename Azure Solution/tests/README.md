@@ -24,6 +24,10 @@ python tests/api_smoke_tests.py
 - `generateToken` rechaza tipos de formulario invalidos.
 - `consultarSolicitud` valida `email` y `token` antes de llamar a Graph.
 - `consultarSolicitud` identifica la lista a consultar a partir del prefijo del token.
+- El parser acepta `multipart/form-data` con campo `payload` y archivos.
+- El plan de subida a `DocumentosAdjuntos` usa carpeta por token, `IDRef = item.id` y `Visible = true`.
+- La firma de Tarjetas +Metro se conserva como `data:image/...;base64,...`.
+- Los diagnosticos de SharePoint incluyen warnings de compatibilidad y detalle util cuando falla la subida documental.
 
 ## Logs
 

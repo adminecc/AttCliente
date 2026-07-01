@@ -621,7 +621,7 @@ async function main() {
       assert(detail.includes("Access denied"), "Se esperaba mensaje REST.");
     }),
 
-    runTest("biblioteca documental usa token como carpeta e IDRef", async () => {
+    runTest("biblioteca documental usa token como carpeta e IDRef numerico", async () => {
       const {
         buildDocumentLibraryAttachmentPlan,
       } = require("../src/shared/sharepoint");
@@ -638,7 +638,7 @@ async function main() {
 
       assert(plan.folderName === "REC-2026-A_B_C", `Carpeta inesperada: ${plan.folderName}.`);
       assert(plan.fileName === "informe_ prueba_.pdf", `Archivo inesperado: ${plan.fileName}.`);
-      assert(plan.fields.IDRef === "REC-2026-A/B:C", "IDRef debe guardar el token de solicitud.");
+      assert(plan.fields.IDRef === 123, "IDRef debe guardar el ID numerico del item creado.");
       assert(plan.fields.Visible === true, "Visible debe marcarse a true.");
     }),
 
