@@ -34,7 +34,7 @@ Azure Solution/
 | Metodo | Ruta                            | Uso                                                        |
 | ------ | ------------------------------- | ---------------------------------------------------------- |
 | `POST` | `/api/solicitudes/crear`        | Valida el payload, genera token y crea item en SharePoint. |
-| `POST` | `/api/solicitudes/consultar`    | Consulta una solicitud por `email` + `token`.              |
+| `POST` | `/api/solicitudes/consultar`    | Consulta una solicitud por `token` + correo o telefono.    |
 | `POST` | `/api/solicitudes/generartoken` | Genera un token para pruebas.                              |
 
 ## Mapeo Real De SharePoint
@@ -187,6 +187,43 @@ Respuesta esperada si SharePoint y permisos estan bien:
 }
 ```
 
+Probar consulta:
+
+```powershell
+Invoke-RestMethod `
+  -Method Post `
+  -Uri "http://localhost:7071/api/solicitudes/consultar" `
+  -ContentType "application/json" `
+  -Body '{"token":"SUG-2026-ABCDEFGH","personalData":"maria@example.com"}'
+```
+
+`personalData` puede ser el correo electronico o el telefono asociado a la solicitud. Tambien se aceptan `email` o `telefono` como campos explicitos si el consumidor prefiere enviarlos separados:
+
+```json
+{
+  "token": "SUG-2026-ABCDEFGH",
+  "email": "maria@example.com"
+}
+```
+
+Respuesta esperada si existe coincidencia:
+
+```json
+{
+  "encontrado": true,
+  "solicitud": {
+    "caseId": "SUG-2026-ABCDEFGH",
+    "type": "Sugerencias",
+    "status": "En tramite",
+    "submittedAt": "2026-06-29",
+    "updatedAt": "2026-06-30",
+    "resolutionSummary": "La solicitud esta registrada y pendiente de revision por el area responsable.",
+    "nextStep": "Recibira una notificacion cuando se incorpore una respuesta al expediente.",
+    "attachments": []
+  }
+}
+```
+
 ## Despliegue En Azure
 
 Antes de publicar, crea las mismas variables en:
@@ -218,6 +255,22 @@ Invoke-RestMethod `
   -ContentType "application/json" `
   -Body $body
 ```
+
+```powershell
+Invoke-RestMethod `
+  -Method Post `
+  -Uri "https://metroattfn-e0gucabgedacccey.spaincentral-01.azurewebsites.net/api/solicitudes/consultar" `
+  -ContentType "application/json" `
+  -Body '{"token":"SUG-2026-ABCDEFGH","personalData":"maria@example.com"}'
+```
+
+Para usar el prototipo de consulta desde navegador, revisa CORS en la Function App:
+
+```text
+Function App > API > CORS
+```
+
+Durante pruebas con Live Server debe estar permitido `http://localhost:5500`. En produccion se anadira el dominio final del formulario.
 
 ## Si Falla
 

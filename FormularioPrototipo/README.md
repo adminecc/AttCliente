@@ -37,6 +37,8 @@ El formulario envia contra la Azure Function configurada en `script.js`:
 https://metroattfn-e0gucabgedacccey.spaincentral-01.azurewebsites.net/api/solicitudes/crear
 ```
 
+El prototipo de consulta de estado (`ConsultaClientePrototipo/`) llama a la misma Function App en `/api/solicitudes/consultar` usando el token de solicitud y un correo electronico o telefono de confirmacion.
+
 Se pueden hacer pruebas en esta API pues está en desarrollo pero apunta a las listas de prueba creando los items satisfactoriamente. La lista de tarjetas + metro sí está en producción: evitar, en la medida de lo posible hacer pruebas en esta lista o avisar cuando se hayan introducido items de test.
 
 ## Tipos de solicitud
