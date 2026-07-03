@@ -18,8 +18,9 @@ El estilo visual no debe tomarse como contrato de produccion. El contrato funcio
 - `ConsultaClientePrototipo/README.md`: contrato funcional del prototipo de consulta de estado.
 - `ejemplos_y_campos/unified-payload-schema.json`: esquema JSON del payload aceptado por la API.
 - `ejemplos_y_campos/sharepoint_list_fields_reducido.csv`: artefacto local generado con campos reales de SharePoint para las listas cerradas.
+- `ejemplos_y_campos/sharepoint_list_fields_utilizados.csv`: artefacto local generado con los campos de SharePoint que usa actualmente el formulario/API y que no deben eliminarse sin revisar el flujo.
 
-Los CSV `sharepoint_list_fields.csv` y `sharepoint_list_fields_reducido.csv` se generan localmente con `ejemplos_y_campos/export_sharepoint_list_fields.py` y no se versionan en Git. Para desarrollo del formulario se debe usar la version reducida cuando se necesite consultar nombres internos, tipos y choices de las listas cerradas.
+Los CSV `sharepoint_list_fields.csv`, `sharepoint_list_fields_reducido.csv` y `sharepoint_list_fields_utilizados.csv` se generan localmente con `ejemplos_y_campos/export_sharepoint_list_fields.py` y no se versionan en Git. Para desarrollo del formulario se debe usar la version reducida cuando se necesite consultar nombres internos, tipos y choices de las listas cerradas. Para limpieza de columnas en SharePoint, usar primero la version de campos utilizados.
 
 ## Ejecucion local
 
