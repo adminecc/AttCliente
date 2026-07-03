@@ -236,6 +236,7 @@ Invoke-RestMethod `
 - Revisa que la lista existe y que su URL coincide con el mapeo de `src/shared/form-contract.js`.
 - Revisa nombres internos de columnas con `FormularioPrototipo/ejemplos_y_campos/sharepoint_list_fields.csv`.
 - Para el contrato funcional de las listas cerradas usa `FormularioPrototipo/ejemplos_y_campos/sharepoint_list_fields_reducido.csv`.
+- Ambos CSV se generan localmente con `FormularioPrototipo/ejemplos_y_campos/export_sharepoint_list_fields.py` y no se versionan en Git.
 
 ## Adjuntos
 

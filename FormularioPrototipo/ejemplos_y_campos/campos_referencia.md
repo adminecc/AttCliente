@@ -48,8 +48,6 @@ Obligatorio API: `Clasificacion`, `FechaYHoraConsulta`, `Lugar`, `DescripcionCon
 
 Nota: `DAB`, `Tipologia`, `Subtipologia`, `EstadoDeLaResolucion` y otros campos de clasificacion avanzada son `lookup`; la API solo debe enviarlos cuando pueda resolverlos contra la lista auxiliar correspondiente. Actualmente el formulario envia los campos directos necesarios para registrar la reclamacion.
 
-Columnas SharePoint pendientes para guardar todo lo que puede capturar el bloque comun del formulario en `ReclamacionesQuejas`: `Escalera`, `Piso`, `Puerta`, `Provincia`, `EstadoCliente`.
-
 ## Objetos Perdidos NUEVA
 
 Campos directos usados: `TipoDeTitulo`, `NumTituloViaje`, `FechaPerdida`, `LineaMetro`, `Localizacion`, `EstPerdida`, `NUnidadTren`, `EstOrig`, `EstDest`, `TipoObjeto`, `ColorObj`, `DistintivoObj`, `Descripcion`.

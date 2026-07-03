@@ -74,8 +74,6 @@ Este documento recoge el contrato entre el formulario prototipo, la Azure Functi
 
 La API convierte campos lookup a `CampoLookupId`. Si el payload trae un numero, lo usa como ID; si trae texto, busca el valor en la lista auxiliar por `Title`. Los campos avanzados de clasificacion (`Tipologia`, `Subtipologia`, `EstadoDeLaResolucion`, etc.) no se envian desde el prototipo hasta que exista una regla funcional para seleccionarlos.
 
-Columnas pendientes en SharePoint para guardar todo el bloque comun del formulario en `ReclamacionesQuejas`: `Escalera`, `Piso`, `Puerta`, `Provincia`, `EstadoCliente`.
-
 ## Objetos Perdidos NUEVA
 
 | Campo | Uso |

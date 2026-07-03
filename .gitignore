@@ -35,6 +35,9 @@ coverage/
 .nyc_output
 Azure Solution/tests/logs/*.log
 
+# Generated SharePoint field exports
+FormularioPrototipo/ejemplos_y_campos/sharepoint_list_fields*.csv
+
 # Build/Dist output
 dist/
 build/
