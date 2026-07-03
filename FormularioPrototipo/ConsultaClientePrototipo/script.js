@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function setLoading(isLoading) {
     searchButton.disabled = isLoading;
-    searchButton.querySelector('.btn-icon').textContent = isLoading ? '...' : '?';
+    searchButton.querySelector('.btn-icon').textContent = isLoading ? '...' : '';
     searchButton.lastChild.textContent = isLoading ? ' Buscando' : ' Buscar';
   }
 
@@ -80,7 +80,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderTracking(status) {
     const normalizedStatus = status || 'En tramite';
-    const isOpen = normalizedStatus.toLowerCase().includes('tram');
+    const statusKey = normalizedStatus.toLowerCase();
+    const isOpen = statusKey.includes('tram') || statusKey.includes('registr');
     const finalStatus = isOpen ? 'Pendiente de resolucion' : normalizedStatus;
 
     trackingLine.className = `tracking-line ${isOpen ? 'tracking-open' : 'tracking-closed'}`;
@@ -97,29 +98,29 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderCase(caseRecord) {
-    document.getElementById('resultCaseId').textContent = caseRecord.caseId || caseRecord.token || '-';
-    document.getElementById('resultType').textContent = caseRecord.type || caseRecord.tipoFormulario || '-';
-    document.getElementById('resultSubmittedAt').textContent = formatDate(caseRecord.submittedAt || caseRecord.fechaCreacion);
-    document.getElementById('resultUpdatedAt').textContent = formatDate(caseRecord.updatedAt || caseRecord.fechaCreacion);
-    document.getElementById('resultSummary').textContent = caseRecord.resolutionSummary || 'No hay informacion adicional disponible para este estado.';
-    document.getElementById('resultNextStep').textContent = caseRecord.nextStep || '';
+    const normalizedCase = normalizeSolicitud(caseRecord);
 
-    renderTracking(caseRecord.status || caseRecord.estado);
-    renderAttachments(caseRecord.attachments || caseRecord.adjuntos || []);
+    document.getElementById('resultCaseId').textContent = normalizedCase.caseId;
+    document.getElementById('resultType').textContent = normalizedCase.type;
+    document.getElementById('resultSubmittedAt').textContent = formatDate(normalizedCase.submittedAt);
+    document.getElementById('resultUpdatedAt').textContent = formatDate(normalizedCase.updatedAt);
+    document.getElementById('resultSummary').textContent = normalizedCase.resolutionSummary;
+    document.getElementById('resultNextStep').textContent = normalizedCase.nextStep;
+
+    renderTracking(normalizedCase.status);
+    renderAttachments(normalizedCase.attachments);
     resultSection.classList.remove('hidden');
     resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  async function consultarSolicitud() {
+  async function consultarSolicitud(token, personalData) {
+    const payload = buildConsultaPayload(token, personalData);
     const response = await fetch(`${API_BASE_URL}/api/solicitudes/consultar`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        token: normalizeCaseId(caseIdInput.value),
-        personalData: personalDataInput.value.trim()
-      })
+      body: JSON.stringify(payload)
     });
 
     const body = await response.json().catch(() => ({}));
@@ -128,6 +129,77 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     return body.solicitud;
+  }
+
+  function buildConsultaPayload(token, personalData) {
+    const value = String(personalData || '').trim();
+    const payload = { token, personalData: value };
+
+    if (value.includes('@')) {
+      payload.email = value;
+    } else {
+      payload.telefono = value;
+    }
+
+    return payload;
+  }
+
+  function normalizeSolicitud(solicitud) {
+    const timeline = Array.isArray(solicitud.timeline) ? solicitud.timeline : [];
+    const status = solicitud.status || solicitud.estado || 'En tramite';
+    const submittedAt = solicitud.submittedAt || solicitud.fechaCreacion || timeline[0]?.fecha || '';
+    const updatedAt = solicitud.updatedAt || solicitud.fechaModificacionEstadoCliente || timeline[0]?.fecha || submittedAt;
+    const responseText = solicitud.resolutionSummary || solicitud.respuestaOrganizacion?.texto || '';
+
+    return {
+      caseId: solicitud.caseId || solicitud.token || solicitud.titulo || '-',
+      type: solicitud.type || solicitud.tipoFormulario || solicitud.lista || 'Solicitud',
+      status,
+      submittedAt,
+      updatedAt,
+      resolutionSummary: responseText || buildDefaultSummary(status),
+      nextStep: solicitud.nextStep || buildNextStep(status, responseText),
+      attachments: normalizeAttachments(solicitud.attachments || solicitud.adjuntos || []),
+    };
+  }
+
+  function normalizeAttachments(attachments) {
+    return attachments.map((attachment) => ({
+      name: attachment.name || attachment.nombre || 'Adjunto',
+      url: attachment.url || attachment.urlDescarga || attachment.webUrl || '#',
+      mimeType: attachment.mimeType || attachment.tipo || '',
+      size: attachment.size || formatFileSize(attachment.sizeBytes || attachment.tamanioBytes || 0),
+    }));
+  }
+
+  function buildDefaultSummary(status) {
+    const value = String(status || '').toLowerCase();
+    if (value.includes('tram') || value.includes('registr')) {
+      return 'La solicitud esta registrada y pendiente de revision por el area responsable.';
+    }
+
+    return 'La solicitud tiene una actualizacion registrada.';
+  }
+
+  function buildNextStep(status, responseText) {
+    if (responseText) {
+      return 'Revise la informacion de estado indicada por Metro de Malaga.';
+    }
+
+    const value = String(status || '').toLowerCase();
+    if (value.includes('tram') || value.includes('registr')) {
+      return 'Recibira una notificacion cuando se incorpore una respuesta al expediente.';
+    }
+
+    return '';
+  }
+
+  function formatFileSize(bytes) {
+    const value = Number(bytes);
+    if (!Number.isFinite(value) || value <= 0) return '';
+    if (value < 1024) return `${value} B`;
+    if (value < 1024 * 1024) return `${Math.round(value / 1024)} KB`;
+    return `${(value / 1024 / 1024).toFixed(1)} MB`;
   }
 
   searchForm.addEventListener('submit', async (event) => {
@@ -151,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       setLoading(true);
-      const solicitud = await consultarSolicitud();
+      const solicitud = await consultarSolicitud(normalizeCaseId(caseIdInput.value), personalDataInput.value.trim());
       renderCase(solicitud);
     } catch (error) {
       caseIdInput.classList.add('error');
