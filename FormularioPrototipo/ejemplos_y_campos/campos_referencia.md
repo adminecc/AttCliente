@@ -9,16 +9,16 @@ Los campos enviados a la API deben usar los nombres internos de SharePoint (`fie
 
 | Campo API                                                                           | Lista SharePoint               | Nota                                                       |
 | ----------------------------------------------------------------------------------- | ------------------------------ | ---------------------------------------------------------- |
-| `Title`                                                                             | Todas Excepto Tarjetas +Metro | Lo genera la API como token`REC-*`, `CON-*`, `SUG-*`, etc. |
-| `Nombre`                                                                            | Todas Excepto Tarjetas +Metro | Nombre de la persona solicitante.                          |
-| `Apellidos`                                                                         | Todas Excepto Tarjetas +Metro | Apellidos de la persona solicitante.                       |
-| `TipoDeDocumento`                                                                   | Todas Excepto Tarjetas +Metro | `NIF`, `PAS`, `NIE`.                                       |
-| `NumeroDeDocumento`                                                                 | Todas Excepto Tarjetas +Metro | Documento.                                                 |
-| `CorreoElectronico`                                                                 | Todas Excepto Tarjetas +Metro | Email.                                                     |
-| `Telefono`                                                                          | Todas Excepto Tarjetas +Metro | Telefono.                                                  |
-| `Nacionalidad`                                                                      | Todas Excepto Tarjetas +Metro | Debe coincidir con choice de SharePoint.                   |
+| `Title`                                                                             | Todas                         | Lo genera la API como token`REC-*`, `CON-*`, `SUG-*`, etc. |
+| `Nombre`                                                                            | Todas excepto Tarjetas +Metro | Nombre de la persona solicitante.                          |
+| `Apellidos`                                                                         | Todas excepto Tarjetas +Metro | Apellidos de la persona solicitante.                       |
+| `TipoDeDocumento`                                                                   | Todas excepto Tarjetas +Metro | `NIF`, `PAS`, `NIE`.                                       |
+| `NumeroDeDocumento`                                                                 | Todas excepto Tarjetas +Metro | Documento.                                                 |
+| `CorreoElectronico`                                                                 | Todas excepto Tarjetas +Metro | Email.                                                     |
+| `Telefono`                                                                          | Todas excepto Tarjetas +Metro | Telefono.                                                  |
+| `Nacionalidad`                                                                      | Todas excepto Tarjetas +Metro | Debe coincidir con choice de SharePoint.                   |
 | `Direccion`, `Numero`, `Escalera`, `Piso`, `Puerta`, `CP`, `Localidad`, `Provincia` | Todas                          | Direccion postal/contacto.                                 |
-| `EstadoCliente`                                                                     | Todas Excepto Tarjetas +Metro | La API lo inicializa como`En tramite`.                     |
+| `EstadoCliente`                                                                     | Todas con columna equivalente | La API lo inicializa como`En tramite`.                     |
 
 ## ConsultaInformacion
 
@@ -46,13 +46,13 @@ Campos directos usados por ahora: `Clasificacion`, `FechaYHoraConsulta`, `Lugar`
 
 Obligatorio API: `Clasificacion`, `FechaYHoraConsulta`, `Lugar`, `DescripcionConsulta`.
 
-Pendiente: `Tipologia`, `Subtipologia`, `DAB`, `EstadoDeLaResolucion`, etc. son `lookup`; no deben enviarse como texto hasta resolver los IDs de lookup.
+Nota: `DAB`, `Tipologia`, `Subtipologia`, `EstadoDeLaResolucion` y otros campos de clasificacion avanzada son `lookup`; la API solo debe enviarlos cuando pueda resolverlos contra la lista auxiliar correspondiente. Actualmente el formulario envia los campos directos necesarios para registrar la reclamacion.
+
+Columnas SharePoint pendientes para guardar todo lo que puede capturar el bloque comun del formulario en `ReclamacionesQuejas`: `Escalera`, `Piso`, `Puerta`, `Provincia`, `EstadoCliente`.
 
 ## Objetos Perdidos NUEVA
 
-En este caso, la lista destino no está lista pero se define aquí como debe ser y lo programado en el prototipo no es aun contractual.
-
-Campos directos que deberían usarse: `TipoDeTitulo`, `NumTituloViaje`, `FechaPerdida`, `LineaMetro`, `Localizacion`, `EstPerdida`, `NUnidadTren`, `EstOrig`, `EstDest`, `TipoObjeto`, `ColorObj`, `DistintivoObj`, `Descripcion`.
+Campos directos usados: `TipoDeTitulo`, `NumTituloViaje`, `FechaPerdida`, `LineaMetro`, `Localizacion`, `EstPerdida`, `NUnidadTren`, `EstOrig`, `EstDest`, `TipoObjeto`, `ColorObj`, `DistintivoObj`, `Descripcion`.
 
 Obligatorio API: `FechaPerdida`, `LineaMetro`, `Localizacion`, `TipoObjeto`, `Descripcion`.
 
@@ -62,13 +62,11 @@ Nota: `FechaPerdida` tendrá la fecha y la hora.
 
 ## ClientesTarjetaMetro
 
-En este caso varían ligeramente y quizá haga falta modificar minimamente el formulario que te entregamos para adaptarlo a los campos que debemos rellenar (por ejemplo, la separación de apellidos o añadir un segundo teléfono)
-
-Campos especificos: `NombreCliente`, `ApellidoCliente1`, `ApellidoCliente2`, `DNICliente`, `EmailCliente`, `TelefonoCliente1`, `TelefonoCliente2`, `NombreRep`, `ApellidoRep1`, `ApellidoRep2`, `DNIRep`, `EmailRep`, `TelefonoRep1`, `TelefonoRep2`, `MetodoNotificacion`, `Firma`.
+Campos especificos: `NombreCliente`, `ApellidoCliente1`, `ApellidoCliente2`, `DNICliente`, `EmailCliente`, `TelefonoCliente1`, `TelefonoCliente2`, `NombreRep`, `ApellidoRep1`, `ApellidoRep2`, `DNIRep`, `EmailRep`, `TelefonoRep1`, `TelefonoRep2`, `Direccion`, `Numero`, `Escalera`, `Piso`, `Puerta`, `CP`, `Localidad`, `Provincia`, `MetodoNotificacion`, `Firma`.
 
 Obligatorio API: `NombreCliente`, `ApellidoCliente1`, `DNICliente`, `EmailCliente`, `TelefonoCliente1`, `MetodoNotificacion`.
 
-Los campos de dirección deben tomar los mismos nombres que en otras listas (aun no configurados en las listas destino)
+Los campos de direccion usan los mismos nombres internos que el resto de listas.
 
 ## Normalizacion de valores
 

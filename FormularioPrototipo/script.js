@@ -1142,9 +1142,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (tipoFormularioActual === 'objetos') {
             payloadApi.FechaPerdida = values.FechaPerdida;
             payloadApi.LineaMetro = values.LineaMetro;
-            payloadApi.Localizacion = values.Localizacion === 'estacion'
-                ? values.EstPerdida
-                : values.Localizacion;
+            payloadApi.Localizacion = values.Localizacion;
             payloadApi.EstPerdida = values.EstPerdida;
             payloadApi.NUnidadTren = values.NUnidadTren;
             payloadApi.EstOrig = values.EstOrig;
@@ -1162,6 +1160,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (tipoFormularioActual === 'tarjetas') {
             const firmaDataUrl = document.getElementById('signature-data')?.value || null;
+            const direccionTarjeta = payloadUnificado.postalReply?.direccionEnvio || direccion;
             if (firmaDataUrl && !firmaDataUrl.startsWith('data:image/')) {
                 console.warn('[Metro API] Firma de Tarjetas con formato inesperado; se esperaba data:image/... base64.', {
                     firmaPreview: firmaDataUrl.slice(0, 40)
@@ -1177,6 +1176,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 EmailCliente: applicant.email,
                 confirmEmail: applicant.email,
                 TelefonoCliente1: applicant.telefono,
+                Direccion: direccionTarjeta.via,
+                Numero: direccionTarjeta.numero,
+                Escalera: direccionTarjeta.escalera,
+                Piso: direccionTarjeta.piso,
+                Puerta: direccionTarjeta.puerta,
+                CP: direccionTarjeta.codigoPostal,
+                Localidad: direccionTarjeta.municipio,
+                Provincia: direccionTarjeta.provincia,
                 MetodoNotificacion: values.medioNotificacionTarjeta,
                 Firma: firmaDataUrl,
                 attachments: payloadUnificado.attachments,

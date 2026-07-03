@@ -14,6 +14,24 @@ BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 
 OUT_CSV = BASE_DIR / "sharepoint_list_fields.csv"
+OUT_REDUCED_CSV = BASE_DIR / "sharepoint_list_fields_reducido.csv"
+
+REDUCED_LISTS = {
+    "ConsultaInformacion",
+    "Sugerencias",
+    "Agradecimientos",
+    "Objetos Perdidos NUEVA",
+    "ClientesTarjetaMetro",
+}
+
+TECHNICAL_FIELDS = {
+    "Attachments",
+    "ContentType",
+    "Edit",
+    "DocIcon",
+    "LinkTitle",
+    "LinkTitleNoMenu",
+}
 
 LIST_ENV_KEYS = [
     "LIST_URL_RECLAMACIONES",
@@ -304,10 +322,50 @@ def export_fields() -> None:
     )
 
     df.to_csv(OUT_CSV, index=False, encoding="utf-8-sig")
+    export_reduced_fields(df)
 
     print(f"\nOK -> {OUT_CSV.resolve()}")
+    print(f"OK -> {OUT_REDUCED_CSV.resolve()}")
     print(f"Listas procesadas: {len(LIST_URLS)}")
     print(f"Campos exportados: {len(df)}")
+
+
+def export_reduced_fields(df: pd.DataFrame) -> None:
+    reduced = df[
+        df["list_name"].isin(REDUCED_LISTS)
+        & (df["hidden"] == False)
+        & (df["read_only"] == False)
+        & ~df["field_internal_name_for_create"].isin(TECHNICAL_FIELDS)
+    ].copy()
+
+    reduced = reduced.sort_values(
+        ["list_display_name", "field_internal_name_for_create"],
+        na_position="last",
+    )
+
+    reduced = reduced[[
+        "list_display_name",
+        "field_display_name",
+        "field_internal_name_for_create",
+        "type",
+        "required",
+        "default_value",
+        "text_max_length",
+        "date_time_format",
+        "choices",
+    ]].rename(columns={
+        "list_display_name": "lista",
+        "field_display_name": "nombre_visual",
+        "field_internal_name_for_create": "nombre_interno",
+        "type": "tipo_sharepoint",
+        "required": "obligatorio_sharepoint",
+        "default_value": "valor_defecto",
+        "text_max_length": "longitud_maxima",
+        "date_time_format": "formato_fecha",
+        "choices": "opciones",
+    })
+
+    reduced.to_csv(OUT_REDUCED_CSV, index=False, encoding="utf-8-sig")
 
 
 if __name__ == "__main__":

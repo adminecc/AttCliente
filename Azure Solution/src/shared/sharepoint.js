@@ -62,6 +62,26 @@ const OPERATION_LOCATION_VALUES = {
   desconocido: "",
 };
 
+const LOST_OBJECT_LOCATION_VALUES = {
+  estacion: "En una estación",
+  tren: "En un tren",
+  desconocido: "No lo sé",
+};
+
+const METRO_LINE_VALUES = {
+  1: "Línea 1",
+  2: "Línea 2",
+  ambas: "Ambas / No lo sé",
+};
+
+const CLAIM_TITLE_TYPE_VALUES = {
+  "billete-ocasional": "Ocasional MM",
+  "monedero-metro-malaga": "Monedero MM",
+  masmetro: "Monedero MM",
+  "tarjeta-consorcio": "Monedero Consorcio",
+  "tarjeta-consorcio-joven": "Monedero Consorcio",
+  "tarjeta-consorcio-familia-numerosa": "Familia numerosa Consorcio",
+};
 const THANKS_REASON_VALUES = {
   "atencion-personal": "Atención del personal",
   "resolucion-incidencia": "Resolución de incidencia",
@@ -532,9 +552,7 @@ function buildSharePointFields(payload, type, token, createdAt) {
     Title: token,
   };
 
-  if (!["OBJETOS_PERDIDOS", "TARJETAS_METRO"].includes(type.key)) {
-    fields.EstadoCliente = "En trámite";
-  }
+  fields.EstadoCliente = "En trámite";
 
   if (type.key === "OBJETOS_PERDIDOS") {
     fields.Estado = payload.Estado || "Registrado";
@@ -895,7 +913,18 @@ function isEmptySharePointValue(value) {
 
 function transformSharePointValue(sharePointField, value, type) {
   if (sharePointField === "TipoDeTitulo") {
+    if (type?.key === "RECLAMACIONES") {
+      return CLAIM_TITLE_TYPE_VALUES[value] || value;
+    }
     return TITLE_TYPE_VALUES[value] || value;
+  }
+
+  if (sharePointField === "Localizacion" && type?.key === "OBJETOS_PERDIDOS") {
+    return LOST_OBJECT_LOCATION_VALUES[value] || value;
+  }
+
+  if (sharePointField === "LineaMetro") {
+    return METRO_LINE_VALUES[value] || value;
   }
 
   if (["Localizacion", "LugarEntrega", "Origen", "Destino", "PuntoDeVenta"].includes(sharePointField)) {

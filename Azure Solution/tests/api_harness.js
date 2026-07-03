@@ -468,7 +468,8 @@ async function main() {
 
       assert(validation.valid, `No se esperaban errores de validacion: ${validation.errors.join(", ")}.`);
       assert(fields.Title === "OBJ-2026-ABCDEFGH", "Title debe contener el token de solicitud.");
-      assert(fields.Localizacion === "Unidad-Tren", "Se esperaba Localizacion normalizada.");
+      assert(fields.LineaMetro.includes("1"), "Se esperaba LineaMetro normalizada.");
+      assert(fields.Localizacion === "En un tren", "Se esperaba Localizacion normalizada.");
       assert(fields.EstOrig === "Atarazanas", "Se esperaba EstOrig normalizado.");
       assert(fields.EstDest === "Universidad", "Se esperaba EstDest normalizado.");
       assert(fields.TipoObjeto === "Mochila", "Se esperaba TipoObjeto directo.");
@@ -496,7 +497,7 @@ async function main() {
       assert(fields.Title === "TAR-2026-ABCDEFGH", "Title debe contener el token de solicitud.");
       assert(fields.NombreCliente === "Luis", "Se esperaba NombreCliente directo.");
       assert(fields.MetodoNotificacion === "Correo", "Se esperaba MetodoNotificacion normalizado.");
-      assert(fields.EstadoCliente === undefined, "ClientesTarjetaMetro no debe recibir EstadoCliente.");
+      assert(String(fields.EstadoCliente || "").toLowerCase().includes("tr"), "ClientesTarjetaMetro debe recibir EstadoCliente por defecto.");
     }),
 
     runTest("diagnostico SharePoint avisa de valores incompatibles con columnas", async () => {

@@ -17,9 +17,9 @@ El estilo visual no debe tomarse como contrato de produccion. El contrato funcio
 - `ejemplos_y_campos/campos_referencia.md`: contrato funcional de campos, obligatorios, tipos de formulario, adjuntos y firma.
 - `ConsultaClientePrototipo/README.md`: contrato funcional del prototipo de consulta de estado.
 - `ejemplos_y_campos/unified-payload-schema.json`: esquema JSON del payload aceptado por la API.
-- `ejemplos_y_campos/sharepoint_list_fields_reducido.csv`: campos reales de SharePoint para las listas completas: `ConsultaInformacion`, `Sugerencias` y `Agradecimientos`.
+- `ejemplos_y_campos/sharepoint_list_fields_reducido.csv`: campos reales de SharePoint para las listas completas: `ConsultaInformacion`, `Sugerencias`, `Agradecimientos`, `Objetos Perdidos NUEVA` y `ClientesTarjetaMetro`.
 
-El CSV completo exportado desde SharePoint (`sharepoint_list_fields.csv`) se conserva como referencia tecnica, pero para desarrollo del formulario se debe usar la version reducida cuando se necesite consultar nombres internos, tipos y choices de las listas ya cerradas.
+El CSV completo exportado desde SharePoint (`sharepoint_list_fields.csv`) se conserva como referencia tecnica. Para desarrollo del formulario se debe usar la version reducida cuando se necesite consultar nombres internos, tipos y choices de las listas cerradas.
 
 ## Ejecucion local
 

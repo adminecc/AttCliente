@@ -235,6 +235,7 @@ Invoke-RestMethod `
 - Revisa permisos Graph y admin consent.
 - Revisa que la lista existe y que su URL coincide con el mapeo de `src/shared/form-contract.js`.
 - Revisa nombres internos de columnas con `FormularioPrototipo/ejemplos_y_campos/sharepoint_list_fields.csv`.
+- Para el contrato funcional de las listas cerradas usa `FormularioPrototipo/ejemplos_y_campos/sharepoint_list_fields_reducido.csv`.
 
 ## Adjuntos
 
@@ -284,4 +285,4 @@ Nota tecnica:
 
 - Se descarto `AttachmentFiles/add` sobre la lista porque SharePoint REST devuelve `401 Unsupported app only token` con esta app-only.
 - Graph no permite `driveItem` en listas normales, solo en bibliotecas documentales.
-- En listas grandes como `Objetos Perdidos NUEVA`, Graph puede devolver cero resultados al filtrar por campos aunque el item exista. Si existe carpeta documental por token, la API puede leer su `IDRef` y recuperar el item origen por ID; para solicitudes sin adjuntos puede hacer falta un indice SharePoint o una estrategia especifica de consulta.
+- En listas grandes como `Objetos Perdidos NUEVA`, la consulta por token/email se tratara en la siguiente iteracion de `GET /api/solicitudes/consultar`. Para solicitudes con adjuntos, la biblioteca documental permite recuperar el item origen mediante `IDRef`.

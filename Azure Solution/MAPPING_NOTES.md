@@ -21,7 +21,7 @@ Este documento recoge el contrato entre el formulario prototipo, la Azure Functi
 | `Title` | Token generado por API. |
 | `Nombre`, `Apellidos`, `TipoDeDocumento`, `NumeroDeDocumento`, `CorreoElectronico`, `Telefono`, `Nacionalidad` | Datos de solicitante. |
 | `Direccion`, `Numero`, `Escalera`, `Piso`, `Puerta`, `CP`, `Localidad`, `Provincia` | Direccion postal/contacto si aplica. |
-| `EstadoCliente` | Se inicializa como `En tramite` en Consulta, Sugerencias y Agradecimientos. |
+| `EstadoCliente` | Se inicializa como `En tramite` en todas las listas que tienen la columna. |
 
 ## ConsultaInformacion
 
@@ -72,8 +72,9 @@ Este documento recoge el contrato entre el formulario prototipo, la Azure Functi
 | `DescripcionConsulta` | Texto principal obligatorio. |
 | `Observaciones` | Detalles auxiliares no estructurados. |
 
-La API convierte campos lookup a `CampoLookupId`. Si el payload trae un numero, lo usa como ID; si trae texto, busca el valor en la lista auxiliar por `Title`.
-Pendiente: `DAB` conserva el codigo del formulario; si se quiere resolver como lookup, el valor debe coincidir con la lista auxiliar o hay que anadir una regla explicita de correspondencia por estacion. Tambien falta validar catalogos reales para `Tipologia`, `Subtipologia`, `EstadoDeLaResolucion` y otros lookups que aun no tienen campo visible en el prototipo.
+La API convierte campos lookup a `CampoLookupId`. Si el payload trae un numero, lo usa como ID; si trae texto, busca el valor en la lista auxiliar por `Title`. Los campos avanzados de clasificacion (`Tipologia`, `Subtipologia`, `EstadoDeLaResolucion`, etc.) no se envian desde el prototipo hasta que exista una regla funcional para seleccionarlos.
+
+Columnas pendientes en SharePoint para guardar todo el bloque comun del formulario en `ReclamacionesQuejas`: `Escalera`, `Piso`, `Puerta`, `Provincia`, `EstadoCliente`.
 
 ## Objetos Perdidos NUEVA
 
@@ -81,7 +82,7 @@ Pendiente: `DAB` conserva el codigo del formulario; si se quiere resolver como l
 | --- | --- |
 | `FechaPerdida` | Fecha del extravio. Obligatorio. |
 | `LineaMetro` | Linea en la que se perdio el objeto. Obligatorio. |
-| `Localizacion` | Choice normalizado desde slug/estacion. Obligatorio. |
+| `Localizacion` | Choice normalizado (`estacion` -> `En una estacion`, `tren` -> `En un tren`, `desconocido` -> `No lo se`). Obligatorio. |
 | `EstPerdida` | Estacion donde se perdio el objeto, si aplica. |
 | `NUnidadTren` | Numero/unidad de tren si aplica. |
 | `EstOrig` | Estacion de origen del viaje, si aplica. |
@@ -100,6 +101,7 @@ Pendiente: `DAB` conserva el codigo del formulario; si se quiere resolver como l
 | --- | --- |
 | `NombreCliente`, `ApellidoCliente1`, `ApellidoCliente2`, `DNICliente`, `EmailCliente`, `TelefonoCliente1`, `TelefonoCliente2` | Datos del cliente. |
 | `NombreRep`, `ApellidoRep1`, `ApellidoRep2`, `DNIRep`, `EmailRep`, `TelefonoRep1`, `TelefonoRep2` | Representante si aplica. |
+| `Direccion`, `Numero`, `Escalera`, `Piso`, `Puerta`, `CP`, `Localidad`, `Provincia` | Direccion de contacto/envio. |
 | `MetodoNotificacion` | Choice normalizado (`email` -> `Correo`, `impreso` -> `Impresion`). |
 | `Firma` | Data URL/base64 de la firma (`data:image/png;base64,...`) guardado en la columna de texto. |
 | `Title` | Token generado por API aunque la columna no sea requerida. |
@@ -125,7 +127,7 @@ Pendiente: `DAB` conserva el codigo del formulario; si se quiere resolver como l
 | 2026-06-29 | Agradecimientos | Varios campos llegaban con nombres prototipo. | Solucionado | El payload API usa nombres internos reales (`Motivo`, `FechaEpisodio`, `Lugar`, etc.). |
 | 2026-06-29 | Formulario prototipo | El modal mostraba referencia local `ATT-*`. | Solucionado | El modal usa `response.token`. |
 | 2026-06-29 | Diagnostico SharePoint | Eran dificiles de detectar errores de tipo/formato. | Solucionado | Warnings preventivos y `diagnostics.sharePoint`. |
-| 2026-06-29 | Contrato API | Habia dependencia de `FIELD_MAP` y nombres prototipo. | En curso | API y prototipo migrados a nombres directos; lookup resolver generico implementado; quedan pendientes catalogos/controles de `Tipologia` y `Subtipologia`. |
+| 2026-06-29 | Contrato API | Habia dependencia de `FIELD_MAP` y nombres prototipo. | Solucionado | API y prototipo migrados a nombres directos; lookup resolver generico implementado para los campos que se envian. |
 | 2026-06-29 | Adjuntos | El prototipo declaraba multipart pero enviaba JSON. | Solucionado | El prototipo envia `FormData` cuando hay binarios y la API sube los archivos a `DocumentosAdjuntos`. |
 | 2026-06-29 | Tarjetas +Metro | Registros de prueba de adjuntos/firma. | Solucionado | Borrados items `1372` y `1374` en `ClientesTarjetaMetro` con Graph (`204`). |
 | 2026-06-30 | Tarjetas +Metro | La firma se estaba guardando como nombre de archivo y no como contenido base64. | Solucionado | La firma vuelve a enviarse en `Firma` como `data:image/png;base64,...`. Prueba real: item `1378`, token `TAR-2026-GNS673TD`, `Firma` leida como data URL; item borrado tras validar. |
