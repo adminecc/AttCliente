@@ -3,7 +3,7 @@ const { isEmail } = require("../shared/validation");
 const { getTypeFromToken } = require("../shared/token");
 const {
   getGraphAccessToken,
-  findListItemByEmailAndToken,
+  findListItemByContactAndToken,
   getListItemAttachments,
   getListItemTimeline,
   buildSolicitudResponse,
@@ -26,15 +26,18 @@ app.http("consultarSolicitud", {
     }
 
     const email = normalizeEmail(body.email);
+    const telefono = normalizePhone(body.telefono);
+    const personalData = String(body.personalData || body.datoConfirmacion || "").trim();
     const token = normalizeToken(body.token);
+    const contact = buildContact({ email, telefono, personalData });
 
-    if (!email || !token) {
+    if (!contact || !token) {
       return jsonResponse(400, {
-        error: "Los campos 'email' y 'token' son obligatorios.",
+        error: "Los campos 'token' y correo electronico o telefono son obligatorios.",
       });
     }
 
-    if (!isEmail(email)) {
+    if (contact.kind === "email" && !isEmail(contact.value)) {
       return jsonResponse(400, {
         error: "El formato del correo electronico no es valido.",
       });
@@ -59,10 +62,10 @@ app.http("consultarSolicitud", {
 
     let item;
     try {
-      item = await findListItemByEmailAndToken(
+      item = await findListItemByContactAndToken(
         accessToken,
         type,
-        email,
+        contact,
         token,
         undefined,
         context
@@ -77,21 +80,25 @@ app.http("consultarSolicitud", {
     if (!item) {
       return jsonResponse(404, {
         encontrado: false,
-        mensaje: "No se encontro ninguna solicitud asociada al email y token indicados.",
+        mensaje: "No se encontro ninguna solicitud asociada al dato de confirmacion y token indicados.",
       });
     }
 
     const [attachments, timeline] = await Promise.all([
       getListItemAttachments(accessToken, type, item.id, undefined, context),
       getListItemTimeline(accessToken, type, item.id, undefined, context).catch((error) => {
-        context.log.warn("consultarSolicitud - no se pudo recuperar timeline:", error.message);
+        if (typeof context.warn === "function") {
+          context.warn("consultarSolicitud - no se pudo recuperar timeline:", error.message);
+        } else {
+          context.log("WARNING: consultarSolicitud - no se pudo recuperar timeline:", error.message);
+        }
         return [];
       }),
     ]);
 
     return jsonResponse(200, {
       encontrado: true,
-      solicitud: buildSolicitudResponse(item, type.sharePoint.listName, attachments, timeline),
+      solicitud: buildSolicitudResponse(item, type.sharePoint.listName, attachments, timeline, type),
     });
   },
 });
@@ -100,8 +107,23 @@ function normalizeEmail(email) {
   return String(email || "").trim().toLowerCase();
 }
 
+function normalizePhone(phone) {
+  return String(phone || "").replace(/[^\d]/g, "").replace(/^0034/, "").replace(/^34/, "");
+}
+
 function normalizeToken(token) {
   return String(token || "").trim().toUpperCase();
+}
+
+function buildContact({ email, telefono, personalData }) {
+  if (email) return { kind: "email", value: email };
+  if (telefono) return { kind: "phone", value: telefono };
+
+  const value = String(personalData || "").trim();
+  if (!value) return null;
+  if (value.includes("@")) return { kind: "email", value: normalizeEmail(value) };
+  const normalizedPhone = normalizePhone(value);
+  return normalizedPhone ? { kind: "phone", value: normalizedPhone } : null;
 }
 
 function jsonResponse(status, body) {

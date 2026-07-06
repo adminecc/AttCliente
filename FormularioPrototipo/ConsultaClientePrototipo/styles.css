@@ -109,6 +109,7 @@ body {
 
 .main-content {
     flex: 1;
+    width: 100%;
 }
 
 .form-section,
@@ -243,6 +244,7 @@ body {
 }
 
 .btn-icon {
+    display: none;
     font-size: 1.125rem;
     line-height: 1;
 }
@@ -577,6 +579,17 @@ body {
 
     .result-header {
         flex-direction: column;
+    }
+}
+
+@media (max-width: 960px) and (min-width: 769px) {
+    .search-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .inline-action {
+        grid-column: 1 / -1;
+        justify-content: flex-end;
     }
 }
 

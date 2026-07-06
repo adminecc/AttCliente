@@ -315,22 +315,30 @@ async function resolveLookupItems(accessToken, siteId, lookupListId, context) {
 }
 
 async function findListItemByEmailAndToken(accessToken, type, email, token, config = getConfig(), context) {
+  return findListItemByContactAndToken(
+    accessToken,
+    type,
+    { kind: "email", value: email },
+    token,
+    config,
+    context
+  );
+}
+
+async function findListItemByContactAndToken(accessToken, type, contact, token, config = getConfig(), context) {
   const target = await resolveSharePointTarget(accessToken, type, config, context);
   const readableColumns = await resolveColumnNames(accessToken, target, context);
-  const emailField = readableColumns.has("CorreoElectronico")
-    ? "CorreoElectronico"
-    : readableColumns.has("EmailCliente")
-      ? "EmailCliente"
-      : "Email";
+  const identityField = resolveIdentityField(readableColumns, contact.kind);
+  const identityValue = normalizeIdentityValue(contact);
   const tokenField = "Title";
-  const filter = `fields/${emailField} eq '${escapeOData(email)}' and fields/${tokenField} eq '${escapeOData(token)}'`;
+  const filter = `fields/${identityField} eq '${escapeOData(identityValue)}' and fields/${tokenField} eq '${escapeOData(token)}'`;
   const url =
     `${GRAPH_BASE_URL}/sites/${encodeURIComponent(target.siteId)}/lists/${encodeURIComponent(target.listId)}/items` +
     "?$expand=fields" +
     `&$filter=${encodeURIComponent(filter)}` +
     "&$top=1";
 
-  context?.log?.(`findListItemByEmailAndToken - GET ${url}`);
+  context?.log?.(`findListItemByContactAndToken - GET ${url}`);
 
   try {
     const response = await axios.get(url, {
@@ -347,30 +355,43 @@ async function findListItemByEmailAndToken(accessToken, type, email, token, conf
 
     warn(
       context,
-      `findListItemByEmailAndToken - filtro Graph sin resultados en ${target.listName}, usando busqueda local.`
+      `findListItemByContactAndToken - filtro Graph sin resultados en ${target.listName}, usando busqueda local.`
     );
     return findListItemByEmailAndTokenFallbackOrDocumentFolder(
       accessToken,
       target,
-      emailField,
-      email,
+      identityField,
+      identityValue,
       token,
       context
     );
   } catch (error) {
     warn(
       context,
-      `findListItemByEmailAndToken - filtro Graph no disponible, usando busqueda local: ${error.message}`
+      `findListItemByContactAndToken - filtro Graph no disponible, usando busqueda local: ${error.message}`
     );
     return findListItemByEmailAndTokenFallbackOrDocumentFolder(
       accessToken,
       target,
-      emailField,
-      email,
+      identityField,
+      identityValue,
       token,
       context
     );
   }
+}
+
+function resolveIdentityField(readableColumns, kind) {
+  const candidates = kind === "phone"
+    ? ["Telefono", "TelefonoCliente1", "TelefonoRep1"]
+    : ["CorreoElectronico", "EmailCliente", "EmailRep", "Email"];
+
+  return candidates.find((field) => readableColumns.has(field)) || candidates[0];
+}
+
+function normalizeIdentityValue(contact = {}) {
+  const value = String(contact.value || "").trim();
+  return contact.kind === "phone" ? normalizePhoneComparable(value) : value.toLowerCase();
 }
 
 async function findListItemByEmailAndTokenFallbackOrDocumentFolder(accessToken, target, emailField, email, token, context) {
@@ -404,7 +425,7 @@ async function findListItemByEmailAndTokenFallback(accessToken, target, emailFie
   return (response.data?.value || []).find((item) => {
     const fields = item.fields || {};
     return normalizeComparable(fields.Title) === normalizeComparable(token)
-      && normalizeComparable(fields[emailField]) === normalizeComparable(email);
+      && identityMatches(fields[emailField], email, emailField);
   }) || null;
 }
 
@@ -445,7 +466,7 @@ async function findListItemByDocumentFolder(accessToken, target, emailField, ema
   const fields = itemResponse.data?.fields || {};
   if (
     normalizeComparable(fields.Title) === normalizeComparable(token)
-    && normalizeComparable(fields[emailField]) === normalizeComparable(email)
+    && identityMatches(fields[emailField], email, emailField)
   ) {
     return itemResponse.data;
   }
@@ -538,7 +559,7 @@ async function getListItemTimeline(accessToken, type, itemId, config = getConfig
       return {
         fecha: version.lastModifiedDateTime || "",
         usuario: version.lastModifiedBy?.user?.displayName || "",
-        estado: fields.Estado || "",
+        estado: fields.EstadoCliente || fields.Estado || "",
         respuestaOrganizacion: fields.RespuestaOrganizacion || "",
         fechaRespuesta: fields.FechaRespuesta || "",
         version: version.id || "",
@@ -968,31 +989,90 @@ function transformSharePointValue(sharePointField, value, type) {
   return value;
 }
 
-function buildSolicitudResponse(item, listName, attachments = [], timeline = []) {
+function buildSolicitudResponse(item, listName, attachments = [], timeline = [], type) {
   const fields = item.fields || {};
+  const token = fields.Title || "";
+  const estado = fields.EstadoCliente || fields.Estado || "En tramite";
+  const submittedAt = toIsoDateTime(item.createdDateTime || fields.Created || fields.FechaCreacion);
+  const updatedAt = toIsoDateTime(item.lastModifiedDateTime || fields.Modified || fields.FechaModificacionEstadoCliente || submittedAt);
+  const responseText = fields.RespuestaOrganizacion || fields.Respuesta || "";
+  const normalizedAttachments = attachments.map(mapAttachmentForResponse);
 
   return {
     id: item.id,
     lista: listName,
-    token: fields.Title || "",
-    estado: fields.EstadoCliente || fields.Estado || "",
+    token,
+    estado,
     tipoFormulario: fields.TipoFormulario || "",
     tipoSolicitud: "",
-    titulo: fields.Title || "",
+    titulo: token,
     nombreCompleto: fields.NombreCliente
       ? [fields.NombreCliente, fields.ApellidoCliente1, fields.ApellidoCliente2].filter(Boolean).join(" ")
       : [fields.Nombre, fields.Apellidos].filter(Boolean).join(" "),
     email: fields.CorreoElectronico || fields.EmailCliente || "",
     telefono: fields.Telefono || fields.TelefonoCliente1 || "",
-    fechaCreacion: fields.FechaCreacion || "",
+    fechaCreacion: submittedAt,
     descripcion: fields.Descripcion || fields.DescripcionConsulta || "",
     respuestaOrganizacion: {
-      texto: fields.RespuestaOrganizacion || "",
+      texto: responseText,
       fecha: fields.FechaRespuesta || "",
     },
     adjuntos: attachments,
     timeline,
+    caseId: token,
+    type: type?.label || fields.TipoFormulario || listName,
+    status: estado,
+    submittedAt,
+    updatedAt,
+    resolutionSummary: responseText || buildDefaultStatusSummary(estado),
+    nextStep: buildNextStep(estado, responseText),
+    attachments: normalizedAttachments,
   };
+}
+
+function mapAttachmentForResponse(attachment) {
+  return {
+    id: attachment.id || attachment.nombre || attachment.name || "",
+    name: attachment.nombre || attachment.name || "Adjunto",
+    url: attachment.urlDescarga || attachment.webUrl || attachment.url || "",
+    mimeType: attachment.tipo || attachment.mimeType || "",
+    size: attachment.size || formatFileSize(attachment.tamanioBytes || attachment.sizeBytes || 0),
+  };
+}
+
+function toIsoDateTime(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toISOString();
+}
+
+function buildDefaultStatusSummary(status) {
+  if (normalizeComparable(status).includes("tram")) {
+    return "La solicitud esta registrada y pendiente de revision por el area responsable.";
+  }
+
+  return "La solicitud tiene una actualizacion registrada.";
+}
+
+function buildNextStep(status, responseText) {
+  if (responseText) {
+    return "Revise la informacion de estado indicada por Metro de Malaga.";
+  }
+
+  if (normalizeComparable(status).includes("tram")) {
+    return "Recibira una notificacion cuando se incorpore una respuesta al expediente.";
+  }
+
+  return "";
+}
+
+function formatFileSize(bytes) {
+  const value = Number(bytes);
+  if (!Number.isFinite(value) || value <= 0) return "";
+  if (value < 1024) return `${value} B`;
+  if (value < 1024 * 1024) return `${Math.round(value / 1024)} KB`;
+  return `${(value / 1024 / 1024).toFixed(1)} MB`;
 }
 
 async function resolveSharePointTarget(accessToken, type, config = getConfig(), context) {
@@ -1168,6 +1248,18 @@ function normalizeComparable(value) {
   return String(value || "").trim().toLowerCase();
 }
 
+function identityMatches(actual, expected, fieldName = "") {
+  if (String(fieldName).toLowerCase().includes("telefono")) {
+    return normalizePhoneComparable(actual) === normalizePhoneComparable(expected);
+  }
+
+  return normalizeComparable(actual) === normalizeComparable(expected);
+}
+
+function normalizePhoneComparable(value) {
+  return String(value || "").replace(/[^\d]/g, "").replace(/^0034/, "").replace(/^34/, "");
+}
+
 function hexThumbprintToBase64Url(thumbprintHex) {
   const cleanHex = String(thumbprintHex || "").replace(/[\s:.-]/g, "").toUpperCase();
   if (cleanHex.length !== 40) {
@@ -1207,6 +1299,7 @@ module.exports = {
   buildDocumentLibraryAttachmentPlan,
   prepareLookupFieldWrites,
   findListItemByEmailAndToken,
+  findListItemByContactAndToken,
   getListItemAttachments,
   getListItemTimeline,
   buildSharePointFields,

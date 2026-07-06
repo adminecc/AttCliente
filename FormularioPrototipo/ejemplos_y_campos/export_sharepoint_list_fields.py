@@ -15,13 +15,19 @@ load_dotenv(BASE_DIR / ".env")
 
 OUT_CSV = BASE_DIR / "sharepoint_list_fields.csv"
 OUT_REDUCED_CSV = BASE_DIR / "sharepoint_list_fields_reducido.csv"
+OUT_USED_CSV = BASE_DIR / "sharepoint_list_fields_utilizados.csv"
 
 REDUCED_LISTS = {
     "ConsultaInformacion",
     "Sugerencias",
     "Agradecimientos",
     "Objetos Perdidos NUEVA",
+    "Objetos Perdidos",
     "ClientesTarjetaMetro",
+}
+
+LIST_ALIASES = {
+    "Objetos Perdidos NUEVA": "Objetos Perdidos",
 }
 
 TECHNICAL_FIELDS = {
@@ -32,6 +38,123 @@ TECHNICAL_FIELDS = {
     "LinkTitle",
     "LinkTitleNoMenu",
 }
+
+COMMON_CONECTA_USED_FIELDS = {
+    "Title",
+    "Nombre",
+    "Apellidos",
+    "TipoDeDocumento",
+    "NumeroDeDocumento",
+    "CorreoElectronico",
+    "Telefono",
+    "Nacionalidad",
+    "Direccion",
+    "Numero",
+    "Escalera",
+    "Piso",
+    "Puerta",
+    "CP",
+    "Localidad",
+    "Provincia",
+    "EstadoCliente",
+}
+
+USED_FIELDS_BY_LIST = {
+    "ConsultaInformacion": COMMON_CONECTA_USED_FIELDS | {
+        "TipoDeTitulo",
+        "NumTituloViaje",
+        "Descripcion",
+        "FechaModificacionEstadoCliente",
+    },
+    "Sugerencias": COMMON_CONECTA_USED_FIELDS | {
+        "Estacion",
+        "OtraUbicacion",
+        "TipoDeTitulo",
+        "NumTituloViaje",
+        "Descripcion",
+        "FechaModificacionEstadoCliente",
+    },
+    "Agradecimientos": COMMON_CONECTA_USED_FIELDS | {
+        "Motivo",
+        "FechaEpisodio",
+        "Lugar",
+        "Estacion",
+        "Tren",
+        "DirigidoA",
+        "Colectivos",
+        "NumIdentificacionPersonaTrabajad",
+        "Descripcion",
+        "FechaModificacionEstadoCliente",
+    },
+    "ReclamacionesQuejas": COMMON_CONECTA_USED_FIELDS | {
+        "Clasificacion",
+        "FechaYHoraConsulta",
+        "Lugar",
+        "TipoDeTitulo",
+        "NBilleteTitulo",
+        "DAB",
+        "PuntoDeVenta",
+        "TipoDeInstalacion",
+        "NClienteNTarjCredito",
+        "ImporteAPagar",
+        "DescripcionConsulta",
+        "Observaciones",
+    },
+    "Objetos Perdidos": COMMON_CONECTA_USED_FIELDS | {
+        "Estado",
+        "TipoRegistro",
+        "TipoDeTitulo",
+        "NumTituloViaje",
+        "FechaPerdida",
+        "LineaMetro",
+        "Localizacion",
+        "EstPerdida",
+        "NUnidadTren",
+        "EstOrig",
+        "EstDest",
+        "TipoObjeto",
+        "ColorObj",
+        "DistintivoObj",
+        "Descripcion",
+        "Observaciones",
+    },
+    "ClientesTarjetaMetro": {
+        "Title",
+        "EstadoCliente",
+        "NombreCliente",
+        "ApellidoCliente1",
+        "ApellidoCliente2",
+        "DNICliente",
+        "EmailCliente",
+        "TelefonoCliente1",
+        "TelefonoCliente2",
+        "NombreRep",
+        "ApellidoRep1",
+        "ApellidoRep2",
+        "DNIRep",
+        "EmailRep",
+        "TelefonoRep1",
+        "TelefonoRep2",
+        "Direccion",
+        "Numero",
+        "Escalera",
+        "Piso",
+        "Puerta",
+        "CP",
+        "Localidad",
+        "Provincia",
+        "MetodoNotificacion",
+        "Firma",
+    },
+    "DocumentosAdjuntos": {
+        "IDRef",
+        "Visible",
+    },
+}
+
+OPTIONAL_LIST_ENV_KEYS = [
+    "LIST_URL_DOCUMENTOS_ADJUNTOS",
+]
 
 LIST_ENV_KEYS = [
     "LIST_URL_RECLAMACIONES",
@@ -50,6 +173,7 @@ if missing_urls:
     )
 
 LIST_URLS = [os.environ[key] for key in LIST_ENV_KEYS]
+LIST_URLS.extend(os.environ[key] for key in OPTIONAL_LIST_ENV_KEYS if os.environ.get(key))
 
 
 def get_token() -> str:
@@ -123,7 +247,12 @@ def parse_sharepoint_list_url(url: str) -> dict:
     parsed = urllib.parse.urlparse(url)
     path = urllib.parse.unquote(parsed.path)
 
+    is_library = False
     match = re.search(r"^(/sites/[^/]+)/Lists/([^/]+)/", path, re.I)
+    if not match:
+        match = re.search(r"^(/sites/[^/]+)/([^/]+)/Forms/", path, re.I)
+        is_library = True
+
     if not match:
         raise ValueError(f"No se pudo parsear la URL de lista: {url}")
 
@@ -134,7 +263,11 @@ def parse_sharepoint_list_url(url: str) -> dict:
         "hostname": parsed.hostname,
         "site_path": site_path,
         "list_path_name": list_path_name,
-        "list_web_base": f"{parsed.scheme}://{parsed.hostname}{site_path}/Lists/{list_path_name}",
+        "list_web_base": (
+            f"{parsed.scheme}://{parsed.hostname}{site_path}/{list_path_name}"
+            if is_library
+            else f"{parsed.scheme}://{parsed.hostname}{site_path}/Lists/{list_path_name}"
+        ),
         "original_url": url,
     }
 
@@ -323,11 +456,16 @@ def export_fields() -> None:
 
     df.to_csv(OUT_CSV, index=False, encoding="utf-8-sig")
     export_reduced_fields(df)
+    missing_used = export_used_fields(df)
 
     print(f"\nOK -> {OUT_CSV.resolve()}")
     print(f"OK -> {OUT_REDUCED_CSV.resolve()}")
+    print(f"OK -> {OUT_USED_CSV.resolve()}")
     print(f"Listas procesadas: {len(LIST_URLS)}")
     print(f"Campos exportados: {len(df)}")
+    print(f"Campos usados no encontrados: {len(missing_used)}")
+    for item in missing_used:
+        print(f"  - {item['lista']}: {item['nombre_interno']}")
 
 
 def export_reduced_fields(df: pd.DataFrame) -> None:
@@ -366,6 +504,47 @@ def export_reduced_fields(df: pd.DataFrame) -> None:
     })
 
     reduced.to_csv(OUT_REDUCED_CSV, index=False, encoding="utf-8-sig")
+
+
+def export_used_fields(df: pd.DataFrame) -> list[dict]:
+    used_rows = []
+
+    for list_name, fields in USED_FIELDS_BY_LIST.items():
+        export_list_name = LIST_ALIASES.get(list_name, list_name)
+        subset = df[
+            (df["list_display_name"].isin({list_name, export_list_name}))
+            & df["field_internal_name_for_create"].isin(fields)
+        ].copy()
+
+        existing = set(subset["field_internal_name_for_create"])
+        for missing in sorted(fields - existing):
+            used_rows.append({
+                "lista": list_name,
+                "nombre_visual": "",
+                "nombre_interno": missing,
+                "tipo_sharepoint": "",
+                "obligatorio_sharepoint": "",
+                "valor_defecto": "",
+                "opciones": "",
+                "estado": "NO_ENCONTRADO_EN_EXPORT",
+            })
+
+        for _, row in subset.iterrows():
+            used_rows.append({
+                "lista": row["list_display_name"],
+                "nombre_visual": row["field_display_name"],
+                "nombre_interno": row["field_internal_name_for_create"],
+                "tipo_sharepoint": row["type"],
+                "obligatorio_sharepoint": row["required"],
+                "valor_defecto": row["default_value"],
+                "opciones": row["choices"],
+                "estado": "USADO",
+            })
+
+    used = pd.DataFrame(used_rows)
+    used = used.sort_values(["lista", "estado", "nombre_interno"], na_position="last")
+    used.to_csv(OUT_USED_CSV, index=False, encoding="utf-8-sig")
+    return [row for row in used_rows if row["estado"] == "NO_ENCONTRADO_EN_EXPORT"]
 
 
 if __name__ == "__main__":

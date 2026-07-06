@@ -208,6 +208,7 @@ async function main() {
     buildFieldCompatibilityWarnings,
     prepareLookupFieldWrites,
     formatAttachmentUploadError,
+    buildSolicitudResponse,
   } = require("../src/shared/sharepoint");
   const { validateSolicitudPayload } = require("../src/shared/validation");
 
@@ -650,7 +651,7 @@ async function main() {
       assert(plan.fields.Visible === true, "Visible debe marcarse a true.");
     }),
 
-    runTest("consultarSolicitud exige email y token", async () => {
+    runTest("consultarSolicitud exige dato de confirmacion y token", async () => {
       const { response, body } = await invoke("consultarSolicitud", {});
 
       assert(response.status === 400, `Se esperaba 400 y llego ${response.status}.`);
@@ -659,7 +660,7 @@ async function main() {
 
     runTest("consultarSolicitud rechaza token con prefijo desconocido sin llamar a Graph", async () => {
       const { response, body } = await invoke("consultarSolicitud", {
-        email: "consulta@example.com",
+        personalData: "consulta@example.com",
         token: "ZZZ-2026-ABCDEFGH",
       });
 
@@ -669,12 +670,48 @@ async function main() {
 
     runTest("consultarSolicitud acepta prefijo real y falla despues al no tener credenciales Graph", async () => {
       const { response, body } = await invoke("consultarSolicitud", {
-        email: "consulta@example.com",
+        personalData: "consulta@example.com",
         token: "REC-2026-ABCDEFGH",
       });
 
       assert(response.status === 500, `Se esperaba 500 por credenciales no configuradas y llego ${response.status}.`);
       assert(String(body.error || "").includes("Microsoft Graph"), "Se esperaba error controlado de Graph.");
+    }),
+
+    runTest("respuesta de consulta incluye contrato del prototipo", async () => {
+      const response = buildSolicitudResponse(
+        {
+          id: "8014",
+          createdDateTime: "2026-06-29T08:00:00.000Z",
+          lastModifiedDateTime: "2026-06-30T09:00:00.000Z",
+          fields: {
+            Title: "SUG-2026-ABCDEFGH",
+            EstadoCliente: "En tramite",
+            Nombre: "Maria",
+            Apellidos: "Lopez",
+            CorreoElectronico: "maria@example.com",
+            Telefono: "600123456",
+            Descripcion: "Texto de prueba.",
+          },
+        },
+        "Sugerencias",
+        [{
+          nombre: "documento.pdf",
+          tipo: "application/pdf",
+          tamanioBytes: 2048,
+          webUrl: "https://example.test/documento.pdf",
+        }],
+        [],
+        FORM_TYPES.SUGERENCIAS
+      );
+
+      assert(response.caseId === "SUG-2026-ABCDEFGH", "Se esperaba caseId con el token.");
+      assert(response.type === "Sugerencias", "Se esperaba label del tipo de formulario.");
+      assert(response.status === "En tramite", "Se esperaba estado para tracking.");
+      assert(response.submittedAt === "2026-06-29T08:00:00.000Z", "Se esperaba fecha y hora de creacion normalizada.");
+      assert(response.updatedAt === "2026-06-30T09:00:00.000Z", "Se esperaba fecha y hora de modificacion normalizada.");
+      assert(response.attachments.length === 1, "Se esperaba adjunto normalizado.");
+      assert(response.attachments[0].name === "documento.pdf", "Se esperaba nombre de adjunto.");
     }),
 
     runTest("contrato SharePoint apunta a las listas reales", async () => {

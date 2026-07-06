@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estado de su consulta - Metro de Málaga</title>
+    <title>Estado de su consulta - Metro de Malaga</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -24,29 +24,29 @@
         <main class="main-content">
             <section class="form-section intro-section">
                 <h2 class="section-title">
-                    <span class="section-icon" aria-hidden="true">?</span>
+                    <span class="section-icon" aria-hidden="true">i</span>
                     Consulta del expediente
                 </h2>
                 <p class="intro-text">
-                    Introduce el identificador de tu caso recibido en el momento de realizar la solicitud y el dato de confirmación asociado.
+                    Introduce el identificador de tu caso recibido en el momento de realizar la solicitud y el dato de confirmacion asociado.
                 </p>
 
                 <form id="searchForm" class="form" novalidate>
                     <div class="form-grid search-grid">
                         <div class="form-group">
-                            <label for="caseId" class="label required">ID de solicitud o número de caso</label>
+                            <label for="caseId" class="label required">ID de solicitud o numero de caso</label>
                             <input
                                 type="text"
                                 id="caseId"
                                 name="caseId"
                                 class="input input-large"
                                 autocomplete="off"
-                                placeholder="Ej: ATT-2026-41001"
+                                placeholder="Ej: OBJ-2026-HZ5FDBJ9"
                                 required
                             >
                         </div>
                         <div class="form-group">
-                            <label for="personalData" class="label required">Correo electrónico o teléfono</label>
+                            <label for="personalData" class="label required">Correo electronico o telefono</label>
                             <input
                                 type="text"
                                 id="personalData"
@@ -59,7 +59,7 @@
                         </div>
                         <div class="form-actions inline-action">
                             <button type="submit" class="btn btn-primary" id="searchButton">
-                                <span class="btn-icon" aria-hidden="true">⌕</span>
+                                <span class="btn-icon" aria-hidden="true"></span>
                                 Buscar
                             </button>
                         </div>
@@ -73,7 +73,7 @@
                 <div class="result-header">
                     <div>
                         <p class="eyebrow">Expediente</p>
-                        <h2 id="resultCaseId">ATT-2026-00000</h2>
+                        <h2 id="resultCaseId">-</h2>
                     </div>
                 </div>
 
@@ -92,13 +92,13 @@
                         <strong id="resultSubmittedAt">-</strong>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">Última actualización</span>
+                        <span class="detail-label">Ultima actualizacion</span>
                         <strong id="resultUpdatedAt">-</strong>
                     </div>
                 </div>
 
                 <div class="status-detail">
-                    <h3>Información del estado</h3>
+                    <h3>Informacion del estado</h3>
                     <p id="resultSummary">-</p>
                     <p id="resultNextStep" class="next-step">-</p>
                 </div>
@@ -111,11 +111,10 @@
         </main>
 
         <footer class="footer">
-            <p>© 2026 Metro de Málaga · <a href="#">Aviso legal</a> · <a href="#">Privacidad</a> · <a href="#">Accesibilidad</a></p>
+            <p>2026 Metro de Malaga | <a href="#">Aviso legal</a> | <a href="#">Privacidad</a> | <a href="#">Accesibilidad</a></p>
         </footer>
     </div>
 
-    <script src="data/sample-cases.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
