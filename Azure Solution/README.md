@@ -197,11 +197,12 @@ Invoke-RestMethod `
   -Body '{"token":"SUG-2026-ABCDEFGH","personalData":"maria@example.com"}'
 ```
 
-`personalData` puede ser el correo electronico o el telefono asociado a la solicitud. Tambien se aceptan `email` o `telefono` como campos explicitos si el consumidor prefiere enviarlos separados:
+`personalData` puede ser el correo electronico o el telefono asociado a la solicitud. Tambien se aceptan `email` o `telefono` como campos explicitos. El prototipo actual envia `personalData` y, ademas, el campo explicito correspondiente para mantener compatibilidad:
 
 ```json
 {
   "token": "SUG-2026-ABCDEFGH",
+  "personalData": "maria@example.com",
   "email": "maria@example.com"
 }
 ```

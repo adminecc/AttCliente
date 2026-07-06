@@ -18,16 +18,30 @@ El prototipo llama a:
 POST https://metroattfn-e0gucabgedacccey.spaincentral-01.azurewebsites.net/api/solicitudes/consultar
 ```
 
-Payload:
+Payload que envia el prototipo:
 
 ```json
 {
   "token": "SUG-2026-ABCDEFGH",
-  "personalData": "correo@example.com"
+  "personalData": "correo@example.com",
+  "email": "correo@example.com"
 }
 ```
 
-`personalData` puede ser el correo electronico o el telefono asociado a la solicitud.
+`personalData` contiene el correo electronico o el telefono asociado a la solicitud. Para mantener compatibilidad con la Azure Function y facilitar la busqueda, el prototipo tambien envia el campo explicito correspondiente:
+
+- Si `personalData` contiene `@`, envia `email`.
+- Si no contiene `@`, envia `telefono`.
+
+Ejemplo con telefono:
+
+```json
+{
+  "token": "OBJ-2026-ABCDEFGH",
+  "personalData": "612345678",
+  "telefono": "612345678"
+}
+```
 
 Respuesta esperada:
 
@@ -54,14 +68,16 @@ Respuesta esperada:
 }
 ```
 
-La respuesta tambien mantiene campos heredados (`token`, `estado`, `adjuntos`, `fechaCreacion`) para compatibilidad con posibles consumidores anteriores.
+La pantalla usa principalmente `caseId`, `type`, `status`, `submittedAt`, `updatedAt`, `resolutionSummary`, `nextStep` y `attachments`. Las fechas se esperan en formato ISO con hora cuando la Function App esta actualizada. Si la API no devuelve fecha/hora, la pantalla muestra `-`.
+
+La respuesta tambien mantiene campos heredados (`token`, `estado`, `adjuntos`, `fechaCreacion`) para compatibilidad con posibles consumidores anteriores. El prototipo normaliza ambos contratos para que pueda funcionar durante despliegues intermedios.
 
 ## Flujo
 
 1. El usuario introduce el codigo de solicitud (`XXX-2026-XXXXXXXX`).
 2. Introduce correo electronico o telefono.
 3. El prototipo envia ambos datos a la API.
-4. Si hay coincidencia, muestra estado, fechas, resumen y adjuntos visibles.
+4. Si hay coincidencia, muestra estado, fechas con hora cuando estan disponibles, resumen y adjuntos visibles.
 5. Si no hay coincidencia o la API devuelve error, muestra un mensaje generico sin exponer datos del expediente.
 
 ## Adjuntos
