@@ -993,8 +993,8 @@ function buildSolicitudResponse(item, listName, attachments = [], timeline = [],
   const fields = item.fields || {};
   const token = fields.Title || "";
   const estado = fields.EstadoCliente || fields.Estado || "En tramite";
-  const submittedAt = toDateOnly(item.createdDateTime || fields.Created || fields.FechaCreacion);
-  const updatedAt = toDateOnly(item.lastModifiedDateTime || fields.Modified || fields.FechaModificacionEstadoCliente || submittedAt);
+  const submittedAt = toIsoDateTime(item.createdDateTime || fields.Created || fields.FechaCreacion);
+  const updatedAt = toIsoDateTime(item.lastModifiedDateTime || fields.Modified || fields.FechaModificacionEstadoCliente || submittedAt);
   const responseText = fields.RespuestaOrganizacion || fields.Respuesta || "";
   const normalizedAttachments = attachments.map(mapAttachmentForResponse);
 
@@ -1040,11 +1040,11 @@ function mapAttachmentForResponse(attachment) {
   };
 }
 
-function toDateOnly(value) {
+function toIsoDateTime(value) {
   if (!value) return "";
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return String(value).slice(0, 10);
-  return date.toISOString().slice(0, 10);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toISOString();
 }
 
 function buildDefaultStatusSummary(status) {

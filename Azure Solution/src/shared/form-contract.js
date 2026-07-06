@@ -20,7 +20,7 @@ const FORM_TYPES = {
   CONSULTAS: {
     key: "CONSULTAS",
     formValue: "consultas",
-    label: "Consulta de informacion",
+    label: "Consulta de Información",
     tokenPrefix: "CON",
     sharePoint: {
       siteEnvKey: "SHAREPOINT_CONNECTA_SITE_ID",
@@ -86,7 +86,7 @@ const FORM_TYPES = {
   TARJETAS_METRO: {
     key: "TARJETAS_METRO",
     formValue: "tarjetas",
-    label: "Datos personales para confeccion de tarjetas +Metro",
+    label: "Solicitud de tarjeta +Metro",
     tokenPrefix: "TAR",
     sharePoint: {
       siteEnvKey: "SHAREPOINT_TARJETAS_SITE_ID",

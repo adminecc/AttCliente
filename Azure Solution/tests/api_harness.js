@@ -708,8 +708,8 @@ async function main() {
       assert(response.caseId === "SUG-2026-ABCDEFGH", "Se esperaba caseId con el token.");
       assert(response.type === "Sugerencias", "Se esperaba label del tipo de formulario.");
       assert(response.status === "En tramite", "Se esperaba estado para tracking.");
-      assert(response.submittedAt === "2026-06-29", "Se esperaba fecha de creacion normalizada.");
-      assert(response.updatedAt === "2026-06-30", "Se esperaba fecha de modificacion normalizada.");
+      assert(response.submittedAt === "2026-06-29T08:00:00.000Z", "Se esperaba fecha y hora de creacion normalizada.");
+      assert(response.updatedAt === "2026-06-30T09:00:00.000Z", "Se esperaba fecha y hora de modificacion normalizada.");
       assert(response.attachments.length === 1, "Se esperaba adjunto normalizado.");
       assert(response.attachments[0].name === "documento.pdf", "Se esperaba nombre de adjunto.");
     }),

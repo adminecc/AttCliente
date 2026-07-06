@@ -26,14 +26,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function formatDate(value) {
     if (!value) return '-';
-    const date = new Date(value);
+    const rawValue = String(value);
+    const date = new Date(rawValue);
     if (Number.isNaN(date.getTime())) return value;
 
-    return new Intl.DateTimeFormat('es-ES', {
+    const hasTime = /[T\s]\d{2}:\d{2}/.test(rawValue);
+    const options = {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric'
-    }).format(date);
+    };
+
+    if (hasTime) {
+      options.hour = '2-digit';
+      options.minute = '2-digit';
+    }
+
+    return new Intl.DateTimeFormat('es-ES', options).format(date);
   }
 
   function hideResult() {
@@ -153,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     return {
       caseId: solicitud.caseId || solicitud.token || solicitud.titulo || '-',
-      type: solicitud.type || solicitud.tipoFormulario || solicitud.lista || 'Solicitud',
+      type: normalizeRequestTypeName(solicitud.type || solicitud.tipoFormulario || solicitud.lista || 'Solicitud'),
       status,
       submittedAt,
       updatedAt,
@@ -161,6 +170,33 @@ document.addEventListener('DOMContentLoaded', () => {
       nextStep: solicitud.nextStep || buildNextStep(status, responseText),
       attachments: normalizeAttachments(solicitud.attachments || solicitud.adjuntos || []),
     };
+  }
+
+  function normalizeRequestTypeName(value) {
+    const normalized = String(value || '').trim();
+    const key = normalized.toLowerCase();
+    const typeNames = {
+      reclamaciones: 'Reclamaciones y quejas',
+      reclamacionesquejas: 'Reclamaciones y quejas',
+      'reclamaciones y quejas': 'Reclamaciones y quejas',
+      consultas: 'Consulta de Información',
+      consultainformacion: 'Consulta de Información',
+      'consulta de informacion': 'Consulta de Información',
+      'consulta de información': 'Consulta de Información',
+      sugerencias: 'Sugerencias',
+      agradecimientos: 'Agradecimientos y felicitaciones',
+      'agradecimientos y felicitaciones': 'Agradecimientos y felicitaciones',
+      objetos: 'Objetos perdidos',
+      'objetos perdidos': 'Objetos perdidos',
+      'objetos perdidos nueva': 'Objetos perdidos',
+      tarjetas: 'Solicitud de tarjeta +Metro',
+      clientestarjetametro: 'Solicitud de tarjeta +Metro',
+      'datos personales para confeccion de tarjetas +metro': 'Solicitud de tarjeta +Metro',
+      'datos personales para confección de tarjetas +metro': 'Solicitud de tarjeta +Metro',
+      'solicitud de tarjeta +metro': 'Solicitud de tarjeta +Metro',
+    };
+
+    return typeNames[key] || normalized || 'Solicitud';
   }
 
   function normalizeAttachments(attachments) {
