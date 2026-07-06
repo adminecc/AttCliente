@@ -714,6 +714,33 @@ async function main() {
       assert(response.attachments[0].name === "documento.pdf", "Se esperaba nombre de adjunto.");
     }),
 
+    runTest("respuesta de consulta conserva fecha y hora en todas las listas", async () => {
+      for (const type of Object.values(FORM_TYPES)) {
+        const response = buildSolicitudResponse(
+          {
+            id: `item-${type.key}`,
+            createdDateTime: "2026-07-06T06:15:30.000Z",
+            lastModifiedDateTime: "2026-07-06T07:45:10.000Z",
+            fields: {
+              Title: `${type.tokenPrefix}-2026-ABCDEFGH`,
+              EstadoCliente: "En tramite",
+              CorreoElectronico: "consulta@example.com",
+              Telefono: "600123456",
+              Descripcion: "Texto de prueba.",
+            },
+          },
+          type.sharePoint.listName,
+          [],
+          [],
+          type
+        );
+
+        assert(response.submittedAt === "2026-07-06T06:15:30.000Z", `${type.key} debe conservar fecha y hora de creacion.`);
+        assert(response.updatedAt === "2026-07-06T07:45:10.000Z", `${type.key} debe conservar fecha y hora de modificacion.`);
+        assert(response.type === type.label, `${type.key} debe devolver el nombre estandar de tipo.`);
+      }
+    }),
+
     runTest("contrato SharePoint apunta a las listas reales", async () => {
       const expected = {
         RECLAMACIONES: ["SHAREPOINT_CONNECTA_SITE_ID", "ReclamacionesQuejas"],

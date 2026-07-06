@@ -215,8 +215,8 @@ Respuesta esperada si existe coincidencia:
     "caseId": "SUG-2026-ABCDEFGH",
     "type": "Sugerencias",
     "status": "En tramite",
-    "submittedAt": "2026-06-29",
-    "updatedAt": "2026-06-30",
+    "submittedAt": "2026-06-29T08:00:00.000Z",
+    "updatedAt": "2026-06-30T09:00:00.000Z",
     "resolutionSummary": "La solicitud esta registrada y pendiente de revision por el area responsable.",
     "nextStep": "Recibira una notificacion cuando se incorpore una respuesta al expediente.",
     "attachments": []
