@@ -1,6 +1,7 @@
 const { app } = require("@azure/functions");
 const { validateSolicitudPayload } = require("../shared/validation");
 const { generarTokenForType } = require("../shared/token");
+const { getAccessTokenConfig, validateAccessToken } = require("../shared/access-token");
 const {
   getGraphAccessToken,
   createListItem,
@@ -14,6 +15,29 @@ app.http("crearSolicitud", {
   route: "solicitudes/crear",
   handler: async (request, context) => {
     context.log("crearSolicitud - inicio");
+
+    // Seguridad: validar el token temporal antes de procesar el body, adjuntos, firmas o SharePoint.
+    const accessTokenConfig = getAccessTokenConfig();
+    if (accessTokenConfig.requireForSolicitudes) {
+      let accessTokenValidation;
+      try {
+        accessTokenValidation = await validateAccessToken(request, { config: accessTokenConfig });
+      } catch (error) {
+        context.error("crearSolicitud - error validando token temporal:", error.message);
+        return jsonResponse(500, {
+          ok: false,
+          error: "Error validando el token temporal.",
+        });
+      }
+
+      if (!accessTokenValidation.valid) {
+        context.warn?.(`crearSolicitud - token temporal rechazado: ${accessTokenValidation.error || "no valido"}`);
+        return jsonResponse(accessTokenValidation.status || 401, {
+          ok: false,
+          error: accessTokenValidation.error || "Token temporal no valido.",
+        });
+      }
+    }
 
     let body;
     let files = [];
@@ -35,6 +59,7 @@ app.http("crearSolicitud", {
         error: error.message || "El cuerpo de la peticion no es valido.",
       });
     }
+
 
     const validation = validateSolicitudPayload(body);
     if (!validation.valid) {

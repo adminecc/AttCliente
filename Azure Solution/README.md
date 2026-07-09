@@ -16,8 +16,11 @@ Azure Solution/
 │  ├─ functions/
 │  │  ├─ solicitudes-create.js
 │  │  ├─ solicitudes-consultar.js
-│  │  └─ token-generate.js
+│  │  ├─ token-generate.js
+│  │  ├─ access-token-generate.js
+│  │  └─ access-token-cleanup.js
 │  └─ shared/
+│     ├─ access-token.js
 │     ├─ config.js
 │     ├─ form-contract.js
 │     ├─ sharepoint.js
@@ -33,9 +36,10 @@ Azure Solution/
 
 | Metodo | Ruta                            | Uso                                                        |
 | ------ | ------------------------------- | ---------------------------------------------------------- |
-| `POST` | `/api/solicitudes/crear`        | Valida el payload, genera token y crea item en SharePoint. |
-| `POST` | `/api/solicitudes/consultar`    | Consulta una solicitud por `token` + correo o telefono.    |
-| `POST` | `/api/solicitudes/generartoken` | Genera un token para pruebas.                              |
+| `POST` | `/api/solicitudes/crear`        | Valida el payload, genera token de solicitud y crea item en SharePoint. |
+| `POST` | `/api/solicitudes/consultar`    | Consulta una solicitud por `token` + correo o telefono.              |
+| `POST` | `/api/solicitudes/generartoken` | Genera un token de solicitud para pruebas.                            |
+| `GET/POST` | `/api/seguridad/token`      | Genera un GUID temporal de acceso, valido por defecto 15 minutos.     |
 
 ## Mapeo Real De SharePoint
 
@@ -76,6 +80,72 @@ SHAREPOINT_TARJETAS_SITE_ID
 SHAREPOINT_TARJETAS_SITE_URL
 FUNCTIONS_WORKER_RUNTIME=node
 ```
+
+### Token temporal de acceso
+
+Se ha anadido un endpoint independiente para emitir tokens temporales de acceso:
+
+```http
+GET /api/seguridad/token
+POST /api/seguridad/token
+```
+
+Este token es distinto del token de solicitud `REC-2026-...`, `OBJ-2026-...`, etc. El token temporal es un GUID y se guarda en Azure Table Storage durante el tiempo configurado. Por defecto caduca a los 15 minutos.
+
+Variables nuevas:
+
+```text
+ACCESS_TOKEN_STORAGE_CONNECTION_STRING  # normalmente igual que AzureWebJobsStorage
+ACCESS_TOKEN_TABLE_NAME=FunctionAccessTokens
+ACCESS_TOKEN_TTL_MINUTES=15
+ACCESS_TOKEN_ALLOWED_ORIGINS=https://www.tuweb-autorizada.es
+ACCESS_TOKEN_ALLOWED_IPS=X.X.X.X
+ACCESS_TOKEN_REQUIRED=false
+ACCESS_TOKEN_SINGLE_USE=false
+```
+
+- `ACCESS_TOKEN_ALLOWED_ORIGINS`: webs autorizadas, separadas por coma o punto y coma. Ejemplo: `https://formularios.metromalaga.es`.
+- `ACCESS_TOKEN_ALLOWED_IPS`: IPs publicas autorizadas, separadas por coma o punto y coma.
+- Si informas origins e IPs, deben cumplirse ambas condiciones.
+- `ACCESS_TOKEN_REQUIRED=true` activa la validacion de este token en `POST /api/solicitudes/crear`.
+- `ACCESS_TOKEN_SINGLE_USE=true` hace que cada token solo pueda usarse una vez.
+
+Ejemplo de obtencion del token temporal:
+
+```powershell
+Invoke-RestMethod `
+  -Method Post `
+  -Uri "http://localhost:7071/api/seguridad/token" `
+  -ContentType "application/json" `
+  -Headers @{ Origin = "https://formularios.metromalaga.es" } `
+  -Body '{"purpose":"reclamaciones"}'
+```
+
+Respuesta:
+
+```json
+{
+  "ok": true,
+  "token": "f2fd49de-9c8d-4a7a-ae21-fc90e6f51d1b",
+  "tokenType": "Bearer",
+  "expiresInMinutes": 15,
+  "expiresAtUtc": "2026-07-07T14:45:00.000Z"
+}
+```
+
+Para enviar una solicitud con validacion activa, manda el token en una de estas dos formas:
+
+```http
+Authorization: Bearer f2fd49de-9c8d-4a7a-ae21-fc90e6f51d1b
+```
+
+o bien:
+
+```http
+x-mm-access-token: f2fd49de-9c8d-4a7a-ae21-fc90e6f51d1b
+```
+
+Una funcion Timer `cleanupAccessTokens` limpia tokens caducados cada 30 minutos.
 
 Las URLs ya estan en la plantilla. Lo que tienes que obtener son los dos site IDs.
 

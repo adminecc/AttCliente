@@ -1,0 +1,21 @@
+# Node
+node_modules/
+
+# Azure Functions local settings
+local.settings.json
+
+# Logs
+*.log
+tests/logs/
+
+# Azurite local emulator
+__blobstorage__/
+__queuestorage__/
+__azurite_db_*.json
+AzuriteConfig/
+
+# Local backups / packages
+*.zip
+
+# VS Code local config
+.vscode/

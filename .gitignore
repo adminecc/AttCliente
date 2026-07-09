@@ -16,7 +16,7 @@ local.settings.json
 .funcsec/
 
 # IDEs and editors
-.vscode/
+
 .idea/
 *.suo
 *.ntvs*

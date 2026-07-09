@@ -9,6 +9,9 @@ const mockApp = {
   http(name, config) {
     registry.set(name, config);
   },
+  timer(name, config) {
+    registry.set(name, config);
+  },
 };
 
 Module._load = function patchedLoad(request, parent, isMain) {
@@ -48,11 +51,16 @@ function createContext() {
   return { log, error, warn, entries };
 }
 
-function requestWithJson(payload) {
+function requestWithJson(payload, extraHeaders = {}) {
+  const headers = {
+    "content-type": "application/json",
+    ...Object.fromEntries(Object.entries(extraHeaders).map(([key, value]) => [key.toLowerCase(), value])),
+  };
+
   return {
     headers: {
       get(name) {
-        return String(name).toLowerCase() === "content-type" ? "application/json" : "";
+        return headers[String(name).toLowerCase()] || "";
       },
     },
     async json() {
@@ -146,14 +154,14 @@ function parseBody(response) {
   return JSON.parse(response.body);
 }
 
-async function invoke(functionName, payload) {
+async function invoke(functionName, payload, extraHeaders = {}) {
   const config = registry.get(functionName);
   if (!config?.handler) {
     throw new Error(`No se ha registrado el handler ${functionName}.`);
   }
 
   const context = createContext();
-  const response = await config.handler(requestWithJson(payload), context);
+  const response = await config.handler(requestWithJson(payload, extraHeaders), context);
 
   return {
     response,
@@ -201,6 +209,8 @@ async function main() {
   const createModule = loadFunction("src/functions/solicitudes-create.js");
   loadFunction("src/functions/solicitudes-consultar.js");
   loadFunction("src/functions/token-generate.js");
+  loadFunction("src/functions/access-token-generate.js");
+  loadFunction("src/functions/access-token-cleanup.js");
   const { FORM_TYPES } = require("../src/shared/form-contract");
   const { assertGraphConfig } = require("../src/shared/config");
   const {
@@ -211,8 +221,59 @@ async function main() {
     buildSolicitudResponse,
   } = require("../src/shared/sharepoint");
   const { validateSolicitudPayload } = require("../src/shared/validation");
+  const { isGuid, normalizeOrigin, isRequesterAllowed } = require("../src/shared/access-token");
 
   const tests = [
+    runTest("generateAccessToken genera GUID temporal cuando el origen esta permitido", async () => {
+      const previousStoreDisabled = process.env.ACCESS_TOKEN_STORE_DISABLED;
+      const previousAllowedOrigins = process.env.ACCESS_TOKEN_ALLOWED_ORIGINS;
+      process.env.ACCESS_TOKEN_STORE_DISABLED = "true";
+      process.env.ACCESS_TOKEN_ALLOWED_ORIGINS = "https://formularios.metromalaga.es";
+
+      try {
+        const result = await invoke(
+          "generateAccessToken",
+          { purpose: "reclamaciones" },
+          { origin: "https://formularios.metromalaga.es" }
+        );
+
+        assert(result.response.status === 200, `Se esperaba 200 y llego ${result.response.status}.`);
+        assert(result.body.ok === true, "Se esperaba ok=true.");
+        assert(isGuid(result.body.token), "Se esperaba token GUID.");
+        assert(result.body.expiresInMinutes === 15, "Se esperaba validez por defecto de 15 minutos.");
+      } finally {
+        process.env.ACCESS_TOKEN_STORE_DISABLED = previousStoreDisabled;
+        process.env.ACCESS_TOKEN_ALLOWED_ORIGINS = previousAllowedOrigins;
+      }
+    }),
+
+    runTest("generateAccessToken rechaza origen no permitido", async () => {
+      const previousStoreDisabled = process.env.ACCESS_TOKEN_STORE_DISABLED;
+      const previousAllowedOrigins = process.env.ACCESS_TOKEN_ALLOWED_ORIGINS;
+      process.env.ACCESS_TOKEN_STORE_DISABLED = "true";
+      process.env.ACCESS_TOKEN_ALLOWED_ORIGINS = "https://formularios.metromalaga.es";
+
+      try {
+        const result = await invoke(
+          "generateAccessToken",
+          { purpose: "reclamaciones" },
+          { origin: "https://malicioso.example" }
+        );
+
+        assert(result.response.status === 403, `Se esperaba 403 y llego ${result.response.status}.`);
+      } finally {
+        process.env.ACCESS_TOKEN_STORE_DISABLED = previousStoreDisabled;
+        process.env.ACCESS_TOKEN_ALLOWED_ORIGINS = previousAllowedOrigins;
+      }
+    }),
+
+    runTest("isRequesterAllowed valida Origin normalizado", async () => {
+      const request = requestWithJson({}, { origin: "https://FORMULARIOS.metromalaga.es/ruta" });
+      const result = isRequesterAllowed(request, { allowedOrigins: ["https://formularios.metromalaga.es"], allowedIps: [] });
+      assert(result.allowed === true, "Se esperaba origen permitido tras normalizar.");
+      assert(normalizeOrigin(result.origin) === "https://formularios.metromalaga.es", "Se esperaba origin normalizado.");
+    }),
+
     runTest("parseSolicitudRequest mantiene compatibilidad con JSON", async () => {
       const { payload, files } = await createModule.parseSolicitudRequest(requestWithJson({
         tipoFormulario: "consultas",
