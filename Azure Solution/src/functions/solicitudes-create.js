@@ -7,6 +7,7 @@ const {
   createListItem,
   buildSharePointFields,
   uploadListItemAttachments,
+  uploadNativeListItemAttachments,
 } = require("../shared/sharepoint");
 
 app.http("crearSolicitud", {
@@ -106,7 +107,88 @@ app.http("crearSolicitud", {
 
     const attachmentWarnings = [];
     const uploadedAttachments = [];
-    if (files.length > 0) {
+
+    // Para el resto de formularios se conserva exactamente el flujo original.
+    // El generador PDF solo se carga y ejecuta para TARJETAS_METRO.
+    if (isTarjetaMasMetro(validation.type)) {
+      let generatedReport;
+
+      try {
+        const {
+          generarInformeTarjetaMasMetro,
+        } = require("../shared/tarjeta-mas-metro-report");
+
+        generatedReport = await generarInformeTarjetaMasMetro(
+          validation.payload,
+          {
+            createdAt,
+            token,
+            files,
+            itemId: createdItem.id,
+            logoPath: process.env.METRO_MALAGA_LOGO_PATH,
+          }
+        );
+
+        validateGeneratedReport(generatedReport);
+
+        context.log(
+          `crearSolicitud - informe Tarjeta Mas Metro generado nombre='${generatedReport.fileName}' bytes=${generatedReport.sizeBytes}`
+        );
+      } catch (error) {
+        context.error(
+          "crearSolicitud - item creado, pero no se pudo generar el informe Tarjeta Mas Metro:",
+          error.message
+        );
+
+        return jsonResponse(500, {
+          ok: false,
+          partialSuccess: true,
+          solicitudId: createdItem.id,
+          token,
+          error: "La solicitud se ha creado, pero no se pudo generar el informe PDF.",
+          diagnostics: buildDiagnostics(error),
+        });
+      }
+
+      try {
+
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        context.log(`Item ID creado: ${createdItem.id}`);
+        
+        const uploadResult = await uploadNativeListItemAttachments(
+          accessToken,
+          validation.type,
+          createdItem.id,
+          [...files, generatedReport],
+          undefined,
+          context
+        );
+
+        uploadedAttachments.push(...(uploadResult.uploaded || []));
+        attachmentWarnings.push(...(uploadResult.warnings || []));
+
+        if ((uploadResult.uploaded || []).length === 0) {
+          throw new Error(
+            (uploadResult.warnings || []).join(" | ") ||
+            "No se pudo adjuntar ningun documento al item."
+          );
+        }
+      } catch (error) {
+        context.error(
+          "crearSolicitud - item e informe generados, pero no se pudieron subir los adjuntos de Tarjeta Mas Metro:",
+          error.message
+        );
+
+        return jsonResponse(500, {
+          ok: false,
+          partialSuccess: true,
+          solicitudId: createdItem.id,
+          token,
+          error: "La solicitud se ha creado, pero no se pudieron adjuntar los documentos.",
+          diagnostics: buildDiagnostics(error),
+        });
+      }
+    } else if (files.length > 0) {
       try {
         const uploadResult = await uploadListItemAttachments(
           accessToken,
@@ -145,6 +227,29 @@ app.http("crearSolicitud", {
     });
   },
 });
+
+
+function isTarjetaMasMetro(type) {
+  return type?.key === "TARJETAS_METRO";
+}
+
+function validateGeneratedReport(report) {
+  if (!report || typeof report !== "object") {
+    throw new Error("El generador no ha devuelto el informe PDF.");
+  }
+
+  if (!report.fileName) {
+    throw new Error("El informe generado no contiene fileName.");
+  }
+
+  if (!Buffer.isBuffer(report.content) || report.content.length === 0) {
+    throw new Error("El contenido del informe PDF no es un Buffer valido.");
+  }
+
+  report.fieldName = report.fieldName || "InformeTarjetaMasMetro";
+  report.contentType = report.contentType || "application/pdf";
+  report.sizeBytes = report.sizeBytes || report.content.length;
+}
 
 function describeFilesForDebug(files = []) {
   return files.map((file) => ({

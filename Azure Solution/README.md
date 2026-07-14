@@ -412,3 +412,47 @@ Nota tecnica:
 - Se descarto `AttachmentFiles/add` sobre la lista porque SharePoint REST devuelve `401 Unsupported app only token` con esta app-only.
 - Graph no permite `driveItem` en listas normales, solo en bibliotecas documentales.
 - En listas grandes como `Objetos Perdidos NUEVA`, la consulta por token/email se tratara en la siguiente iteracion de `GET /api/solicitudes/consultar`. Para solicitudes con adjuntos, la biblioteca documental permite recuperar el item origen mediante `IDRef`.
+
+*** GENERADO NUEVO CERTIFICADO PARA USO EN SHAREPOINT LIST ITEMS ATTACHMENTS ***
+
+THUMBPRINT  : BD095C5BC17ADD6AB69C27170B267B5660A65986
+
+private - key :
+Bag Attributes
+    localKeyID: 01 00 00 00 
+    friendlyName: te-c2009fe4-a4dc-49d2-b1e7-4af3348af4fe
+    Microsoft CSP Name: Microsoft Base Cryptographic Provider v1.0
+Key Attributes
+    X509v3 Key Usage: 80 
+-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCk1Qrd3pPX2ecD
+GK9Ex2+TcMRF2tJGJxOBw9qS720rvzsQgkEkfaHIfbimKZamyCRVsV78dyLOc7Lj
+v5mZivVdFD7acykjTuQMnE7xymsx/JAxsMh0XX3WNt9CoiyhwQhxDwavGIx6PwvA
+1zRZzC6RZO+gxGHGe6R0toFCLY8o0KBP5wIvU1ajHkSDyr4S6gjePBTPTPCEabpo
+T7ckHjaRL7+pBkmDWn6VO5yimn4n+Nm798IxUL3qynotMYBXvbeYI90PTH1+Z+VS
+Ute78bJEHdJpAS0msNjefoVnPIjQ8ayMXmf+jpnS2gG64zD3dHnUr39U0MMOioWA
+KS1C/nKZAgMBAAECggEBAJQjtER7Cbxw5iHuSXczFqAYNQ3jACB0dh+l+gccj61F
+jLvllM5K6t/Zvd34eqEiNyWc55VXLT0G1rvBMza/oI0q6OJDpbFJ8cMzp+++0GB4
+cM935nBOpg2j+ztTrXEin4eczZEIKxijGNkTkMUzsJaTdJm0ZXuRG9iZPcpQT92J
+UWmNAyCK+z+xOndDVRNiWlD4aRYImkeOmR9RmeCZs5HJQxxWBV+6JwMBUQC2405O
++rbwd5p5+tnjBgf5wmjh258Dt0BDKvxU+MyBff7jNc6DyEfGO7eOC0WTOARVEMec
+NaUmDBBd21XTRpPUkDB+UkdGJeoJqvdg7eG6muQm79ECgYEAx8mv9AyWFfLGXGJS
+XkpHSvp2uyA8fm0bBAxnfc+xrBKvb8T4J4faJevyUmhyLZdaum3o3KolUtc1dKsF
+QS27UfPPC5n6u+lR7sztn6U0V6xWUQc9Bwb9TwIxa+xblOVlEHjZP68RIXZdbcru
+i4U4F6rVktSKNNrRJkopmNRm4oMCgYEA0zWSL8CW6zXp0CMCe3eEloys8x3jia6t
+pqtG6sFuqUkxqBjvyaykq39nR5xMbJFNmyZwv3nYcwoiOeCuR3Z8j+J4OO+vRofb
+DmtpYXbkn92/pwXxZ8NpduUNdkkDP9bWxTRGjCCBpNoVtOvbPwHCQaDjIgeoU5vU
+DZMullUY27MCgYBeV1P6F1NsC9c1Wsxwb/zYYAte86r9PEIsmDrqgv/wNGaZjdZs
+vE775z3nQiDgfH9AV5RFVycGxk8cx4FUtOamnU2gudZXk6a38BcpctaTq/KakqNz
+xQ4ql+uEffkFB4nAzIAx/VZGieE2bkRUp9TEAEyX6DtXGBj5Tr3zyCDJRwKBgA1w
+WS7kqDWrJodx0tScVDloFhEaE8JM9Qun1klVqX7oA1rYy1kfvRKUdrPdxBccX73B
+gmcMj7MyL99S5oPxjBdzp4an6ZUpS8ztFLV45S8u4uTzwdqCWpGQHX0rRCOpvdyq
+aNq9rsIYhk0OvNKTgBLA8/LUXeeEAMgkV1CFdaF1AoGAGg6ysrL0y0QKSqCo2Nbt
+YFGSz9PTf+dzRkinOnGbYoFIH3WtodGbExMkKQki3fgFIWX+uiJqLpztQ6oue+lB
+G5oOCNJzTnIs2EE2tP9f7pNFFO3BjjeTJAvfL5f8i/WsDTO/k9NPJ5bgI71ULPQY
+bmmQBliZgyM8CXoWsiNFihk=
+-----END PRIVATE KEY-----
+
+
+
+

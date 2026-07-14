@@ -149,12 +149,57 @@ async function getGraphAccessToken(config = getConfig()) {
   return requestAccessToken(config, "https://graph.microsoft.com/.default");
 }
 
-async function getSharePointAccessToken(siteUrl, config = getConfig()) {
+async function getSharePointAccessToken(
+  siteUrl,
+  config = getConfig()
+) {
   assertGraphConfig(config);
 
+  if (!config.certThumbprint) {
+    throw new Error(
+      "AZURE_CERT_THUMBPRINT no esta configurada."
+    );
+  }
+
+  if (!config.certPrivateKey) {
+    throw new Error(
+      "AZURE_CERT_PRIVATE_KEY no esta configurada."
+    );
+  }
+
   const origin = new URL(siteUrl).origin;
-  return requestAccessToken(config, `${origin}/.default`);
+
+  const tokenUrl =
+    `https://login.microsoftonline.com/${config.tenantId}/oauth2/v2.0/token`;
+
+  const params = buildCertificateTokenParams(
+    config,
+    tokenUrl,
+    `${origin}/.default`
+  );
+
+  const response = await axios.post(
+    tokenUrl,
+    params.toString(),
+    {
+      headers: {
+        "Content-Type":
+          "application/x-www-form-urlencoded",
+      },
+      timeout: 10000,
+    }
+  );
+
+  if (!response.data?.access_token) {
+    throw new Error(
+      "Microsoft no devolvio access_token."
+    );
+  }
+
+  return response.data.access_token;
 }
+
+
 
 async function requestAccessToken(config, scope) {
   const tokenUrl = `https://login.microsoftonline.com/${config.tenantId}/oauth2/v2.0/token`;
@@ -633,6 +678,192 @@ async function uploadListItemAttachments(accessToken, type, itemId, files = [], 
   }
 
   return { uploaded, warnings };
+}
+
+async function uploadNativeListItemAttachments(
+  graphAccessToken,
+  type,
+  itemId,
+  files = [],
+  config = getConfig(),
+  context
+) {
+  if (!Array.isArray(files) || files.length === 0) {
+    return { uploaded: [], warnings: [] };
+  }
+
+  const target = await resolveSharePointTarget(
+    graphAccessToken,
+    type,
+    config,
+    context
+  );
+
+  if (!target.siteUrl) {
+    throw new Error(
+      `No se ha configurado la URL del sitio SharePoint para ${type?.key || "el formulario"}.`
+    );
+  }
+
+  const sharePointAccessToken = await getSharePointAccessToken(
+    target.siteUrl,
+    config
+  );
+
+  const payload =
+  decodeJwtPayload(
+    sharePointAccessToken
+  );
+
+context.log(
+  "SP_TOKEN=" +
+  JSON.stringify(
+    {
+      aud: payload.aud,
+      appidacr: payload.appidacr,
+      roles: payload.roles,
+    },
+    null,
+    2
+  )
+);
+
+  const uploaded = [];
+  const warnings = [];
+
+  for (const file of files) {
+    try {
+      validateNativeAttachment(file);
+
+      const fileName = sanitizeAttachmentFileName(
+        file.fileName || `${file.fieldName || "documento"}.bin`
+      );
+
+      const siteUrl = normalizeSiteUrl(target.siteUrl);
+      const numericItemId = Number(itemId);
+
+      if (!Number.isFinite(numericItemId)) {
+        throw new Error(`El ID del item '${itemId}' no es valido.`);
+      }
+
+      const escapedListName =
+  escapeSharePointRestString(target.listName);
+
+const escapedFileName =
+  escapeSharePointRestString(fileName);
+
+const url =
+  `${siteUrl}/_api/web/lists/getbytitle('${escapedListName}')` +
+  `/items(${numericItemId})/AttachmentFiles/add(FileName='${escapedFileName}')`;
+
+context?.log?.(
+  `ATTACHMENT_ADD=${url}`
+);
+
+const response = await axios.post(
+  url,
+  file.content,
+  {
+    headers: {
+      Authorization: `Bearer ${sharePointAccessToken}`,
+      Accept: "application/json;odata=nometadata",
+      "Content-Type":
+        file.contentType || "application/octet-stream",
+    },
+    maxBodyLength: Infinity,
+    timeout: 30000,
+  }
+);
+
+const attachment =
+  response.data?.d ||
+  response.data ||
+  {};
+
+      uploaded.push({
+        nombre: fileName,
+        tipo: file.contentType || "application/octet-stream",
+        tamanioBytes: file.sizeBytes || file.content.length,
+        fieldName: file.fieldName || "",
+        itemId: numericItemId,
+        url:
+          attachment?.ServerRelativeUrl ||
+          attachment?.serverRelativeUrl ||
+          "",
+      });
+
+    } catch (error) {
+
+      context.error(
+        "ATTACHMENT_ADD_ERROR=" +
+        JSON.stringify({
+          status: error.response?.status,
+          data: error.response?.data,
+          headers: error.response?.headers,
+          message: error.message,
+        })
+      );
+
+      const fileName =
+        file?.fileName ||
+        file?.fieldName ||
+        "archivo";
+
+      warnings.push(
+        `${fileName}: ${formatNativeAttachmentError(error)}`
+      );
+
+      throw error;
+    }
+  }
+
+  return {
+    uploaded,
+    warnings,
+  };
+}
+  
+
+function validateNativeAttachment(file) {
+  if (!file || typeof file !== "object") {
+    throw new Error("El adjunto no es valido.");
+  }
+
+  if (!Buffer.isBuffer(file.content)) {
+    throw new Error("El adjunto no contiene un Buffer valido.");
+  }
+
+  if (file.content.length === 0) {
+    throw new Error("El adjunto esta vacio.");
+  }
+}
+
+function formatNativeAttachmentError(error) {
+  const status = error.response?.status;
+  const detail =
+    error.response?.data?.error?.message?.value ||
+    error.response?.data?.error?.message ||
+    error.response?.data?.["odata.error"]?.message?.value ||
+    error.message ||
+    "Error desconocido subiendo el adjunto.";
+
+  const requestId =
+    error.response?.headers?.sprequestguid ||
+    error.response?.headers?.["sprequestguid"] ||
+    error.response?.headers?.["request-id"];
+
+  const parts = [];
+  if (status) parts.push(`HTTP ${status}`);
+  if (detail) parts.push(String(detail));
+  if (requestId) parts.push(`sprequestguid=${requestId}`);
+
+  if (status === 401 || status === 403) {
+    parts.push(
+      "Revisar permisos de aplicacion sobre el sitio SharePoint de Tarjeta Mas Metro."
+    );
+  }
+
+  return parts.join(" | ") || "Error desconocido subiendo el adjunto.";
 }
 
 function formatAttachmentUploadError(error) {
@@ -1295,6 +1526,7 @@ module.exports = {
   getSharePointAccessToken,
   createListItem,
   uploadListItemAttachments,
+  uploadNativeListItemAttachments,
   formatAttachmentUploadError,
   buildDocumentLibraryAttachmentPlan,
   prepareLookupFieldWrites,
