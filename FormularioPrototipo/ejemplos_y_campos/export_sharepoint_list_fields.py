@@ -150,6 +150,21 @@ USED_FIELDS_BY_LIST = {
         "IDRef",
         "Visible",
     },
+    "Sanciones": {
+        "Title",
+        "NombreCliente",
+        "DNI",
+        "NombreTutor",
+        "DNITutor",
+        "TipoSolicitud",
+        "TipoInfraccion",
+        "CodSancion",
+        "MotivoSancion",
+        "FechaInfraccion",
+        "OrigenFraude",
+        "Importe",
+        "EstadoDelPago",
+    },
 }
 
 OPTIONAL_LIST_ENV_KEYS = [
@@ -163,6 +178,7 @@ LIST_ENV_KEYS = [
     "LIST_URL_OBJETOS_PERDIDOS",
     "LIST_URL_CLIENTES_TARJETA_METRO",
     "LIST_URL_CONSULTA_INFORMACION",
+    "LIST_URL_SANCIONES",
 ]
 
 missing_urls = [key for key in LIST_ENV_KEYS if not os.environ.get(key)]

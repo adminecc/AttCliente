@@ -69,7 +69,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const date = new Date(String(value).length === 10 ? `${value}T00:00:00` : value);
     return Number.isNaN(date.getTime())
       ? String(value)
-      : new Intl.DateTimeFormat('es-ES').format(date);
+      : new Intl.DateTimeFormat('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(date);
   }
 
   function formatAmount(value) {
@@ -90,20 +96,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function render(sanction) {
     setText('resultTitle', sanction.Title);
-    setText('resultName', sanction.Nombre);
+    setText('resultName', sanction.NombreCliente);
     setText('resultDni', sanction.DNI);
     setText('resultType', sanction.TipoSolicitud);
     setText('resultInfraction', sanction.TipoInfraccion);
     setText('resultNotification', sanction.CodSancion);
     setText('resultReason', sanction.MotivoSancion);
-    setText('resultDate', formatDate(sanction.Fecha));
+    setText('resultDate', formatDate(sanction.FechaInfraccion));
     setText('resultPlace', mapPlace(sanction.OrigenFraude));
     setText('resultAmount', formatAmount(sanction.Importe));
     setText('resultPaymentStatus', sanction.EstadoDelPago);
 
-    const hasTutor = Boolean(sanction.NombreTutor || sanction.DNITutor);
-    document.getElementById('guardianDetails').hidden = !hasTutor;
-    document.getElementById('guardianDniDetail').hidden = !hasTutor;
+    const hasTutor = Boolean(
+      String(sanction.NombreTutor || '').trim() || String(sanction.DNITutor || '').trim(),
+    );
+    const guardianRecord = document.getElementById('guardianRecord');
+    const peopleList = document.querySelector('.people-list');
+    guardianRecord.hidden = !hasTutor;
+    guardianRecord.style.display = hasTutor ? '' : 'none';
+    peopleList.classList.toggle('single-person', !hasTutor);
     setText('resultGuardianName', sanction.NombreTutor);
     setText('resultGuardianDni', sanction.DNITutor);
 

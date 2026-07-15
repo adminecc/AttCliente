@@ -38,6 +38,7 @@ Azure Solution/
 | ------ | ------------------------------- | ---------------------------------------------------------- |
 | `POST` | `/api/solicitudes/crear`        | Valida el payload, genera token de solicitud y crea item en SharePoint. |
 | `POST` | `/api/solicitudes/consultar`    | Consulta una solicitud por `token` + correo o telefono.              |
+| `POST` | `/api/sanciones/consultar`      | Consulta una sancion por expediente (`Title`) + DNI.                  |
 | `POST` | `/api/solicitudes/generartoken` | Genera un token de solicitud para pruebas.                            |
 | `GET/POST` | `/api/seguridad/token`      | Genera un GUID temporal de acceso, valido por defecto 15 minutos.     |
 
@@ -57,8 +58,43 @@ El mapeo vive en `src/shared/form-contract.js`. Las llamadas a Graph resuelven e
 
 - `SHAREPOINT_CONNECTA_SITE_ID` para `ConectaDEV`.
 - `SHAREPOINT_TARJETAS_SITE_ID` para `TarjetaMasMetro`.
+- `SHAREPOINT_SANCIONES_SITE_ID` para la lista `Sanciones` de `ConectaDEV`.
 
 No necesitas configurar IDs de lista. La funcion consulta las listas del site y resuelve automaticamente el `listId` por `webUrl`, `displayName` o `name` antes de crear o consultar items.
+
+### Consulta de sanciones
+
+`POST /api/sanciones/consultar` recibe los nombres internos de SharePoint:
+
+```json
+{
+  "Title": "SAN-2026-000001",
+  "DNI": "12345678Z"
+}
+```
+
+La función filtra la lista `Sanciones` por `fields/Title` y `fields/DNI` y devuelve únicamente el contrato de la pantalla. La fecha es `FechaInfraccion`; `Created` y `Modified` no se usan:
+
+```json
+{
+  "encontrado": true,
+  "sancion": {
+    "Title": "SAN-2026-000001",
+    "NombreCliente": "Lucía García López",
+    "DNI": "12345678Z",
+    "NombreTutor": "",
+    "DNITutor": "",
+    "TipoSolicitud": "Sanción",
+    "TipoInfraccion": "Viajar sin título válido",
+    "CodSancion": "NOT-2026-0001",
+    "MotivoSancion": "Acceso a la red sin acreditar un título de transporte válido.",
+    "FechaInfraccion": "2026-06-03T18:42:00+02:00",
+    "OrigenFraude": "ATZ",
+    "Importe": 50,
+    "EstadoDelPago": "Pendiente"
+  }
+}
+```
 
 ## Variables De Entorno
 

@@ -19,12 +19,14 @@ No hay build ni dependencias npm. También se puede abrir `index.html` directame
 Cuando la combinación coincide, la pantalla muestra, en bloques compactos:
 
 1. El expediente (`Title`).
-2. Nombre y DNI; si existen, nombre y DNI del tutor.
+2. Nombre (`NombreCliente`) y DNI; si existen, nombre y DNI del tutor.
 3. Tipo de sanción (`TipoSolicitud`), tipo de infracción (`TipoInfraccion`) y número de notificación (`CodSancion`).
-4. Motivo (`MotivoSancion`), fecha (`Fecha`) y lugar (`OrigenFraude`).
+4. Motivo (`MotivoSancion`), fecha (`FechaInfraccion`) y lugar (`OrigenFraude`).
 5. Importe (`Importe`), estado del pago (`EstadoDelPago`) y `Pagar` solo para estados pendientes o equivalentes.
 
 El mapeo de `OrigenFraude` está en `script.js`. Por ejemplo, `ATZ` se muestra como `Atarazanas`; si llega un código no conocido, se muestra su valor original hasta completar el catálogo.
+
+`FechaInfraccion` representa el momento en que se impuso la sanción y debe llegar como fecha y hora, preferiblemente en ISO 8601 (`2026-06-03T18:42:00+02:00`). La interfaz muestra ambos valores. No se utiliza `Created`, `createdDateTime` ni la fecha de creación del elemento de SharePoint.
 
 ## Contrato previsto para la API
 
@@ -59,7 +61,7 @@ La respuesta prevista puede ser directamente el elemento o envolverlo así:
   "encontrado": true,
   "sancion": {
     "Title": "SAN-2026-000001",
-    "Nombre": "Lucía García López",
+    "NombreCliente": "Lucía García López",
     "DNI": "12345678Z",
     "NombreTutor": "",
     "DNITutor": "",
@@ -67,7 +69,7 @@ La respuesta prevista puede ser directamente el elemento o envolverlo así:
     "TipoInfraccion": "Viajar sin título válido",
     "CodSancion": "NOT-2026-0001",
     "MotivoSancion": "Acceso a la red sin acreditar un título de transporte válido.",
-    "Fecha": "2026-06-03",
+    "FechaInfraccion": "2026-06-03T18:42:00+02:00",
     "OrigenFraude": "ATZ",
     "Importe": 50,
     "EstadoDelPago": "Pendiente"
@@ -75,14 +77,14 @@ La respuesta prevista puede ser directamente el elemento o envolverlo así:
 }
 ```
 
-La interfaz consume los nombres estáticos del payload y no nombres de presentación. Si la extracción de la lista confirma otro nombre interno para los cuatro campos personales (`Nombre`, `DNI`, `NombreTutor`, `DNITutor`), se cambia el contrato mock y las líneas de renderizado de `script.js`; el resto del flujo no cambia.
+La interfaz consume los nombres estáticos del payload y no nombres de presentación. La extracción confirma `NombreCliente`, `DNI`, `NombreTutor`, `DNITutor` y `FechaInfraccion`; el mock y el renderizado ya usan ese contrato.
 
 ## Mapeo de campos SharePoint
 
 | Uso en pantalla | StaticName | Title en SharePoint |
 | --- | --- | --- |
 | Expediente | `Title` | Título |
-| Nombre | `Nombre` | Nombre |
+| Nombre | `NombreCliente` | Nombre del Cliente |
 | DNI | `DNI` | DNI |
 | Nombre del tutor | `NombreTutor` | Nombre del tutor |
 | DNI del tutor | `DNITutor` | DNI del tutor |
@@ -90,7 +92,7 @@ La interfaz consume los nombres estáticos del payload y no nombres de presentac
 | Tipo de infracción | `TipoInfraccion` | Tipo de Registro |
 | Nº Notificación | `CodSancion` | Nº Notificación |
 | Motivo | `MotivoSancion` | Motivo Sanción |
-| Fecha | `Fecha` | Fecha |
+| Fecha de la sanción | `FechaInfraccion` | Fecha |
 | Lugar | `OrigenFraude` | Origen del fraude |
 | Importe | `Importe` | Importe |
 | Estado del pago | `EstadoDelPago` | Estado del pago |
@@ -103,7 +105,7 @@ La decisión de mostrar u ocultar el botón es solo visual. La API de pago deber
 
 ## Próximo paso de integración
 
-1. Confirmar en la extracción de SharePoint los StaticName de `Nombre`, `DNI`, `NombreTutor` y `DNITutor`.
+1. Mantener sincronizados los StaticName confirmados en la extracción: `NombreCliente`, `DNI`, `NombreTutor`, `DNITutor` y `FechaInfraccion`.
 2. Implementar `POST /api/sanciones/consultar`, filtrando por `Title` y `DNI` en SharePoint y devolviendo únicamente los campos de la tabla.
 3. Configurar `API_CONFIG.endpoint` y probar la respuesta real conservando los nombres estáticos.
 4. Añadir la URL de la pasarela al contrato solo cuando exista el flujo de pago.

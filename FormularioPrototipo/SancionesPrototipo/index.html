@@ -31,39 +31,57 @@
     </section>
 
     <section id="result" class="card result-card" aria-live="polite" hidden>
-      <div class="case-heading">
-        <span>Expediente</span>
-        <strong id="resultTitle">-</strong>
-      </div>
-
-      <div class="detail-grid people-grid">
-        <div class="detail"><span>Nombre</span><strong id="resultName">-</strong></div>
-        <div class="detail"><span>DNI</span><strong id="resultDni">-</strong></div>
-        <div id="guardianDetails" class="detail guardian-detail" hidden>
-          <span>Nombre del tutor</span><strong id="resultGuardianName">-</strong>
+      <header class="case-heading">
+        <div>
+          <span>Expediente</span>
+          <strong id="resultTitle">-</strong>
         </div>
-        <div id="guardianDniDetail" class="detail guardian-detail" hidden>
-          <span>DNI del tutor</span><strong id="resultGuardianDni">-</strong>
+        <span class="case-kind">Consulta de sanción</span>
+      </header>
+
+      <section class="result-section personal-section" aria-labelledby="personal-title">
+        <h2 id="personal-title">Datos personales</h2>
+        <div class="people-list">
+          <div class="person-record">
+            <span class="person-role">Persona sancionada</span>
+            <dl class="person-data">
+              <div><dt>Nombre</dt><dd id="resultName">-</dd></div>
+              <div><dt>DNI</dt><dd id="resultDni">-</dd></div>
+            </dl>
+          </div>
+          <div id="guardianRecord" class="person-record" hidden>
+            <span class="person-role">Tutor</span>
+            <dl class="person-data">
+              <div><dt>Nombre</dt><dd id="resultGuardianName">-</dd></div>
+              <div><dt>DNI</dt><dd id="resultGuardianDni">-</dd></div>
+            </dl>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <div class="detail-grid three-columns">
-        <div class="detail"><span>Tipo de sanción</span><strong id="resultType">-</strong></div>
-        <div class="detail"><span>Tipo de infracción</span><strong id="resultInfraction">-</strong></div>
-        <div class="detail"><span>Nº Notificación</span><strong id="resultNotification">-</strong></div>
-      </div>
+      <section class="result-section sanction-section" aria-labelledby="sanction-title">
+        <h2 id="sanction-title">Datos de la sanción</h2>
+        <dl class="details-list">
+          <div><dt>Tipo de sanción</dt><dd id="resultType">-</dd></div>
+          <div><dt>Tipo de infracción</dt><dd id="resultInfraction">-</dd></div>
+          <div><dt>Nº Notificación</dt><dd id="resultNotification">-</dd></div>
+          <div class="detail-wide"><dt>Motivo de la sanción</dt><dd id="resultReason">-</dd></div>
+          <div><dt>Fecha de la sanción</dt><dd id="resultDate">-</dd></div>
+          <div><dt>Lugar</dt><dd id="resultPlace">-</dd></div>
+        </dl>
+      </section>
 
-      <div class="detail-grid three-columns">
-        <div class="detail"><span>Motivo de la sanción</span><strong id="resultReason">-</strong></div>
-        <div class="detail"><span>Fecha</span><strong id="resultDate">-</strong></div>
-        <div class="detail"><span>Lugar</span><strong id="resultPlace">-</strong></div>
-      </div>
-
-      <div class="payment-row">
-        <div class="payment-detail detail"><span>Importe</span><strong id="resultAmount">-</strong></div>
-        <div class="payment-detail detail"><span>Estado del pago</span><strong id="resultPaymentStatus">-</strong></div>
+      <footer class="payment-row">
+        <div class="payment-amount">
+          <span>Importe</span>
+          <strong id="resultAmount">-</strong>
+        </div>
+        <div class="payment-status">
+          <span>Estado del pago</span>
+          <strong id="resultPaymentStatus">-</strong>
+        </div>
         <button id="payButton" class="button button-primary" type="button" hidden>Pagar</button>
-      </div>
+      </footer>
     </section>
   </main>
 
