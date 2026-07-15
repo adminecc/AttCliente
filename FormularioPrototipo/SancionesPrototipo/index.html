@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Consulta de sanciones - Metro de Málaga</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="page-shell">
+    <section class="card search-card" aria-labelledby="page-title">
+      <div class="brand" aria-hidden="true"><span>M</span></div>
+      <div>
+        <p class="overline">Metro de Málaga</p>
+        <h1 id="page-title">Consulta de sanción</h1>
+      </div>
+
+      <form id="searchForm" class="search-form" novalidate>
+        <label>
+          <span>Expediente</span>
+          <input id="expediente" name="Title" type="text" placeholder="SAN-2026-000001" autocomplete="off" required>
+        </label>
+        <label>
+          <span>DNI</span>
+          <input id="dni" name="DNI" type="text" placeholder="12345678Z" autocomplete="off" required>
+        </label>
+        <button class="button button-primary" id="searchButton" type="submit">Consultar</button>
+      </form>
+      <p id="message" class="message" role="alert" hidden></p>
+    </section>
+
+    <section id="result" class="card result-card" aria-live="polite" hidden>
+      <div class="case-heading">
+        <span>Expediente</span>
+        <strong id="resultTitle">-</strong>
+      </div>
+
+      <div class="detail-grid people-grid">
+        <div class="detail"><span>Nombre</span><strong id="resultName">-</strong></div>
+        <div class="detail"><span>DNI</span><strong id="resultDni">-</strong></div>
+        <div id="guardianDetails" class="detail guardian-detail" hidden>
+          <span>Nombre del tutor</span><strong id="resultGuardianName">-</strong>
+        </div>
+        <div id="guardianDniDetail" class="detail guardian-detail" hidden>
+          <span>DNI del tutor</span><strong id="resultGuardianDni">-</strong>
+        </div>
+      </div>
+
+      <div class="detail-grid three-columns">
+        <div class="detail"><span>Tipo de sanción</span><strong id="resultType">-</strong></div>
+        <div class="detail"><span>Tipo de infracción</span><strong id="resultInfraction">-</strong></div>
+        <div class="detail"><span>Nº Notificación</span><strong id="resultNotification">-</strong></div>
+      </div>
+
+      <div class="detail-grid three-columns">
+        <div class="detail"><span>Motivo de la sanción</span><strong id="resultReason">-</strong></div>
+        <div class="detail"><span>Fecha</span><strong id="resultDate">-</strong></div>
+        <div class="detail"><span>Lugar</span><strong id="resultPlace">-</strong></div>
+      </div>
+
+      <div class="payment-row">
+        <div class="payment-detail detail"><span>Importe</span><strong id="resultAmount">-</strong></div>
+        <div class="payment-detail detail"><span>Estado del pago</span><strong id="resultPaymentStatus">-</strong></div>
+        <button id="payButton" class="button button-primary" type="button" hidden>Pagar</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="data/sample-sanctions.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
