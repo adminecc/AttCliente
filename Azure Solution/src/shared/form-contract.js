@@ -5,7 +5,7 @@ const FORM_TYPES = {
     label: "Reclamaciones y quejas",
     tokenPrefix: "REC",
     sharePoint: {
-      siteEnvKey: "SHAREPOINT_CONNECTA_SITE_ID",
+      siteEnvKey: "SHAREPOINT_ATTCLIENTE_SITE_ID",
       siteUrl: "https://metromalaga.sharepoint.com/sites/ConectaDEV",
       listName: "ReclamacionesQuejas",
       listUrl: "https://metromalaga.sharepoint.com/sites/ConectaDEV/Lists/ReclamacionesQuejas/AllItems.aspx",
@@ -23,7 +23,7 @@ const FORM_TYPES = {
     label: "Consulta de Información",
     tokenPrefix: "CON",
     sharePoint: {
-      siteEnvKey: "SHAREPOINT_CONNECTA_SITE_ID",
+      siteEnvKey: "SHAREPOINT_ATTCLIENTE_SITE_ID",
       siteUrl: "https://metromalaga.sharepoint.com/sites/ConectaDEV",
       listName: "ConsultaInformacion",
       listUrl: "https://metromalaga.sharepoint.com/sites/ConectaDEV/Lists/ConsultaInformacion/AllItems.aspx",
@@ -38,7 +38,7 @@ const FORM_TYPES = {
     label: "Sugerencias",
     tokenPrefix: "SUG",
     sharePoint: {
-      siteEnvKey: "SHAREPOINT_CONNECTA_SITE_ID",
+      siteEnvKey: "SHAREPOINT_ATTCLIENTE_SITE_ID",
       siteUrl: "https://metromalaga.sharepoint.com/sites/ConectaDEV",
       listName: "Sugerencias",
       listUrl: "https://metromalaga.sharepoint.com/sites/ConectaDEV/Lists/Sugerencias/AllItems.aspx",
@@ -54,7 +54,7 @@ const FORM_TYPES = {
     label: "Agradecimientos y felicitaciones",
     tokenPrefix: "AGR",
     sharePoint: {
-      siteEnvKey: "SHAREPOINT_CONNECTA_SITE_ID",
+      siteEnvKey: "SHAREPOINT_ATTCLIENTE_SITE_ID",
       siteUrl: "https://metromalaga.sharepoint.com/sites/ConectaDEV",
       listName: "Agradecimientos",
       listUrl: "https://metromalaga.sharepoint.com/sites/ConectaDEV/Lists/Agradecimientos/AllItems.aspx",
@@ -70,7 +70,7 @@ const FORM_TYPES = {
     label: "Objetos perdidos",
     tokenPrefix: "OBJ",
     sharePoint: {
-      siteEnvKey: "SHAREPOINT_CONNECTA_SITE_ID",
+      siteEnvKey: "SHAREPOINT_ATTCLIENTE_SITE_ID",
       siteUrl: "https://metromalaga.sharepoint.com/sites/ConectaDEV",
       listName: "Objetos Perdidos NUEVA",
       listUrl: "https://metromalaga.sharepoint.com/sites/ConectaDEV/Lists/Objetos%20Perdidos%20NUEVA/AllItems.aspx",

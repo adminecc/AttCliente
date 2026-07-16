@@ -56,7 +56,7 @@ Azure Solution/
 
 El mapeo vive en `src/shared/form-contract.js`. Las llamadas a Graph resuelven el `siteId` con:
 
-- `SHAREPOINT_CONNECTA_SITE_ID` para `ConectaDEV`.
+- `SHAREPOINT_ATTCLIENTE_SITE_ID` para el site de Atención al Cliente (`ConectaDEV`).
 - `SHAREPOINT_TARJETAS_SITE_ID` para `TarjetaMasMetro`.
 - `SHAREPOINT_SANCIONES_SITE_ID` para la lista `Sanciones` de `ConectaDEV`.
 
@@ -110,8 +110,8 @@ Rellena estas claves en `local.settings.json` para pruebas locales y en Azure Ap
 AZURE_TENANT_ID
 AZURE_CLIENT_ID
 AZURE_CLIENT_SECRET
-SHAREPOINT_CONNECTA_SITE_ID
-SHAREPOINT_CONNECTA_SITE_URL
+SHAREPOINT_ATTCLIENTE_SITE_ID
+SHAREPOINT_ATTCLIENTE_SITE_URL
 SHAREPOINT_TARJETAS_SITE_ID
 SHAREPOINT_TARJETAS_SITE_URL
 SHAREPOINT_SANCIONES_SITE_ID
@@ -395,7 +395,7 @@ Durante pruebas con Live Server debe estar permitido `http://localhost:5500`. En
 
 `Error al registrar la solicitud en SharePoint`:
 
-- Revisa `SHAREPOINT_CONNECTA_SITE_ID` o `SHAREPOINT_TARJETAS_SITE_ID`.
+- Revisa `SHAREPOINT_ATTCLIENTE_SITE_ID` o `SHAREPOINT_TARJETAS_SITE_ID`.
 - Revisa permisos Graph y admin consent.
 - Revisa que la lista existe y que su URL coincide con el mapeo de `src/shared/form-contract.js`.
 - Revisa nombres internos de columnas con `FormularioPrototipo/ejemplos_y_campos/sharepoint_list_fields.csv`.

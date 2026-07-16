@@ -834,11 +834,11 @@ async function main() {
 
     runTest("contrato SharePoint apunta a las listas reales", async () => {
       const expected = {
-        RECLAMACIONES: ["SHAREPOINT_CONNECTA_SITE_ID", "ReclamacionesQuejas"],
-        CONSULTAS: ["SHAREPOINT_CONNECTA_SITE_ID", "ConsultaInformacion"],
-        SUGERENCIAS: ["SHAREPOINT_CONNECTA_SITE_ID", "Sugerencias"],
-        AGRADECIMIENTOS: ["SHAREPOINT_CONNECTA_SITE_ID", "Agradecimientos"],
-        OBJETOS_PERDIDOS: ["SHAREPOINT_CONNECTA_SITE_ID", "Objetos Perdidos NUEVA"],
+        RECLAMACIONES: ["SHAREPOINT_ATTCLIENTE_SITE_ID", "ReclamacionesQuejas"],
+        CONSULTAS: ["SHAREPOINT_ATTCLIENTE_SITE_ID", "ConsultaInformacion"],
+        SUGERENCIAS: ["SHAREPOINT_ATTCLIENTE_SITE_ID", "Sugerencias"],
+        AGRADECIMIENTOS: ["SHAREPOINT_ATTCLIENTE_SITE_ID", "Agradecimientos"],
+        OBJETOS_PERDIDOS: ["SHAREPOINT_ATTCLIENTE_SITE_ID", "Objetos Perdidos NUEVA"],
         TARJETAS_METRO: ["SHAREPOINT_TARJETAS_SITE_ID", "ClientesTarjetaMetro"],
       };
 
@@ -854,7 +854,7 @@ async function main() {
         clientId: "client",
         clientSecret: "secret",
         sites: {
-          SHAREPOINT_CONNECTA_SITE_ID: "connecta-site",
+          SHAREPOINT_ATTCLIENTE_SITE_ID: "attcliente-site",
           SHAREPOINT_TARJETAS_SITE_ID: "tarjetas-site",
         },
       });
@@ -867,7 +867,7 @@ async function main() {
         certThumbprint: "thumbprint",
         certPrivateKey: "private-key",
         sites: {
-          SHAREPOINT_CONNECTA_SITE_ID: "connecta-site",
+          SHAREPOINT_ATTCLIENTE_SITE_ID: "attcliente-site",
           SHAREPOINT_TARJETAS_SITE_ID: "tarjetas-site",
         },
       });

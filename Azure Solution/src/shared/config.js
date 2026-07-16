@@ -6,26 +6,26 @@ function getConfig() {
     certThumbprint: process.env.AZURE_CERT_THUMBPRINT,
     certPrivateKey: process.env.AZURE_CERT_PRIVATE_KEY,
     sites: {
-      SHAREPOINT_CONNECTA_SITE_ID:
-        process.env.SHAREPOINT_CONNECTA_SITE_ID || process.env.SHAREPOINT_SITE_ID,
+      SHAREPOINT_ATTCLIENTE_SITE_ID:
+        process.env.SHAREPOINT_ATTCLIENTE_SITE_ID || process.env.SHAREPOINT_SITE_ID,
       SHAREPOINT_TARJETAS_SITE_ID: process.env.SHAREPOINT_TARJETAS_SITE_ID,
     },
     siteUrls: {
-      SHAREPOINT_CONNECTA_SITE_ID:
-        process.env.SHAREPOINT_CONNECTA_SITE_URL ||
+      SHAREPOINT_ATTCLIENTE_SITE_ID:
+        process.env.SHAREPOINT_ATTCLIENTE_SITE_URL ||
         "https://metromalaga.sharepoint.com/sites/ConectaDEV",
       SHAREPOINT_TARJETAS_SITE_ID:
         process.env.SHAREPOINT_TARJETAS_SITE_URL ||
         "https://metromalaga.sharepoint.com/sites/TarjetaMasMetro",
       SHAREPOINT_SANCIONES_SITE_ID:
         process.env.SHAREPOINT_SANCIONES_SITE_URL ||
-        process.env.SHAREPOINT_CONNECTA_SITE_URL ||
+        process.env.SHAREPOINT_ATTCLIENTE_SITE_URL ||
         "https://metromalaga.sharepoint.com/sites/ConectaDEV",
     },
     sanctions: {
       siteId:
         process.env.SHAREPOINT_SANCIONES_SITE_ID ||
-        process.env.SHAREPOINT_CONNECTA_SITE_ID ||
+        process.env.SHAREPOINT_ATTCLIENTE_SITE_ID ||
         process.env.SHAREPOINT_SITE_ID,
       listName: process.env.SHAREPOINT_SANCIONES_LIST_NAME || "Sanciones",
       listUrl:
