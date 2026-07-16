@@ -67,15 +67,15 @@ document.addEventListener('DOMContentLoaded', () => {
   function formatDate(value) {
     if (!value) return '-';
     const date = new Date(String(value).length === 10 ? `${value}T00:00:00` : value);
-    return Number.isNaN(date.getTime())
-      ? String(value)
-      : new Intl.DateTimeFormat('es-ES', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      }).format(date);
+    if (Number.isNaN(date.getTime())) return String(value);
+    const formatted = new Intl.DateTimeFormat('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
+    return formatted.replace(/,\s*/, ' ');
   }
 
   function formatAmount(value) {
