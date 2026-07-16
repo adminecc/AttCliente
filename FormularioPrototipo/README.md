@@ -10,6 +10,7 @@ El estilo visual no debe tomarse como contrato de produccion. El contrato funcio
 - `script.js`: comportamiento del prototipo, validaciones, construccion del payload y envio a la API.
 - `styles.css`: estilos del prototipo.
 - `ConsultaClientePrototipo/`: prototipo separado para consulta del estado de una solicitud ya creada.
+- `SancionesPrototipo/`: prototipo independiente de consulta de sanciones por expediente y DNI.
 - `ejemplos_y_campos/`: esquemas, ejemplos y referencias de campos.
 
 ## Fuentes de verdad

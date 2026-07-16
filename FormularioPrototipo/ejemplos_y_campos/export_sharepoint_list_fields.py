@@ -150,6 +150,21 @@ USED_FIELDS_BY_LIST = {
         "IDRef",
         "Visible",
     },
+    "Sanciones": {
+        "Title",
+        "NombreCliente",
+        "DNI",
+        "NombreTutor",
+        "DNITutor",
+        "TipoSolicitud",
+        "TipoInfraccion",
+        "CodSancion",
+        "MotivoSancion",
+        "FechaInfraccion",
+        "OrigenFraude",
+        "Importe",
+        "EstadoDelPago",
+    },
 }
 
 OPTIONAL_LIST_ENV_KEYS = [
@@ -163,6 +178,7 @@ LIST_ENV_KEYS = [
     "LIST_URL_OBJETOS_PERDIDOS",
     "LIST_URL_CLIENTES_TARJETA_METRO",
     "LIST_URL_CONSULTA_INFORMACION",
+    "LIST_URL_SANCIONES",
 ]
 
 missing_urls = [key for key in LIST_ENV_KEYS if not os.environ.get(key)]
@@ -465,7 +481,7 @@ def export_fields() -> None:
     print(f"Campos exportados: {len(df)}")
     print(f"Campos usados no encontrados: {len(missing_used)}")
     for item in missing_used:
-        print(f"  - {item['lista']}: {item['nombre_interno']}")
+        print(f"  - {item['lista_visual']}: {item['campo_interno']}")
 
 
 def export_reduced_fields(df: pd.DataFrame) -> None:
@@ -519,9 +535,13 @@ def export_used_fields(df: pd.DataFrame) -> list[dict]:
         existing = set(subset["field_internal_name_for_create"])
         for missing in sorted(fields - existing):
             used_rows.append({
-                "lista": list_name,
-                "nombre_visual": "",
-                "nombre_interno": missing,
+                "site_path": "",
+                "lista_visual": list_name,
+                "lista_interna": "",
+                "lista_url": "",
+                "campo_id": "",
+                "campo_visual": "",
+                "campo_interno": missing,
                 "tipo_sharepoint": "",
                 "obligatorio_sharepoint": "",
                 "valor_defecto": "",
@@ -531,9 +551,13 @@ def export_used_fields(df: pd.DataFrame) -> list[dict]:
 
         for _, row in subset.iterrows():
             used_rows.append({
-                "lista": row["list_display_name"],
-                "nombre_visual": row["field_display_name"],
-                "nombre_interno": row["field_internal_name_for_create"],
+                "site_path": row["site_path"],
+                "lista_visual": row["list_display_name"],
+                "lista_interna": row["list_name"],
+                "lista_url": row["list_web_url"],
+                "campo_id": row["field_id"],
+                "campo_visual": row["field_display_name"],
+                "campo_interno": row["field_internal_name_for_create"],
                 "tipo_sharepoint": row["type"],
                 "obligatorio_sharepoint": row["required"],
                 "valor_defecto": row["default_value"],
@@ -542,7 +566,7 @@ def export_used_fields(df: pd.DataFrame) -> list[dict]:
             })
 
     used = pd.DataFrame(used_rows)
-    used = used.sort_values(["lista", "estado", "nombre_interno"], na_position="last")
+    used = used.sort_values(["lista_visual", "estado", "campo_interno"], na_position="last")
     used.to_csv(OUT_USED_CSV, index=False, encoding="utf-8-sig")
     return [row for row in used_rows if row["estado"] == "NO_ENCONTRADO_EN_EXPORT"]
 

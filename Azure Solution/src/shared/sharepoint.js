@@ -370,6 +370,53 @@ async function findListItemByEmailAndToken(accessToken, type, email, token, conf
   );
 }
 
+async function findSanctionByExpedienteAndDni(accessToken, expediente, dni, config = getConfig(), context) {
+  const sanctionConfig = config.sanctions || {};
+  if (!sanctionConfig.siteId) {
+    throw new Error("SHAREPOINT_SANCIONES_SITE_ID no esta configurado.");
+  }
+
+  const target = {
+    siteId: sanctionConfig.siteId,
+    listName: sanctionConfig.listName || "Sanciones",
+    listUrl: sanctionConfig.listUrl,
+  };
+  const listId = await resolveListId(accessToken, target.siteId, target, context);
+  const filter = `fields/Title eq '${escapeOData(expediente)}' and fields/DNI eq '${escapeOData(dni)}'`;
+  const url =
+    `${GRAPH_BASE_URL}/sites/${encodeURIComponent(target.siteId)}/lists/${encodeURIComponent(listId)}/items` +
+    "?$expand=fields" +
+    `&$filter=${encodeURIComponent(filter)}` +
+    "&$top=1";
+
+  const response = await axios.get(url, {
+    headers: graphHeaders(accessToken, {
+      Prefer: "HonorNonIndexedQueriesWarningMayFailRandomly",
+    }),
+    timeout: 15000,
+  });
+  return response.data?.value?.[0] || null;
+}
+
+function buildSancionResponse(item) {
+  const fields = item?.fields || {};
+  return {
+    Title: fields.Title || "",
+    NombreCliente: fields.NombreCliente || "",
+    DNI: fields.DNI || "",
+    NombreTutor: fields.NombreTutor || "",
+    DNITutor: fields.DNITutor || "",
+    TipoSolicitud: fields.TipoSolicitud || "",
+    TipoInfraccion: fields.TipoInfraccion || "",
+    CodSancion: fields.CodSancion || "",
+    MotivoSancion: fields.MotivoSancion || "",
+    FechaInfraccion: fields.FechaInfraccion || "",
+    OrigenFraude: fields.OrigenFraude || "",
+    Importe: fields.Importe ?? null,
+    EstadoDelPago: fields.EstadoDelPago || "",
+  };
+}
+
 async function findListItemByContactAndToken(accessToken, type, contact, token, config = getConfig(), context) {
   const target = await resolveSharePointTarget(accessToken, type, config, context);
   const readableColumns = await resolveColumnNames(accessToken, target, context);
@@ -1532,6 +1579,8 @@ module.exports = {
   prepareLookupFieldWrites,
   findListItemByEmailAndToken,
   findListItemByContactAndToken,
+  findSanctionByExpedienteAndDni,
+  buildSancionResponse,
   getListItemAttachments,
   getListItemTimeline,
   buildSharePointFields,
