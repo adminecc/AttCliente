@@ -1,7 +1,12 @@
 const axios = require("axios");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const { getConfig, assertGraphConfig, getSiteIdForType } = require("./config");
+const {
+  getConfig,
+  assertGraphConfig,
+  getSiteIdForType,
+  getSiteUrlForType,
+} = require("./config");
 
 const GRAPH_BASE_URL = "https://graph.microsoft.com/v1.0";
 const ATTACHMENT_LIBRARY_NAME = "DocumentosAdjuntos";
@@ -1359,15 +1364,19 @@ async function resolveSharePointTarget(accessToken, type, config = getConfig(), 
   }
 
   const siteId = getSiteIdForType(type, config);
-  const listId = await resolveListId(accessToken, siteId, type.sharePoint, context);
+  const target = {
+    ...type.sharePoint,
+    siteUrl: getSiteUrlForType(type, config),
+  };
+  const listId = await resolveListId(accessToken, siteId, target, context);
 
   return {
     siteId,
-    siteEnvKey: type.sharePoint.siteEnvKey,
-    siteUrl: type.sharePoint.siteUrl,
-    listName: type.sharePoint.listName,
+    siteEnvKey: target.siteEnvKey,
+    siteUrl: target.siteUrl,
+    listName: target.listName,
     listId,
-    listUrl: type.sharePoint.listUrl,
+    listUrl: target.listUrl,
   };
 }
 

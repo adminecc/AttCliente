@@ -2,6 +2,7 @@ const { app } = require("@azure/functions");
 const { validateSolicitudPayload } = require("../shared/validation");
 const { generarTokenForType } = require("../shared/token");
 const { getAccessTokenConfig, validateAccessToken } = require("../shared/access-token");
+const { getSiteUrlForType } = require("../shared/config");
 const {
   getGraphAccessToken,
   createListItem,
@@ -214,7 +215,7 @@ app.http("crearSolicitud", {
       tipoFormulario: validation.type.formValue,
       listaDestino: validation.type.key,
       nombreLista: validation.type.sharePoint.listName,
-      siteDestino: validation.type.sharePoint.siteUrl,
+      siteDestino: getSiteUrlForType(validation.type),
       listaUrl: validation.type.sharePoint.listUrl,
       creadoEn: createdAt,
       email: validation.payload.CorreoElectronico || validation.payload.EmailCliente,

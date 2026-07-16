@@ -96,8 +96,23 @@ function getSiteIdForType(type, config = getConfig()) {
   return siteId;
 }
 
+function getSiteUrlForType(type, config = getConfig()) {
+  const siteEnvKey = type?.sharePoint?.siteEnvKey;
+
+  if (!siteEnvKey) {
+    throw new Error(
+      `Tipo de formulario sin site SharePoint configurado: ${
+        type?.key || "desconocido"
+      }.`
+    );
+  }
+
+  return config.siteUrls?.[siteEnvKey] || type.sharePoint.siteUrl;
+}
+
 module.exports = {
   getConfig,
   assertGraphConfig,
   getSiteIdForType,
+  getSiteUrlForType,
 };
