@@ -286,7 +286,7 @@ function getApplicantData(payload) {
     document: firstValue(payload, [
       "DNICliente",
       "DniCliente",
-"dniCliente",
+      "dniCliente",
       "DNI_NIF_NIE",
       "DniNifNie",
       "DocumentoIdentidad",

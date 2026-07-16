@@ -202,9 +202,10 @@ async function validateAccessToken(request, options = {}) {
     return { valid: false, status: 401, error: "Token de acceso ya utilizado." };
   }
 
-  if (entity.clientIp && requester.clientIp && normalizeIp(entity.clientIp) !== normalizeIp(requester.clientIp)) {
+   // DESHABILITADA LA VALIDACION POR IP
+ /* if (entity.clientIp && requester.clientIp && normalizeIp(entity.clientIp) !== normalizeIp(requester.clientIp)) {
     return { valid: false, status: 403, error: "La IP actual no coincide con la IP emisora del token." };
-  }
+  }*/
 
   if (entity.origin && requester.origin && normalizeOrigin(entity.origin) !== normalizeOrigin(requester.origin)) {
     return { valid: false, status: 403, error: "El origen actual no coincide con el origen emisor del token." };

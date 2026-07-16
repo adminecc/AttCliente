@@ -15,6 +15,12 @@ app.http("generateAccessToken", {
 
     const config = getAccessTokenConfig();
     const requester = isRequesterAllowed(request, config);
+    
+    context.log(
+      "REQUESTER=" +
+      JSON.stringify(requester, null, 2)
+    );
+
 
     if (!requester.allowed) {
       context.warn?.(
