@@ -10,6 +10,21 @@ Pantalla publica para consultar una solicitud ya registrada en SharePoint median
 - `data/`: datos mock antiguos conservados como referencia visual, pero no cargados por la pantalla actual.
 - `attachments/`: archivos de ejemplo historicos del mock local.
 
+## Como levantarlo y probarlo
+
+El prototipo llama a la Azure Function desde el navegador, por lo que debe abrirse mediante un servidor HTTP. No lo abras con doble clic (`file://`), porque ese origen no permite configurar CORS de forma util.
+
+Desde la raiz del repositorio:
+
+```powershell
+Set-Location FormularioPrototipo/ConsultaClientePrototipo
+py -m http.server 5510
+```
+
+Abre `http://127.0.0.1:5510/` o `http://localhost:5510/`.
+
+Al cargar la pantalla se solicita automaticamente un token temporal en `/api/seguridad/token`. Ese token se conserva solo en memoria y se envia en la cabecera `Authorization` al consultar. Si caduca o la API lo rechaza, la pantalla lo renueva una vez y repite la consulta.
+
 ## API usada
 
 El prototipo llama a:
@@ -94,8 +109,36 @@ Para usar esta pantalla desde un dominio distinto al de la Function App, Azure d
 Function App > API > CORS
 ```
 
-Durante pruebas locales con Live Server, el origen habitual es:
+Para esta configuración local, añade estos orígenes:
 
 ```text
-http://localhost:5500
+http://127.0.0.1:5510
+http://localhost:5510
 ```
+
+Si usas otro puerto, añade exactamente el origen que aparece en la barra del navegador. El puerto forma parte del origen.
+
+## Variables necesarias en Azure
+
+En `Function App > Configuration > Application settings`, revisa estas variables:
+
+```text
+AZURE_TENANT_ID
+AZURE_CLIENT_ID
+AZURE_CLIENT_SECRET
+AzureWebJobsStorage
+ACCESS_TOKEN_STORAGE_CONNECTION_STRING
+ACCESS_TOKEN_REQUIRED=true
+ACCESS_TOKEN_ALLOWED_ORIGINS=http://127.0.0.1:5510,http://localhost:5510
+ACCESS_TOKEN_ALLOWED_IPS=
+SHAREPOINT_ATTCLIENTE_SITE_ID
+SHAREPOINT_ATTCLIENTE_SITE_URL
+SHAREPOINT_TARJETAS_SITE_ID
+SHAREPOINT_TARJETAS_SITE_URL
+SHAREPOINT_SANCIONES_SITE_ID
+SHAREPOINT_SANCIONES_SITE_URL
+SHAREPOINT_SANCIONES_LIST_NAME=Sanciones
+SHAREPOINT_SANCIONES_LIST_URL=https://metromalaga.sharepoint.com/sites/ConectaDEV/Lists/Sanciones/AllItems.aspx
+```
+
+`ACCESS_TOKEN_ALLOWED_IPS` debe quedar vacía durante estas pruebas. La comparación de IP del token está desactivada en la rama actual. `ACCESS_TOKEN_ALLOWED_ORIGINS` sí debe contener el origen exacto desde el que se abre el prototipo.

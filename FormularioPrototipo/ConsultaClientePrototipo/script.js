@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const messageArea = document.getElementById('messageArea');
   const attachmentsList = document.getElementById('attachmentsList');
   const trackingLine = document.getElementById('trackingLine');
+  let accessToken = '';
+  let accessTokenPromise = null;
 
   function normalizeCaseId(value) {
     return String(value || '').trim().toUpperCase();
@@ -22,6 +24,32 @@ document.addEventListener('DOMContentLoaded', () => {
     searchButton.disabled = isLoading;
     searchButton.querySelector('.btn-icon').textContent = isLoading ? '...' : '';
     searchButton.lastChild.textContent = isLoading ? ' Buscando' : ' Buscar';
+  }
+
+  async function requestAccessToken() {
+    const response = await fetch(`${API_BASE_URL}/api/seguridad/token`, {
+      method: 'GET',
+      headers: { Accept: 'application/json' }
+    });
+    const body = await response.json().catch(() => ({}));
+
+    if (!response.ok || !body.token) {
+      throw new Error(body.error || 'No se pudo preparar el acceso a la consulta.');
+    }
+
+    accessToken = body.token;
+    return accessToken;
+  }
+
+  async function ensureAccessToken() {
+    if (accessToken) return accessToken;
+    if (!accessTokenPromise) {
+      accessTokenPromise = requestAccessToken().finally(() => {
+        accessTokenPromise = null;
+      });
+    }
+
+    return accessTokenPromise;
   }
 
   function formatDate(value) {
@@ -122,17 +150,25 @@ document.addEventListener('DOMContentLoaded', () => {
     resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  async function consultarSolicitud(token, personalData) {
+  async function consultarSolicitud(token, personalData, retry = true) {
+    const temporaryAccessToken = await ensureAccessToken();
     const payload = buildConsultaPayload(token, personalData);
     const response = await fetch(`${API_BASE_URL}/api/solicitudes/consultar`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${temporaryAccessToken}`
       },
       body: JSON.stringify(payload)
     });
 
     const body = await response.json().catch(() => ({}));
+
+    if (retry && (response.status === 401 || response.status === 403)) {
+      accessToken = '';
+      return consultarSolicitud(token, personalData, false);
+    }
+
     if (!response.ok || !body.encontrado) {
       throw new Error(body.mensaje || body.error || 'No se ha encontrado una solicitud con esos datos.');
     }
@@ -272,6 +308,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   caseIdInput.addEventListener('input', () => caseIdInput.classList.remove('error'));
   personalDataInput.addEventListener('input', () => personalDataInput.classList.remove('error'));
+
+  ensureAccessToken().catch((error) => {
+    showMessage('error', error.message);
+  });
 });
 
 function escapeHtml(value) {

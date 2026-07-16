@@ -56,7 +56,7 @@ Azure Solution/
 
 El mapeo vive en `src/shared/form-contract.js`. Las llamadas a Graph resuelven el `siteId` con:
 
-- `SHAREPOINT_CONNECTA_SITE_ID` para `ConectaDEV`.
+- `SHAREPOINT_ATTCLIENTE_SITE_ID` para el site de Atención al Cliente (`ConectaDEV`).
 - `SHAREPOINT_TARJETAS_SITE_ID` para `TarjetaMasMetro`.
 - `SHAREPOINT_SANCIONES_SITE_ID` para la lista `Sanciones` de `ConectaDEV`.
 
@@ -110,12 +110,16 @@ Rellena estas claves en `local.settings.json` para pruebas locales y en Azure Ap
 AZURE_TENANT_ID
 AZURE_CLIENT_ID
 AZURE_CLIENT_SECRET
-SHAREPOINT_CONNECTA_SITE_ID
-SHAREPOINT_CONNECTA_SITE_URL
+SHAREPOINT_ATTCLIENTE_SITE_ID
+SHAREPOINT_ATTCLIENTE_SITE_URL
 SHAREPOINT_TARJETAS_SITE_ID
 SHAREPOINT_TARJETAS_SITE_URL
+SHAREPOINT_SANCIONES_SITE_ID
+SHAREPOINT_SANCIONES_SITE_URL
 FUNCTIONS_WORKER_RUNTIME=node
 ```
+
+Las funciones leen el `siteId` y la URL de cada site desde la variable correspondiente; no es necesario duplicar estos valores en el código. `ConectaDEV` se usa para Atención al Cliente y, actualmente, también para Sanciones.
 
 ### Token temporal de acceso
 
@@ -135,13 +139,13 @@ ACCESS_TOKEN_STORAGE_CONNECTION_STRING  # normalmente igual que AzureWebJobsStor
 ACCESS_TOKEN_TABLE_NAME=FunctionAccessTokens
 ACCESS_TOKEN_TTL_MINUTES=15
 ACCESS_TOKEN_ALLOWED_ORIGINS=https://www.tuweb-autorizada.es
-ACCESS_TOKEN_ALLOWED_IPS=X.X.X.X
+ACCESS_TOKEN_ALLOWED_IPS=  # opcional; dejar vacio para no restringir por IP
 ACCESS_TOKEN_REQUIRED=false
 ACCESS_TOKEN_SINGLE_USE=false
 ```
 
 - `ACCESS_TOKEN_ALLOWED_ORIGINS`: webs autorizadas, separadas por coma o punto y coma. Ejemplo: `https://formularios.metromalaga.es`.
-- `ACCESS_TOKEN_ALLOWED_IPS`: IPs publicas autorizadas, separadas por coma o punto y coma.
+- `ACCESS_TOKEN_ALLOWED_IPS`: opcional; IPs publicas autorizadas, separadas por coma o punto y coma. Si se deja vacia, no se aplica una lista de IPs permitidas.
 - Si informas origins e IPs, deben cumplirse ambas condiciones.
 - `ACCESS_TOKEN_REQUIRED=true` activa la validacion de este token en `POST /api/solicitudes/crear`.
 - `ACCESS_TOKEN_SINGLE_USE=true` hace que cada token solo pueda usarse una vez.
@@ -391,7 +395,7 @@ Durante pruebas con Live Server debe estar permitido `http://localhost:5500`. En
 
 `Error al registrar la solicitud en SharePoint`:
 
-- Revisa `SHAREPOINT_CONNECTA_SITE_ID` o `SHAREPOINT_TARJETAS_SITE_ID`.
+- Revisa `SHAREPOINT_ATTCLIENTE_SITE_ID` o `SHAREPOINT_TARJETAS_SITE_ID`.
 - Revisa permisos Graph y admin consent.
 - Revisa que la lista existe y que su URL coincide con el mapeo de `src/shared/form-contract.js`.
 - Revisa nombres internos de columnas con `FormularioPrototipo/ejemplos_y_campos/sharepoint_list_fields.csv`.
