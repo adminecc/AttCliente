@@ -208,6 +208,7 @@ async function runTest(name, fn) {
 async function main() {
   const createModule = loadFunction("src/functions/solicitudes-create.js");
   loadFunction("src/functions/solicitudes-consultar.js");
+  loadFunction("src/functions/sanciones-consultar.js");
   loadFunction("src/functions/token-generate.js");
   loadFunction("src/functions/access-token-generate.js");
   loadFunction("src/functions/access-token-cleanup.js");
@@ -219,6 +220,7 @@ async function main() {
     prepareLookupFieldWrites,
     formatAttachmentUploadError,
     buildSolicitudResponse,
+    buildSancionResponse,
   } = require("../src/shared/sharepoint");
   const { validateSolicitudPayload } = require("../src/shared/validation");
   const { isGuid, normalizeOrigin, isRequesterAllowed } = require("../src/shared/access-token");
@@ -717,6 +719,34 @@ async function main() {
 
       assert(response.status === 400, `Se esperaba 400 y llego ${response.status}.`);
       assert(String(body.error || "").includes("obligatorios"), "Se esperaba mensaje de campos obligatorios.");
+    }),
+
+    runTest("consultarSancion valida expediente y DNI", async () => {
+      const missing = await invoke("consultarSancion", { Title: "", DNI: "" });
+      assert(missing.response.status === 400, "Se esperaba 400 para datos vacios.");
+
+      const invalid = await invoke("consultarSancion", {
+        Title: "SAN-2026-INVALIDO",
+        DNI: "12345678Z",
+      });
+      assert(invalid.response.status === 400, "Se esperaba 400 para expediente invalido.");
+    }),
+
+    runTest("respuesta de sancion conserva los nombres internos de SharePoint", async () => {
+      const response = buildSancionResponse({
+        fields: {
+          Title: "SAN-2026-000001",
+          DNI: "12345678Z",
+          NombreCliente: "Lucia Garcia Lopez",
+          FechaInfraccion: "2026-06-03T18:42:00+02:00",
+          Importe: 50,
+        },
+      });
+
+      assert(response.Title === "SAN-2026-000001", "Se esperaba Title como expediente.");
+      assert(response.FechaInfraccion === "2026-06-03T18:42:00+02:00", "Se esperaba fecha y hora de la sancion.");
+      assert(response.Importe === 50, "Se esperaba importe numerico.");
+      assert(Object.prototype.hasOwnProperty.call(response, "EstadoDelPago"), "Se esperaba EstadoDelPago en el contrato.");
     }),
 
     runTest("consultarSolicitud rechaza token con prefijo desconocido sin llamar a Graph", async () => {

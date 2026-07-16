@@ -17,6 +17,20 @@ function getConfig() {
       SHAREPOINT_TARJETAS_SITE_ID:
         process.env.SHAREPOINT_TARJETAS_SITE_URL ||
         "https://metromalaga.sharepoint.com/sites/TarjetaMasMetro",
+      SHAREPOINT_SANCIONES_SITE_ID:
+        process.env.SHAREPOINT_SANCIONES_SITE_URL ||
+        process.env.SHAREPOINT_CONNECTA_SITE_URL ||
+        "https://metromalaga.sharepoint.com/sites/ConectaDEV",
+    },
+    sanctions: {
+      siteId:
+        process.env.SHAREPOINT_SANCIONES_SITE_ID ||
+        process.env.SHAREPOINT_CONNECTA_SITE_ID ||
+        process.env.SHAREPOINT_SITE_ID,
+      listName: process.env.SHAREPOINT_SANCIONES_LIST_NAME || "Sanciones",
+      listUrl:
+        process.env.SHAREPOINT_SANCIONES_LIST_URL ||
+        "https://metromalaga.sharepoint.com/sites/ConectaDEV/Lists/Sanciones/AllItems.aspx",
     },
   };
 }
