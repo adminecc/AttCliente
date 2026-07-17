@@ -1277,8 +1277,15 @@ function buildSolicitudResponse(item, listName, attachments = [], timeline = [],
   const token = fields.Title || "";
   const estado = fields.EstadoCliente || fields.Estado || "En tramite";
   const submittedAt = toIsoDateTime(item.createdDateTime || fields.Created || fields.FechaCreacion);
-  const updatedAt = toIsoDateTime(item.lastModifiedDateTime || fields.Modified || fields.FechaModificacionEstadoCliente || submittedAt);
+  const updatedAtCandidate = toIsoDateTime(fields.UltActEstadoCliente);
+  const submittedAtTimestamp = Date.parse(submittedAt);
+  const updatedAtTimestamp = Date.parse(updatedAtCandidate);
+  const updatedAt = Number.isFinite(updatedAtTimestamp)
+    && (!Number.isFinite(submittedAtTimestamp) || updatedAtTimestamp >= submittedAtTimestamp)
+    ? updatedAtCandidate
+    : submittedAt;
   const responseText = fields.RespuestaOrganizacion || fields.Respuesta || "";
+  const infoParaCliente = String(fields.InfoParaCliente || "").trim();
   const normalizedAttachments = attachments.map(mapAttachmentForResponse);
 
   return {
@@ -1307,7 +1314,7 @@ function buildSolicitudResponse(item, listName, attachments = [], timeline = [],
     status: estado,
     submittedAt,
     updatedAt,
-    resolutionSummary: responseText || buildDefaultStatusSummary(estado),
+    resolutionSummary: infoParaCliente || buildDefaultStatusSummary(estado),
     nextStep: buildNextStep(estado, responseText),
     attachments: normalizedAttachments,
   };
@@ -1331,8 +1338,16 @@ function toIsoDateTime(value) {
 }
 
 function buildDefaultStatusSummary(status) {
-  if (normalizeComparable(status).includes("tram")) {
-    return "La solicitud esta registrada y pendiente de revision por el area responsable.";
+  const normalizedStatus = normalizeComparable(status)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  if (normalizedStatus.includes("tram")) {
+    return "La solicitud se ha registrado y está siendo tramitada.";
+  }
+
+  if (normalizedStatus.includes("resuelta")) {
+    return "La solicitud ha sido revisada y resuelta";
   }
 
   return "La solicitud tiene una actualizacion registrada.";

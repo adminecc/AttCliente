@@ -778,6 +778,8 @@ async function main() {
           fields: {
             Title: "SUG-2026-ABCDEFGH",
             EstadoCliente: "En tramite",
+            UltActEstadoCliente: "2026-06-30T09:00:00.000Z",
+            InfoParaCliente: "Mensaje preparado para el cliente.",
             Nombre: "Maria",
             Apellidos: "Lopez",
             CorreoElectronico: "maria@example.com",
@@ -800,7 +802,8 @@ async function main() {
       assert(response.type === "Sugerencias", "Se esperaba label del tipo de formulario.");
       assert(response.status === "En tramite", "Se esperaba estado para tracking.");
       assert(response.submittedAt === "2026-06-29T08:00:00.000Z", "Se esperaba fecha y hora de creacion normalizada.");
-      assert(response.updatedAt === "2026-06-30T09:00:00.000Z", "Se esperaba fecha y hora de modificacion normalizada.");
+      assert(response.updatedAt === "2026-06-30T09:00:00.000Z", "Se esperaba UltActEstadoCliente como fecha de actualizacion.");
+      assert(response.resolutionSummary === "Mensaje preparado para el cliente.", "Se esperaba InfoParaCliente en resolutionSummary.");
       assert(response.attachments.length === 1, "Se esperaba adjunto normalizado.");
       assert(response.attachments[0].name === "documento.pdf", "Se esperaba nombre de adjunto.");
     }),
@@ -815,6 +818,7 @@ async function main() {
             fields: {
               Title: `${type.tokenPrefix}-2026-ABCDEFGH`,
               EstadoCliente: "En tramite",
+              UltActEstadoCliente: "2026-07-06T07:45:10.000Z",
               CorreoElectronico: "consulta@example.com",
               Telefono: "600123456",
               Descripcion: "Texto de prueba.",
@@ -829,6 +833,32 @@ async function main() {
         assert(response.submittedAt === "2026-07-06T06:15:30.000Z", `${type.key} debe conservar fecha y hora de creacion.`);
         assert(response.updatedAt === "2026-07-06T07:45:10.000Z", `${type.key} debe conservar fecha y hora de modificacion.`);
         assert(response.type === type.label, `${type.key} debe devolver el nombre estandar de tipo.`);
+      }
+    }),
+
+    runTest("respuesta de consulta aplica los textos por defecto del estado", async () => {
+      const inProgress = buildSolicitudResponse({
+        createdDateTime: "2026-07-17T08:00:00.000Z",
+        fields: { Title: "REC-2026-ABCDEFGH", EstadoCliente: "En trámite" },
+      }, "ReclamacionesQuejas");
+      const resolved = buildSolicitudResponse({
+        createdDateTime: "2026-07-17T08:00:00.000Z",
+        fields: { Title: "REC-2026-ABCDEFGH", EstadoCliente: "Resuelta aceptada" },
+      }, "ReclamacionesQuejas");
+
+      assert(inProgress.resolutionSummary === "La solicitud se ha registrado y está siendo tramitada.", "Se esperaba texto por defecto para En tramite.");
+      assert(resolved.resolutionSummary === "La solicitud ha sido revisada y resuelta", "Se esperaba texto por defecto para estados Resuelta.");
+    }),
+
+    runTest("respuesta de consulta descarta fechas de actualizacion no validas", async () => {
+      for (const UltActEstadoCliente of ["", "fecha-invalida", "2026-07-16T08:00:00.000Z"]) {
+        const response = buildSolicitudResponse({
+          createdDateTime: "2026-07-17T08:00:00.000Z",
+          lastModifiedDateTime: "2026-07-18T08:00:00.000Z",
+          fields: { Title: "REC-2026-ABCDEFGH", EstadoCliente: "En trámite", UltActEstadoCliente },
+        }, "ReclamacionesQuejas");
+
+        assert(response.updatedAt === response.submittedAt, `Se esperaba la fecha de solicitud para '${UltActEstadoCliente}'.`);
       }
     }),
 
