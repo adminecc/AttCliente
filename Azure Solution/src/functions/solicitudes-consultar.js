@@ -29,6 +29,9 @@ app.http("consultarSolicitud", {
     const telefono = normalizePhone(body.telefono);
     const personalData = String(body.personalData || body.datoConfirmacion || "").trim();
     const token = normalizeToken(body.token);
+
+    context.log(`TOKEN_RECIBIDO='${token}'`);
+    
     const contact = buildContact({ email, telefono, personalData });
 
     if (!contact || !token) {
@@ -85,7 +88,7 @@ app.http("consultarSolicitud", {
     }
 
     const [attachments, timeline] = await Promise.all([
-      getListItemAttachments(accessToken, type, item.id, undefined, context),
+      getListItemAttachments(accessToken, type, item.id, undefined, context,token),
       getListItemTimeline(accessToken, type, item.id, undefined, context).catch((error) => {
         if (typeof context.warn === "function") {
           context.warn("consultarSolicitud - no se pudo recuperar timeline:", error.message);

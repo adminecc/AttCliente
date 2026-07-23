@@ -5,7 +5,7 @@ const {
   getTypeByTokenPrefix,
 } = require("./form-contract");
 
-const SAFE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+const SAFE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ123456789";
 
 function generarTokenForType(type) {
   if (!type?.tokenPrefix) {

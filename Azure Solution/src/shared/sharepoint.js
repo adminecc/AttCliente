@@ -572,42 +572,65 @@ async function findListItemByDocumentFolder(accessToken, target, emailField, ema
   return null;
 }
 
-async function getListItemAttachments(accessToken, type, itemId, config = getConfig(), context, referenceToken = itemId) {
-  const target = await resolveSharePointTarget(accessToken, type, config, context);
+async function getListItemAttachments(
+  accessToken,
+  type,
+  itemId,
+  config = getConfig(),
+  context,
+  referenceToken = itemId
+) {
+  const target = await resolveSharePointTarget(
+    accessToken,
+    type,
+    config,
+    context
+  );
+
   const token = String(referenceToken || "").trim();
-  if (!token) return [];
 
-  const library = await resolveDocumentLibraryTarget(accessToken, target.siteId, context);
-  const filterValue = isNumberLike(token) ? String(Number(token)) : `'${escapeOData(token)}'`;
-  const filter = `fields/IDRef eq ${filterValue}`;
-  const url =
-    `${GRAPH_BASE_URL}/sites/${encodeURIComponent(target.siteId)}/lists/${encodeURIComponent(library.listId)}/items` +
-    "?$expand=fields,driveItem" +
-    `&$filter=${encodeURIComponent(filter)}` +
-    "&$top=200";
-  context?.log?.(`getListItemAttachments - GET ${url}`);
-
-  try {
-    const response = await axios.get(url, {
-      headers: graphHeaders(accessToken, {
-        Prefer: "HonorNonIndexedQueriesWarningMayFailRandomly",
-      }),
-      timeout: 15000,
-    });
-
-    const attachments = mapDocumentLibraryAttachments(response.data?.value || []);
-    if (attachments.length > 0) {
-      return attachments;
-    }
-
-    warn(
-      context,
-      `getListItemAttachments - filtro Graph sin resultados para IDRef=${token}, usando busqueda local.`
-    );
-    return getListItemAttachmentsFallback(accessToken, target.siteId, library.listId, token, context);
-  } catch {
-    return getListItemAttachmentsFallback(accessToken, target.siteId, library.listId, token, context);
+  if (!token) {
+    return [];
   }
+
+  const library = await resolveDocumentLibraryTarget(
+    accessToken,
+    target.siteId,
+    context
+  );
+
+  const folder = await getDriveItemByPath(
+    accessToken,
+    target.siteId,
+    library.driveId,
+    token,
+    context
+  );
+
+  if (!folder?.id) {
+    context?.log?.(
+      `getListItemAttachments - carpeta no encontrada: ${token}`
+    );
+    return [];
+  }
+
+  const url =
+    `${GRAPH_BASE_URL}/sites/${encodeURIComponent(target.siteId)}` +
+    `/drives/${encodeURIComponent(library.driveId)}` +
+    `/items/${encodeURIComponent(folder.id)}/children`;
+
+  context?.log?.(
+    `getListItemAttachments - GET ${url}`
+  );
+
+  const response = await axios.get(url, {
+    headers: graphHeaders(accessToken),
+    timeout: 15000,
+  });
+
+  return mapDocumentLibraryAttachments(
+    response.data?.value || []
+  );
 }
 
 async function getListItemAttachmentsFallback(accessToken, siteId, libraryListId, referenceToken, context) {
@@ -629,14 +652,13 @@ async function getListItemAttachmentsFallback(accessToken, siteId, libraryListId
 
 function mapDocumentLibraryAttachments(items) {
   return items
-    .map((item) => item.driveItem || {})
-    .filter((driveItem) => driveItem.file)
+    .filter((item) => item.file)
     .map((file) => ({
       nombre: file.name,
       tipo: file.file?.mimeType || "",
       tamanioBytes: file.size || 0,
       urlDescarga: file["@microsoft.graph.downloadUrl"] || "",
-      webUrl: file.webUrl || "",
+      webUrl: file.webUrl || ""
     }));
 }
 
