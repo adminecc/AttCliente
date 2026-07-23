@@ -192,6 +192,14 @@ function assert(condition, message) {
   }
 }
 
+function setOrDeleteEnv(name, value) {
+  if (value === undefined) {
+    delete process.env[name];
+  } else {
+    process.env[name] = value;
+  }
+}
+
 async function runTest(name, fn) {
   try {
     await fn();
@@ -213,7 +221,7 @@ async function main() {
   loadFunction("src/functions/access-token-generate.js");
   loadFunction("src/functions/access-token-cleanup.js");
   const { FORM_TYPES } = require("../src/shared/form-contract");
-  const { assertGraphConfig } = require("../src/shared/config");
+  const { getConfig, assertGraphConfig } = require("../src/shared/config");
   const {
     buildSharePointFields,
     buildFieldCompatibilityWarnings,
@@ -368,7 +376,7 @@ async function main() {
 
       assert(response.status === 200, `Se esperaba 200 y llego ${response.status}.`);
       assert(
-        /^REC-\d{4}-[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{8}$/.test(body.token),
+        /^REC-\d{4}-[ABCDEFGHJKMNPQRSTUVWXYZ123456789]{8}$/.test(body.token),
         `Token con formato inesperado: ${body.token}.`
       );
       assert(Boolean(body.generadoEn), "Se esperaba fecha generadoEn.");
@@ -461,11 +469,32 @@ async function main() {
       );
 
       assert(validation.valid, `No se esperaban errores de validacion: ${validation.errors.join(", ")}.`);
-      assert(fields.Estacion === "General / Ninguna espec\u00edfica", "Se esperaba Estacion normalizada.");
+      assert(fields.Estacion === "Toda la red de Metro M\u00e1laga", "Se esperaba Estacion normalizada.");
       assert(fields.OtraUbicacion === "Anden de pruebas", "Se esperaba OtraUbicacion.");
       assert(fields.TipoDeTitulo === "Tarjeta Monedero Consorcio de Transportes de Andaluc\u00eda", "Se esperaba TipoDeTitulo.");
       assert(fields.NumTituloViaje === "12345678900", "Se esperaba NumTituloViaje.");
       assert(fields.Descripcion === "Texto de prueba.", "Se esperaba Descripcion.");
+    }),
+
+    runTest("sugerencias permite ubicar la solicitud fuera de una estacion", async () => {
+      const payload = {
+        tipoFormulario: "sugerencias",
+        Nombre: "Maria",
+        Apellidos: "Lopez",
+        TipoDeDocumento: "NIF",
+        NumeroDeDocumento: "12345678Z",
+        CorreoElectronico: "maria.lopez@example.com",
+        Telefono: "600123456",
+        consentimiento: true,
+        OtraUbicacion: "Interior del tren - UT-3010",
+        Descripcion: "Texto de prueba.",
+      };
+      const validation = validateSolicitudPayload(payload);
+      const fields = buildSharePointFields(validation.payload, FORM_TYPES.SUGERENCIAS, "SUG-2026-ABCDEFGH", "2026-06-29T08:00:00.000Z");
+
+      assert(validation.valid, `No se esperaban errores de validacion: ${validation.errors.join(", ")}.`);
+      assert(!Object.prototype.hasOwnProperty.call(fields, "Estacion"), "Estacion debe quedar vacia fuera de una estacion.");
+      assert(fields.OtraUbicacion === "Interior del tren - UT-3010", "Se esperaba la ubicacion y el tren en OtraUbicacion.");
     }),
 
     runTest("agradecimientos usa nombres directos de SharePoint", async () => {
@@ -479,10 +508,10 @@ async function main() {
           CorreoElectronico: "maria.lopez@example.com",
           Telefono: "600123456",
           consentimiento: true,
-          Motivo: "atencion-personal",
+          Motivo: "instalaciones",
           FechaEpisodio: "2026-06-29",
           Lugar: "estacion",
-          Estacion: "general",
+          Estacion: "cualquiera-l1",
           Tren: "UT-3010",
           DirigidoA: "varios",
           Colectivos: "Personal de estacion y seguridad",
@@ -494,10 +523,10 @@ async function main() {
         "2026-06-29T08:00:00.000Z"
       );
 
-      assert(fields.Motivo === "Atenci\u00f3n del personal", "Se esperaba Motivo normalizado.");
+      assert(fields.Motivo === "Estado de instalaciones", "Se esperaba Motivo normalizado.");
       assert(fields.FechaEpisodio === "2026-06-29", "Se esperaba FechaEpisodio.");
       assert(fields.Lugar === "Una estaci\u00f3n", "Se esperaba Lugar normalizado.");
-      assert(fields.Estacion === "General / Ninguna espec\u00edfica", "Se esperaba Estacion normalizada.");
+      assert(fields.Estacion === "Cualquiera de L\u00ednea 1", "Se esperaba Estacion normalizada.");
       assert(fields.Tren === "UT-3010", "Se esperaba Tren.");
       assert(fields.DirigidoA === "Quiero agradecer a varios colectivos (indique cu\u00e1les)", "Se esperaba DirigidoA normalizado.");
       assert(fields.Colectivos === "Personal de estacion y seguridad", "Se esperaba Colectivos.");
@@ -647,6 +676,43 @@ async function main() {
       assert(fields.DAB === "ATZ-DAB-101", `Se esperaba ATZ-DAB-101 y llego ${fields.DAB}.`);
     }),
 
+    runTest("Reclamaciones conserva los campos bancarios especificos", async () => {
+      const expected = {
+        ModoPago: "Tarjeta bancaria en el móvil",
+        TipoTarjetaBancaria: "Una tarjeta personalizada",
+        PANFisicaPrimeros6: "012345",
+        PANFisicaUltimos4: "6789",
+        PANVirtualPrimeros6: "987654",
+        PANVirtualUltimos4: "3210",
+        EmailMetroPay: "usuario@example.com",
+      };
+      const fields = buildSharePointFields(
+        {
+          tipoFormulario: "reclamaciones",
+          Nombre: "Maria",
+          Apellidos: "Lopez",
+          TipoDeDocumento: "NIF",
+          NumeroDeDocumento: "12345678Z",
+          CorreoElectronico: "maria.lopez@example.com",
+          Telefono: "600123456",
+          consentimiento: true,
+          Clasificacion: "reclamacion",
+          FechaYHoraConsulta: "2026-07-21T10:00:00",
+          Lugar: "El Perchel",
+          DescripcionConsulta: "Texto de prueba.",
+          ...expected,
+        },
+        FORM_TYPES.RECLAMACIONES,
+        "REC-2026-ABCDEFGH",
+        "2026-07-21T08:00:00.000Z"
+      );
+
+      Object.entries(expected).forEach(([name, value]) => {
+        assert(fields[name] === value, `Se esperaba conservar ${name}.`);
+      });
+      assert(fields.NClienteNTarjCredito === undefined, "No debe reutilizarse NClienteNTarjCredito para EmailMetroPay.");
+    }),
+
     runTest("Firma de tarjetas se guarda como data URL", async () => {
       const fields = buildSharePointFields(
         {
@@ -747,6 +813,16 @@ async function main() {
       assert(response.FechaInfraccion === "2026-06-03T18:42:00+02:00", "Se esperaba fecha y hora de la sancion.");
       assert(response.Importe === 50, "Se esperaba importe numerico.");
       assert(Object.prototype.hasOwnProperty.call(response, "EstadoDelPago"), "Se esperaba EstadoDelPago en el contrato.");
+    }),
+
+    runTest("respuesta de sancion usa la fecha canonica de infraccion", async () => {
+      const response = buildSancionResponse({
+        fields: {
+          FechaInfraccion: "2026-06-03T18:42:00+02:00",
+        },
+      });
+
+      assert(response.FechaInfraccion === "2026-06-03T18:42:00+02:00", "Se esperaba FechaInfraccion.");
     }),
 
     runTest("consultarSolicitud rechaza token con prefijo desconocido sin llamar a Graph", async () => {
@@ -901,6 +977,34 @@ async function main() {
           SHAREPOINT_TARJETAS_SITE_ID: "tarjetas-site",
         },
       });
+    }),
+
+    runTest("configuracion de sanciones usa las variables de entorno propias", async () => {
+      const previous = {
+        siteId: process.env.SHAREPOINT_SANCIONES_SITE_ID,
+        siteUrl: process.env.SHAREPOINT_SANCIONES_SITE_URL,
+        listName: process.env.SHAREPOINT_SANCIONES_LIST_NAME,
+        listUrl: process.env.SHAREPOINT_SANCIONES_LIST_URL,
+      };
+      process.env.SHAREPOINT_SANCIONES_SITE_ID = "sanciones-site";
+      process.env.SHAREPOINT_SANCIONES_SITE_URL = "https://example.sharepoint.com/sites/SancionesDEV";
+      process.env.SHAREPOINT_SANCIONES_LIST_NAME = "Sanciones";
+      delete process.env.SHAREPOINT_SANCIONES_LIST_URL;
+
+      try {
+        const config = getConfig();
+        assert(config.sanctions.siteId === "sanciones-site", "Se esperaba el site ID de sanciones.");
+        assert(config.sanctions.siteUrl === "https://example.sharepoint.com/sites/SancionesDEV", "Se esperaba la URL del site de sanciones.");
+        assert(
+          config.sanctions.listUrl === "https://example.sharepoint.com/sites/SancionesDEV/Lists/Sanciones/AllItems.aspx",
+          "La URL de lista debe derivarse del site configurado."
+        );
+      } finally {
+        setOrDeleteEnv("SHAREPOINT_SANCIONES_SITE_ID", previous.siteId);
+        setOrDeleteEnv("SHAREPOINT_SANCIONES_SITE_URL", previous.siteUrl);
+        setOrDeleteEnv("SHAREPOINT_SANCIONES_LIST_NAME", previous.listName);
+        setOrDeleteEnv("SHAREPOINT_SANCIONES_LIST_URL", previous.listUrl);
+      }
     }),
   ];
 

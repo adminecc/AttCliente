@@ -157,6 +157,33 @@
         "string"
       ]
     },
+    "ModoPago": {
+      "type": "string"
+    },
+    "TipoTarjetaBancaria": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "PANFisicaPrimeros6": {
+      "type": "string",
+      "pattern": "^[0-9]{6}$"
+    },
+    "PANFisicaUltimos4": {
+      "type": "string",
+      "pattern": "^[0-9]{4}$"
+    },
+    "PANVirtualPrimeros6": {
+      "type": "string",
+      "pattern": "^[0-9]{6}$"
+    },
+    "PANVirtualUltimos4": {
+      "type": "string",
+      "pattern": "^[0-9]{4}$"
+    },
+    "EmailMetroPay": {
+      "type": "string",
+      "format": "email"
+    },
     "Observaciones": {
       "type": "string"
     },
@@ -359,8 +386,19 @@
           "NumeroDeDocumento",
           "CorreoElectronico",
           "Telefono",
-          "Estacion",
           "Descripcion"
+        ],
+        "anyOf": [
+          {
+            "required": [
+              "Estacion"
+            ]
+          },
+          {
+            "required": [
+              "OtraUbicacion"
+            ]
+          }
         ]
       }
     },

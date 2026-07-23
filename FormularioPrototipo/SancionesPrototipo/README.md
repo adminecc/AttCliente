@@ -97,6 +97,30 @@ La interfaz consume los nombres estáticos del payload y no nombres de presentac
 | Importe | `Importe` | Importe |
 | Estado del pago | `EstadoDelPago` | Estado del pago |
 
+### Contrato actual de columnas
+
+El contrato canónico de la consulta usa estas columnas:
+
+| Nombre visible recomendado | Nombre interno que se conserva | Tipo |
+| --- | --- | --- |
+| Expediente | `Title` | Una línea de texto |
+| Nombre del cliente | `NombreCliente` | Una línea de texto |
+| DNI | `DNI` | Una línea de texto |
+| Nombre del tutor | `NombreTutor` | Una línea de texto |
+| DNI del tutor | `DNITutor` | Una línea de texto |
+| Tipo de sanción | `TipoSolicitud` | Una línea de texto |
+| Tipo de infracción | `TipoInfraccion` | Una línea de texto |
+| Nº de notificación | `CodSancion` | Una línea de texto |
+| Motivo de la sanción | `MotivoSancion` | Una línea de texto |
+| Fecha de la infracción | `FechaInfraccion` | Fecha y hora |
+| Origen de la infracción | `OrigenFraude` | Una línea de texto |
+| Importe | `Importe` | Número |
+| Estado del pago | `EstadoDelPago` | Una línea de texto |
+
+El CSV actualizado confirma estos nombres internos sin duplicados. `TipoApercibimiento`, `NSap`, `Estacion`, `LugarDeInicio`, `LugarDeFin` y el resto de campos operativos no forman parte del endpoint público y no deben confundirse con los campos del contrato.
+
+En SharePoint solo queda corregir el nombre visible `Expeidente` a `Expediente`; el nombre interno seguirá siendo `Title` y no requiere cambios en la Function.
+
 ## Pago
 
 El botón `Pagar` solo aparece si `EstadoDelPago` contiene un estado pendiente, impagado o parcialmente pagado. En este prototipo no navega a una pasarela real. Cuando exista el endpoint de pago, la API podrá devolver una URL de pago (por ejemplo, `paymentUrl`) y el botón deberá usarla tras validar el expediente en backend.

@@ -871,7 +871,7 @@ document.addEventListener('DOMContentLoaded', () => {
             puerta: document.getElementById('puerContacto').value || null,
             codigoPostal: document.getElementById('cpContacto').value || null,
             municipio: document.getElementById('municipioContacto').value || null,
-            provincia: document.getElementById('provinciaContacto').value || null
+            provincia: textoSeleccionado('provinciaContacto')
         } : null;
 
         // 2. Obtener datos del representante (si aplica y está visible)
@@ -901,7 +901,7 @@ document.addEventListener('DOMContentLoaded', () => {
             puerta: document.getElementById('puerEnvio').value || null,
             codigoPostal: document.getElementById('cpEnvio').value || null,
             municipio: document.getElementById('municipioEnvio').value || null,
-            provincia: document.getElementById('provinciaEnvio').value || null
+            provincia: textoSeleccionado('provinciaEnvio')
         } : null;
 
         // 4. Obtener campos específicos del formulario activo (valores dinámicos en 'values')
@@ -1005,7 +1005,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 numeroDocumento: document.getElementById('numeroDocumento').value || null,
                 email: document.getElementById('email').value || null,
                 telefono: document.getElementById('telefono').value || null,
-                nacionalidad: document.getElementById('nacionalidad').value || null,
+                nacionalidad: textoSeleccionado('nacionalidad'),
                 direccionContacto: direccionContacto
             },
             representative: representative,
@@ -1028,6 +1028,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return valores.find(valor => typeof valor === 'string' && valor.trim() !== '')?.trim() || null;
     }
 
+    function textoSeleccionado(id) {
+        const select = document.getElementById(id);
+        if (!select?.value || esElementoOculto(select)) return null;
+        return select.selectedOptions?.[0]?.textContent?.trim() || select.value;
+    }
+
     function normalizarTipoDocumento(tipoDocumento) {
         return tipoDocumento === 'DNI' ? 'NIF' : tipoDocumento;
     }
@@ -1042,8 +1048,12 @@ document.addEventListener('DOMContentLoaded', () => {
             DE: 'ALEMANIA',
             PT: 'PORTUGAL',
             OTRO: 'OTROS',
+            OTHER: 'OTROS',
+            Otro: 'OTROS',
+            'Arabia Saudí': 'ARABIA SAUDITA',
+            Mali: 'MALÍ',
         };
-        return valores[nacionalidad] || nacionalidad;
+        return valores[nacionalidad] || nacionalidad?.toLocaleUpperCase('es-ES') || null;
     }
 
     function combinarFechaHora(fecha, hora) {
@@ -1098,8 +1108,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (tipoFormularioActual === 'sugerencias') {
-            payloadApi.Estacion = primerTextoDisponible(values.lugarSugerencia, 'general');
-            payloadApi.OtraUbicacion = values.otroLugarSugerencia;
+            const lugarSugerencia = values.lugarSugerencia;
+            payloadApi.Estacion = ['tren', 'otro'].includes(lugarSugerencia) ? null : primerTextoDisponible(lugarSugerencia, 'general');
+            payloadApi.OtraUbicacion = lugarSugerencia === 'tren'
+                ? [textoSeleccionado('lugarSugerencia'), textoSeleccionado('trenSugerencia')].filter(Boolean).join(' - ')
+                : values.otroLugarSugerencia;
             payloadApi.TipoDeTitulo = values.tipoTituloSugerencia;
             payloadApi.NumTituloViaje = values.numeracionTituloSugerencia;
             payloadApi.Descripcion = values.descripcionSugerencia;
@@ -1118,23 +1131,43 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (tipoFormularioActual === 'reclamaciones') {
+            const otroTipoTarjetaBancaria = primerTextoDisponible(
+                values.tipo_tarjeta_bancaria_otras_11,
+                values.tipo_tarjeta_bancaria_otras_dab_fisica,
+                values.tipo_tarjeta_bancaria_otras_dab_movil,
+                values.tipo_tarjeta_bancaria_otras_2,
+                values.tipo_tarjeta_bancaria_otras_3
+            );
+            const tipoTarjetaBancaria = otroTipoTarjetaBancaria || primerTextoDisponible(
+                textoSeleccionado('tipo_tarjeta_bancaria_11'),
+                textoSeleccionado('tipo_tarjeta_bancaria_dab_fisica'),
+                textoSeleccionado('tipo_tarjeta_bancaria_dab_movil'),
+                textoSeleccionado('tipo_tarjeta_bancaria_2'),
+                textoSeleccionado('tipo_tarjeta_bancaria_3')
+            );
             payloadApi.Clasificacion = values.clasificacion;
             payloadApi.FechaYHoraConsulta = combinarFechaHora(values.fechaIncidencia, values.horaIncidencia);
             payloadApi.Lugar = values.lugarIncidencia;
             payloadApi.TipoDeTitulo = values.tipoTitulo;
             payloadApi.NBilleteTitulo = values.numeracion_titulo_viaje;
-            payloadApi.NClienteNTarjCredito = values.email_usuario_metro_pay;
             payloadApi.PuntoDeVenta = values.estacion;
             payloadApi.DAB = values.numero_dab;
             payloadApi.TipoDeInstalacion = values.numero_dab ? 'dab' : null;
             payloadApi.ImporteAPagar = values.importe_reclamado_1 || values.importe_reclamado_2 || values.importe_reclamado_3;
+            payloadApi.ModoPago = textoSeleccionado('modo_pago');
+            payloadApi.TipoTarjetaBancaria = tipoTarjetaBancaria;
+            payloadApi.PANFisicaPrimeros6 = primerTextoDisponible(values.pan_tarjeta_primeros_6_11, values.pan_dab_fisica_primeros_6, values.pan_dab_movil_fisica_asoc_primeros_6, values.pan_emv_fisica_primeros_6, values.pan_emv_movil_fisica_asoc_primeros_6, values.pan_tarjeta_registrada_primeros_6);
+            payloadApi.PANFisicaUltimos4 = primerTextoDisponible(values.pan_tarjeta_ultimos_4_11, values.pan_dab_fisica_ultimos_4, values.pan_dab_movil_fisica_asoc_ultimos_4, values.pan_emv_fisica_ultimos_4, values.pan_emv_movil_fisica_asoc_ultimos_4, values.pan_tarjeta_registrada_ultimos_4);
+            payloadApi.PANVirtualPrimeros6 = primerTextoDisponible(values.pan_dab_movil_virtual_primeros_6, values.pan_emv_movil_virtual_primeros_6);
+            payloadApi.PANVirtualUltimos4 = primerTextoDisponible(values.pan_dab_movil_virtual_ultimos_4, values.pan_emv_movil_virtual_ultimos_4);
+            payloadApi.EmailMetroPay = values.email_usuario_metro_pay;
             payloadApi.DescripcionConsulta = values.descripcionDetallada;
             payloadApi.Observaciones = [
                 values.otroLugarIncidencia ? `Otro lugar: ${values.otroLugarIncidencia}` : '',
-                values.trenIncidencia ? `Tren: ${values.trenIncidencia}` : '',
-                values.punto_venta_recarga ? `Punto venta/recarga: ${values.punto_venta_recarga}` : '',
-                values.tipo_operacion ? `Tipo operacion: ${values.tipo_operacion}` : '',
-                values.modo_pago ? `Modo pago: ${values.modo_pago}` : '',
+                values.trenIncidencia ? `Tren: ${textoSeleccionado('trenIncidencia')}` : '',
+                values.punto_venta_recarga ? `Punto venta/recarga: ${textoSeleccionado('punto_venta_recarga')}` : '',
+                values.plataforma_pago ? `Plataforma de pago: ${textoSeleccionado('plataforma_pago')}` : '',
+                values.tipo_operacion ? `Tipo operacion: ${textoSeleccionado('tipo_operacion')}` : '',
                 values.numeracion_titulo_recarga ? `Titulo recargado: ${values.numeracion_titulo_recarga}` : '',
             ].filter(Boolean).join('\n') || null;
         }

@@ -32,6 +32,8 @@ const LOCATION_VALUES = {
   general: "General / Ninguna específica",
   "l1-gral": "Cualquiera de Línea 1",
   "l2-gral": "Cualquiera de Línea 2",
+  "cualquiera-l1": "Cualquiera de Línea 1",
+  "cualquiera-l2": "Cualquiera de Línea 2",
   "linea-1": "Cualquiera de Línea 1",
   "linea-2": "Cualquiera de Línea 2",
   "guadalmedina-l1": "Guadalmedina",
@@ -58,6 +60,11 @@ const LOCATION_VALUES = {
   tren: "Interior del tren",
   otro: "Otra ubicación",
   "otra-ubicacion": "Otra ubicación",
+};
+
+const SUGGESTION_LOCATION_VALUES = {
+  ...LOCATION_VALUES,
+  general: "Toda la red de Metro Málaga",
 };
 
 const OPERATION_LOCATION_VALUES = {
@@ -92,10 +99,14 @@ const THANKS_REASON_VALUES = {
   "resolucion-incidencia": "Resolución de incidencia",
   "mejora-servicio": "Mejora del servicio",
   "estado-instalaciones": "Estado de instalaciones",
+  instalaciones: "Estado de instalaciones",
   "informacion-proporcionada": "Información proporcionada",
+  informacion: "Información proporcionada",
   "actuacion-seguridad": "Actuación de seguridad",
+  seguridad: "Actuación de seguridad",
   "accesibilidad": "Asistencia sobre accesibilidad",
   "objeto-perdido": "Ayuda para recuperar un objeto",
+  "recuperar-objeto": "Ayuda para recuperar un objeto",
   otros: "Otros",
 };
 
@@ -383,6 +394,7 @@ async function findSanctionByExpedienteAndDni(accessToken, expediente, dni, conf
 
   const target = {
     siteId: sanctionConfig.siteId,
+    siteUrl: sanctionConfig.siteUrl,
     listName: sanctionConfig.listName || "Sanciones",
     listUrl: sanctionConfig.listUrl,
   };
@@ -1258,7 +1270,10 @@ function transformSharePointValue(sharePointField, value, type) {
   }
 
   if (["Estacion", "EstPerdida", "EstOrig", "EstDest"].includes(sharePointField)) {
-    return LOCATION_VALUES[value] || value;
+    const locations = sharePointField === "Estacion" && type?.key === "SUGERENCIAS"
+      ? SUGGESTION_LOCATION_VALUES
+      : LOCATION_VALUES;
+    return locations[value] || value;
   }
 
   if (sharePointField === "Clasificacion") {

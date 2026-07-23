@@ -25,6 +25,10 @@ function validateSolicitudPayload(rawPayload) {
         errors.push(field);
       }
     }
+
+    if (type.key === "SUGERENCIAS" && isMissing(payload.Estacion) && isMissing(payload.OtraUbicacion)) {
+      errors.push("Estacion/OtraUbicacion");
+    }
   }
 
   if (payload.recibirPostal === true || payload.recibirPostal === "on") {

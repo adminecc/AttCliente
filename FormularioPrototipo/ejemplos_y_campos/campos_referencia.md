@@ -20,6 +20,8 @@ Los campos enviados a la API deben usar los nombres internos de SharePoint (`fie
 | `Direccion`, `Numero`, `Escalera`, `Piso`, `Puerta`, `CP`, `Localidad`, `Provincia` | Todas                          | Direccion postal/contacto.                                 |
 | `EstadoCliente`                                                                     | Todas con columna equivalente | La API lo inicializa como`En tramite`.                     |
 
+Las provincias se envían con su etiqueta visible (`Málaga`, no `malaga`). Para que todas las nacionalidades ofrecidas por el formulario sean válidas, hay que añadir `CHIPRE`, `EMIRATOS ÁRABES UNIDOS`, `ESLOVENIA` y `OTROS` a las opciones de `Nacionalidad` en las listas de SharePoint.
+
 ## ConsultaInformacion
 
 Campos especificos: `TipoDeTitulo`, `NumTituloViaje`, `Descripcion`.
@@ -30,7 +32,7 @@ Obligatorio API: `Descripcion`.
 
 Campos especificos: `Estacion`, `OtraUbicacion`, `TipoDeTitulo`, `NumTituloViaje`, `Descripcion`.
 
-Obligatorio API: `Estacion`, `Descripcion`.
+Obligatorio API: `Descripcion` y al menos uno entre `Estacion` y `OtraUbicacion`.
 
 ## Agradecimientos
 
@@ -42,11 +44,40 @@ Nota: NumIdentificacionPersonaTrabajad acepta string por si se indica nombre en 
 
 ## ReclamacionesQuejas
 
-Campos directos usados por ahora: `Clasificacion`, `FechaYHoraConsulta`, `Lugar`, `TipoDeTitulo`, `NBilleteTitulo`, `ImporteAPagar`, `DescripcionConsulta`, `Observaciones`.
+Campos directos usados por ahora: `Clasificacion`, `FechaYHoraConsulta`, `Lugar`, `TipoDeTitulo`, `NBilleteTitulo`, `ImporteAPagar`, `ModoPago`, `TipoTarjetaBancaria`, `PANFisicaPrimeros6`, `PANFisicaUltimos4`, `PANVirtualPrimeros6`, `PANVirtualUltimos4`, `EmailMetroPay`, `DescripcionConsulta`, `Observaciones`.
 
 Obligatorio API: `Clasificacion`, `FechaYHoraConsulta`, `Lugar`, `DescripcionConsulta`.
 
 Nota: `DAB`, `Tipologia`, `Subtipologia`, `EstadoDeLaResolucion` y otros campos de clasificacion avanzada son `lookup`; la API solo debe enviarlos cuando pueda resolverlos contra la lista auxiliar correspondiente. Actualmente el formulario envia los campos directos necesarios para registrar la reclamacion.
+
+### Campos creados y enviados directamente
+
+| Nombre visible | Nombre interno | Tipo | Uso |
+| --- | --- | --- | --- |
+| Modo de pago | `ModoPago` | Elección | Efectivo, tarjeta bancaria física o tarjeta bancaria en el móvil. |
+| Tipo de tarjeta bancaria | `TipoTarjetaBancaria` | Texto (una línea) | Guarda la etiqueta seleccionada o, si se elige `Otra`, el texto escrito por la persona usuaria. No se necesita un campo `OtroTipoTarjetaBancaria`. |
+| PAN físico, primeros 6 | `PANFisicaPrimeros6` | Texto (una línea) | Primeros seis dígitos; texto para conservar ceros iniciales. |
+| PAN físico, últimos 4 | `PANFisicaUltimos4` | Texto (una línea) | Últimos cuatro dígitos. |
+| PAN virtual, primeros 6 | `PANVirtualPrimeros6` | Texto (una línea) | Primeros seis dígitos de la tarjeta virtual. |
+| PAN virtual, últimos 4 | `PANVirtualUltimos4` | Texto (una línea) | Últimos cuatro dígitos de la tarjeta virtual. |
+| Correo de MetroPay | `EmailMetroPay` | Texto (una línea) | Correo de la cuenta de MetroPay; ya no se reutiliza `NClienteNTarjCredito`. |
+
+Las opciones de `ModoPago` en SharePoint deben coincidir con las etiquetas del formulario: `Efectivo`, `Tarjeta bancaria física` y `Tarjeta bancaria en el móvil`.
+
+### Campos pendientes para sacar más datos de Observaciones
+
+Estos campos no se enviarán hasta que existan en SharePoint:
+
+| Nombre visible | Nombre interno recomendado | Tipo | Uso |
+| --- | --- | --- | --- |
+| Otra ubicación | `OtraUbicacion` | Texto (una línea) | Lugar escrito cuando se selecciona otra ubicación. |
+| Unidad de tren | `NUnidadTren` | Elección | Unidad seleccionada, por ejemplo `UT-3010`. |
+| Canal de venta o recarga | `CanalVentaRecarga` | Elección | Online o máquina automática de billetes. |
+| Plataforma de pago | `PlataformaPago` | Elección | App/Web de recargas o PayPal. |
+| Tipo de operación | `TipoOperacion` | Elección | Compra de un título nuevo o recarga de un título existente. |
+| Número del título recargado | `NumeroTituloRecargado` | Texto (una línea) | Numeración del título objeto de la recarga. |
+
+Además, conviene actualizar las opciones de `Lugar`, `PuntoDeVenta` y `TipoDeTitulo` para que coincidan exactamente con las etiquetas del formulario. En `Lugar` se deben añadir `Interior del tren` y `Otra ubicación`. Solo se guardan fragmentos PAN de seis y cuatro dígitos; nunca el PAN completo.
 
 ## Objetos Perdidos NUEVA
 
