@@ -1,4 +1,11 @@
 function getConfig() {
+  const sanctionsSiteUrl =
+    process.env.SHAREPOINT_SANCIONES_SITE_URL ||
+    process.env.SHAREPOINT_ATTCLIENTE_SITE_URL ||
+    "https://metromalaga.sharepoint.com/sites/ConectaDEV";
+  const sanctionsListName =
+    process.env.SHAREPOINT_SANCIONES_LIST_NAME || "Sanciones";
+
   return {
     tenantId: process.env.AZURE_TENANT_ID,
     clientId: process.env.AZURE_CLIENT_ID,
@@ -18,19 +25,18 @@ function getConfig() {
         process.env.SHAREPOINT_TARJETAS_SITE_URL ||
         "https://metromalaga.sharepoint.com/sites/TarjetaMasMetro",
       SHAREPOINT_SANCIONES_SITE_ID:
-        process.env.SHAREPOINT_SANCIONES_SITE_URL ||
-        process.env.SHAREPOINT_ATTCLIENTE_SITE_URL ||
-        "https://metromalaga.sharepoint.com/sites/ConectaDEV",
+        sanctionsSiteUrl,
     },
     sanctions: {
       siteId:
         process.env.SHAREPOINT_SANCIONES_SITE_ID ||
         process.env.SHAREPOINT_ATTCLIENTE_SITE_ID ||
         process.env.SHAREPOINT_SITE_ID,
-      listName: process.env.SHAREPOINT_SANCIONES_LIST_NAME || "Sanciones",
+      siteUrl: sanctionsSiteUrl,
+      listName: sanctionsListName,
       listUrl:
         process.env.SHAREPOINT_SANCIONES_LIST_URL ||
-        "https://metromalaga.sharepoint.com/sites/ConectaDEV/Lists/Sanciones/AllItems.aspx",
+        `${sanctionsSiteUrl.replace(/\/$/, "")}/Lists/${encodeURIComponent(sanctionsListName)}/AllItems.aspx`,
     },
   };
 }

@@ -44,7 +44,6 @@ const FORM_TYPES = {
       listUrl: "https://metromalaga.sharepoint.com/sites/ConectaDEV/Lists/Sugerencias/AllItems.aspx",
     },
     requiredFields: [
-      "Estacion",
       "Descripcion",
     ],
   },
