@@ -28,9 +28,9 @@ El mapeo de `OrigenFraude` está en `script.js`. Por ejemplo, `ATZ` se muestra c
 
 `FechaInfraccion` representa el momento en que se impuso la sanción y debe llegar como fecha y hora, preferiblemente en ISO 8601 (`2026-06-03T18:42:00+02:00`). La interfaz muestra ambos valores. No se utiliza `Created`, `createdDateTime` ni la fecha de creación del elemento de SharePoint.
 
-## Contrato previsto para la API
+## Contrato de la API
 
-La pantalla ya separa la consulta de la interfaz en `consult(payload)`. Mientras `API_CONFIG.endpoint` esté vacío usa `data/sample-sanctions.js`. Para conectarla, basta con configurar el endpoint en `script.js`:
+La pantalla separa la consulta de la interfaz en `consult(payload)`. Mientras `API_CONFIG.endpoint` esté vacío usa `data/sample-sanctions.js`. El endpoint real ya implementado es `POST /api/sanciones/consultar`; para conectarlo basta con configurar esa URL en `script.js`:
 
 ```js
 const API_CONFIG = {
@@ -127,9 +127,8 @@ El botón `Pagar` solo aparece si `EstadoDelPago` contiene un estado pendiente, 
 
 La decisión de mostrar u ocultar el botón es solo visual. La API de pago deberá volver a comprobar expediente, identidad, importe y estado antes de crear una operación.
 
-## Próximo paso de integración
+## Siguiente paso
 
-1. Mantener sincronizados los StaticName confirmados en la extracción: `NombreCliente`, `DNI`, `NombreTutor`, `DNITutor` y `FechaInfraccion`.
-2. Implementar `POST /api/sanciones/consultar`, filtrando por `Title` y `DNI` en SharePoint y devolviendo únicamente los campos de la tabla.
-3. Configurar `API_CONFIG.endpoint` y probar la respuesta real conservando los nombres estáticos.
-4. Añadir la URL de la pasarela al contrato solo cuando exista el flujo de pago.
+1. Mantener sincronizados los StaticName confirmados en la extracción.
+2. Configurar `API_CONFIG.endpoint` y probar la respuesta real.
+3. Cuando exista pasarela, añadir un flujo de inicio de pago y una confirmación servidor-servidor; el navegador no marcará directamente la sanción como pagada.
