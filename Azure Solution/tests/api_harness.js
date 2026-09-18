@@ -227,6 +227,7 @@ async function main() {
     buildFieldCompatibilityWarnings,
     prepareLookupFieldWrites,
     formatAttachmentUploadError,
+    mapDocumentLibraryAttachments,
     buildSolicitudResponse,
     buildSancionResponse,
   } = require("../src/shared/sharepoint");
@@ -778,6 +779,31 @@ async function main() {
       assert(plan.fileName === "informe_ prueba_.pdf", `Archivo inesperado: ${plan.fileName}.`);
       assert(plan.fields.IDRef === 123, "IDRef debe guardar el ID numerico del item creado.");
       assert(plan.fields.Visible === true, "Visible debe marcarse a true.");
+    }),
+
+    runTest("consulta publica devuelve solo adjuntos marcados como visibles", async () => {
+      const attachments = mapDocumentLibraryAttachments([
+        {
+          name: "visible.pdf",
+          file: { mimeType: "application/pdf" },
+          size: 2048,
+          webUrl: "https://example.test/visible.pdf",
+          listItem: { fields: { Visible: true } },
+        },
+        {
+          name: "oculto.pdf",
+          file: { mimeType: "application/pdf" },
+          listItem: { fields: { Visible: false } },
+        },
+        {
+          name: "sin-valor.pdf",
+          file: { mimeType: "application/pdf" },
+          listItem: { fields: {} },
+        },
+      ]);
+
+      assert(attachments.length === 1, "Solo debe devolverse el adjunto con Visible=true.");
+      assert(attachments[0].nombre === "visible.pdf", "Se devolvio un adjunto no visible.");
     }),
 
     runTest("consultarSolicitud exige dato de confirmacion y token", async () => {
