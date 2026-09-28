@@ -227,6 +227,7 @@ async function main() {
     buildFieldCompatibilityWarnings,
     prepareLookupFieldWrites,
     formatAttachmentUploadError,
+    mapDocumentLibraryAttachments,
     buildSolicitudResponse,
     buildSancionResponse,
   } = require("../src/shared/sharepoint");
@@ -561,6 +562,7 @@ async function main() {
 
       assert(validation.valid, `No se esperaban errores de validacion: ${validation.errors.join(", ")}.`);
       assert(fields.Title === "OBJ-2026-ABCDEFGH", "Title debe contener el token de solicitud.");
+      assert(fields.FechaHoraRegistro === "2026-06-29T08:00:00.000Z", "Se esperaba registrar la fecha de alta de objetos perdidos.");
       assert(fields.LineaMetro.includes("1"), "Se esperaba LineaMetro normalizada.");
       assert(fields.Localizacion === "En un tren", "Se esperaba Localizacion normalizada.");
       assert(fields.EstOrig === "Atarazanas", "Se esperaba EstOrig normalizado.");
@@ -674,6 +676,7 @@ async function main() {
       );
 
       assert(fields.DAB === "ATZ-DAB-101", `Se esperaba ATZ-DAB-101 y llego ${fields.DAB}.`);
+      assert(fields.FechaYHoraRegistro === "2026-06-29T08:00:00.000Z", "Se esperaba registrar la fecha de alta de reclamaciones.");
     }),
 
     runTest("Reclamaciones conserva los campos bancarios especificos", async () => {
@@ -778,6 +781,31 @@ async function main() {
       assert(plan.fileName === "informe_ prueba_.pdf", `Archivo inesperado: ${plan.fileName}.`);
       assert(plan.fields.IDRef === 123, "IDRef debe guardar el ID numerico del item creado.");
       assert(plan.fields.Visible === true, "Visible debe marcarse a true.");
+    }),
+
+    runTest("consulta publica devuelve solo adjuntos marcados como visibles", async () => {
+      const attachments = mapDocumentLibraryAttachments([
+        {
+          name: "visible.pdf",
+          file: { mimeType: "application/pdf" },
+          size: 2048,
+          webUrl: "https://example.test/visible.pdf",
+          listItem: { fields: { Visible: true } },
+        },
+        {
+          name: "oculto.pdf",
+          file: { mimeType: "application/pdf" },
+          listItem: { fields: { Visible: false } },
+        },
+        {
+          name: "sin-valor.pdf",
+          file: { mimeType: "application/pdf" },
+          listItem: { fields: {} },
+        },
+      ]);
+
+      assert(attachments.length === 1, "Solo debe devolverse el adjunto con Visible=true.");
+      assert(attachments[0].nombre === "visible.pdf", "Se devolvio un adjunto no visible.");
     }),
 
     runTest("consultarSolicitud exige dato de confirmacion y token", async () => {

@@ -629,7 +629,8 @@ async function getListItemAttachments(
   const url =
     `${GRAPH_BASE_URL}/sites/${encodeURIComponent(target.siteId)}` +
     `/drives/${encodeURIComponent(library.driveId)}` +
-    `/items/${encodeURIComponent(folder.id)}/children`;
+    `/items/${encodeURIComponent(folder.id)}/children` +
+    "?$expand=listItem($expand=fields($select=Visible))";
 
   context?.log?.(
     `getListItemAttachments - GET ${url}`
@@ -664,7 +665,7 @@ async function getListItemAttachmentsFallback(accessToken, siteId, libraryListId
 
 function mapDocumentLibraryAttachments(items) {
   return items
-    .filter((item) => item.file)
+    .filter((item) => item.file && item.listItem?.fields?.Visible === true)
     .map((file) => ({
       nombre: file.name,
       tipo: file.file?.mimeType || "",
@@ -709,6 +710,11 @@ function buildSharePointFields(payload, type, token, createdAt) {
   if (type.key === "OBJETOS_PERDIDOS") {
     fields.Estado = payload.Estado || "Registrado";
     fields.TipoRegistro = payload.TipoRegistro || "Objeto Perdido Reclamado";
+    fields.FechaHoraRegistro = createdAt;
+  }
+
+  if (type.key === "RECLAMACIONES") {
+    fields.FechaYHoraRegistro = createdAt;
   }
 
   for (const [payloadField, value] of Object.entries(payload)) {
@@ -1637,6 +1643,7 @@ module.exports = {
   uploadNativeListItemAttachments,
   formatAttachmentUploadError,
   buildDocumentLibraryAttachmentPlan,
+  mapDocumentLibraryAttachments,
   prepareLookupFieldWrites,
   findListItemByEmailAndToken,
   findListItemByContactAndToken,
