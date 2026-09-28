@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const PDFDocument = require("pdfkit");
 
+
 const BRAND = {
   red: "#DC241F",
   burgundy: "#6B130C",
@@ -39,9 +40,9 @@ function buildPdf({ payload, createdAt, signature, logoPath }) {
       size: "A4",
       margins: { top: 42, right: 48, bottom: 46, left: 48 },
       info: {
-        Title: "SOLICITUD TARJETA + METRO",
+        Title: "SOLICITUD EXPEDICIÓN TARJETA + METRO",
         Author: "Metro de Málaga",
-        Subject: "Solicitud Tarjeta Mas Metro",
+        Subject: "Solicitud Tarjeta Más Metro",
         Creator: "Azure Functions",
       },
       bufferPages: true,
@@ -199,90 +200,133 @@ function drawDataCard(doc, rows) {
 
 function drawSignatureBlock(doc, createdAt, signature) {
   const x = doc.page.margins.left;
-  const width = doc.page.width - doc.page.margins.left - doc.page.margins.right;
-  const minY = Math.max(doc.y + 54, 545);
+  const width =
+    doc.page.width -
+    doc.page.margins.left -
+    doc.page.margins.right;
 
-  doc.y = minY;
+  /*
+   * La fecha ya NO tiene una posición fija.
+   *
+   * - Sin tutor: conservamos aproximadamente la posición actual.
+   * - Con tutor: se desplaza automáticamente hacia abajo
+   *   dejando 35 puntos después del último bloque de datos.
+   */
+  const dateY = Math.max(doc.y + 35, 515);
+
   doc
     .fillColor(BRAND.text)
     .font("Helvetica")
     .fontSize(11)
-    .text(formatSpanishDate(createdAt), x, doc.y, {
+    .text(formatSpanishDate(createdAt), x, dateY, {
       width,
       align: "center",
     });
 
-  doc.moveDown(1.25);
-  doc
-    .fillColor(BRAND.burgundy)
-    .font("Helvetica-Bold")
-    .fontSize(9)
-    .text("FIRMA", x, doc.y, { width, align: "center", characterSpacing: 1 });
-
-  const signatureTop = doc.y + 10;
-  const signatureBoxWidth = 225;
-  const signatureBoxHeight = 105;
-  const signatureBoxX = x + (width - signatureBoxWidth) / 2;
-
-  doc
-    .roundedRect(signatureBoxX, signatureTop, signatureBoxWidth, signatureBoxHeight, 7)
-    .lineWidth(0.8)
-    .strokeColor(BRAND.border)
-    .stroke();
-
   if (signature) {
-    doc.image(signature, signatureBoxX + 12, signatureTop + 10, {
-      fit: [signatureBoxWidth - 24, signatureBoxHeight - 20],
+    const signatureWidth = 145;
+    const signatureHeight = 65;
+
+    const signatureX =
+      x + (width - signatureWidth) / 2;
+
+    doc.image(signature, signatureX, dateY + 40, {
+      fit: [signatureWidth, signatureHeight],
       align: "center",
       valign: "center",
     });
-  } else {
-    doc
-      .fillColor(BRAND.muted)
-      .font("Helvetica-Oblique")
-      .fontSize(8.5)
-      .text("Firma no facilitada", signatureBoxX, signatureTop + 47, {
-        width: signatureBoxWidth,
-        align: "center",
-      });
   }
 
-  doc.y = signatureTop + signatureBoxHeight + 10;
+  // Dejamos actualizado doc.y por si posteriormente
+  // se añade cualquier otro elemento al documento.
+  doc.y = dateY + 115;
 }
 
 function drawFooter(doc) {
-  const x = doc.page.margins.left;
-  const width = doc.page.width - doc.page.margins.left - doc.page.margins.right;
-  const y = doc.page.height - doc.page.margins.bottom - 12;
+  const x = 34;
+  const width = doc.page.width - 68;
+
+  // Algo más arriba para permitir una fuente mayor
+  const footerY = doc.page.height - 132;
+
+  const privacyTitle =
+    "INFORMACIÓN SOBRE TRATAMIENTO DE DATOS PERSONALES, POLÍTICA DE PRIVACIDAD";
+
+  const privacyText =
+    "Responsable del tratamiento: METRO DE MÁLAGA, S.A., con domicilio en Camino de Santa Inés, s/n, 29590 – Málaga, NIF A-92592856 (\"MM\"). " +
+    "Delegado de Protección de Datos: dpd@metromalaga.es. " +
+    "Finalidad del tratamiento: tramitar y gestionar adecuadamente su solicitud de emisión de título de transporte personalizado. " +
+    "Base de legitimación: consentimiento. El consentimiento podrá ser retirado en cualquier momento, si bien, en caso de ser retirado, MM no podrá seguir tramitando su solicitud. " +
+    "Plazo de conservación: plazo necesario para gestionar el uso del título emitido y el necesario para el cumplimiento de obligaciones legales. " +
+    "Comunicación: MM podrá comunicar los datos personales a encargados del tratamiento y/o a organismos públicos competentes. " +
+    "No se prevén transferencias internacionales de datos. " +
+    "Derechos: podrá ejercer sus derechos (acceso, rectificación o supresión, limitación, oposición, portabilidad y a no ser objeto de decisiones individuales automatizadas) " +
+    "a través del correo electrónico dpd@metromalaga.es o mediante correo postal a la atención del Dpto. de Asesoría Jurídica, a Camino de Santa Inés, s/n, 29590, Málaga. " +
+    "Puede consultar información adicional sobre protección de datos en nuestra página web www.metromalaga.es o directamente al personal de MM presente en nuestras instalaciones.";
+
+  doc.save();
 
   doc
-    .moveTo(x, y - 8)
-    .lineTo(x + width, y - 8)
-    .lineWidth(0.5)
-    .strokeColor("#DED0CB")
-    .stroke();
-
-  doc
-    .fillColor(BRAND.muted)
-    .font("Helvetica")
-    .fontSize(7.5)
-    .text("Metro de Málaga - Solicitud generada electrónicamente", x, y, {
+    .fillColor("#3F3F3F")
+    .font("Helvetica-Bold")
+    .fontSize(6.2)
+    .text(privacyTitle, x, footerY, {
       width,
-      align: "center",
+      align: "left",
+      underline: true,
       lineBreak: false,
     });
+
+  doc
+    .fillColor("#555555")
+    .font("Helvetica")
+    .fontSize(5.6)
+    .text(privacyText, x, footerY + 10, {
+      width,
+      align: "justify",
+      lineGap: 0.6,
+    });
+
+  doc.restore();
 }
 
 function getApplicantData(payload) {
-  return {
-    name: firstValue(payload, [
+  const name =
+    firstValue(payload, [
       "NombreCompleto",
       "NombreSolicitante",
       "Solicitante",
       "NombreApellidos",
       "NombreYApellidos",
-      "Nombre",
-    ]),
+    ]) ||
+    joinNonEmpty([
+      firstValue(payload, [
+        "NombreCliente",
+        "Nombre",
+      ]),
+      firstValue(payload, [
+        "ApellidoCliente1",
+        "PrimerApellido",
+        "Apellido1",
+      ]),
+      firstValue(payload, [
+        "ApellidoCliente2",
+        "SegundoApellido",
+        "Apellido2",
+      ]),
+      // Por si el frontend manda ambos apellidos juntos
+      !firstValue(payload, [
+        "ApellidoCliente1",
+        "PrimerApellido",
+        "Apellido1",
+      ])
+        ? firstValue(payload, ["Apellidos"])
+        : "",
+    ]);
+
+  return {
+    name,
+
     document: firstValue(payload, [
       "DNICliente",
       "DniCliente",
@@ -295,12 +339,15 @@ function getApplicantData(payload) {
       "NIF",
       "NIE",
     ]),
+
     phone: firstValue(payload, [
       "TelefonoContacto",
+      "TelefonoCliente1",
       "Telefono",
       "Movil",
       "TelefonoSolicitante",
     ]),
+
     email: firstValue(payload, [
       "CorreoElectronico",
       "EmailCliente",
@@ -311,25 +358,70 @@ function getApplicantData(payload) {
 }
 
 function getRepresentativeData(payload) {
-  const data = {
-    name: firstValue(payload, [
+  const name =
+    firstValue(payload, [
+      "NombreCompletoTutor",
       "NombreCompletoRepresentante",
-      "NombreRepresentante",
-      "Representante",
+      "NombreApellidosTutor",
       "NombreApellidosRepresentante",
-    ]),
+    ]) ||
+    joinNonEmpty([
+      firstValue(payload, [
+        "NombreTutor",
+        "NombreRepresentante",
+        "Representante",
+        "NombreRep",
+      ]),
+      firstValue(payload, [
+        "ApellidoTutor1",
+        "ApellidoRepresentante1",
+        "ApellidoRep1",
+        "PrimerApellidoTutor",
+      ]),
+      firstValue(payload, [
+        "ApellidoTutor2",
+        "ApellidoRepresentante2",
+        "ApellidoRep2",
+        "SegundoApellidoTutor",
+      ]),
+      !firstValue(payload, [
+        "ApellidoTutor1",
+        "ApellidoRepresentante1",
+        "ApellidoRep1",
+        "PrimerApellidoTutor",
+      ])
+        ? firstValue(payload, [
+            "ApellidosTutor",
+            "ApellidosRepresentante",
+          ])
+        : "",
+    ]);
+
+  const data = {
+    name,
+
     document: firstValue(payload, [
+      "DNITutor",
+      "DniTutor",
       "DNIRepresentante",
       "NIFRepresentante",
       "NIERepresentante",
       "DocumentoRepresentante",
       "DniNifNieRepresentante",
+      "DNIRep",
     ]),
+
     phone: firstValue(payload, [
+      "TelefonoTutor",
       "TelefonoRepresentante",
+      "TelefonoRep1",
       "MovilRepresentante",
     ]),
+
     email: firstValue(payload, [
+      "EmailTutor",
+      "CorreoTutor",
+      "EmailRep",
       "EmailRepresentante",
       "CorreoRepresentante",
       "CorreoElectrónicoRepresentante",
@@ -338,7 +430,9 @@ function getRepresentativeData(payload) {
 
   return {
     ...data,
-    hasData: Object.values(data).some((value) => String(value || "").trim() !== ""),
+    hasData: Object.values(data).some(
+      (value) => String(value || "").trim() !== ""
+    ),
   };
 }
 
@@ -401,13 +495,39 @@ function resolveLogoPath(explicitPath) {
 }
 
 function formatSpanishDate(date) {
-  const weekdays = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-  const months = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+  const weekdays = [
+    "Domingo",
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
   ];
 
-  return `En Málaga a ${weekdays[date.getDay()]} ${date.getDate()} de ${months[date.getMonth()]} de ${date.getFullYear()}`;
+  const months = [
+    "enero",
+    "febrero",
+    "marzo",
+    "abril",
+    "mayo",
+    "junio",
+    "julio",
+    "agosto",
+    "septiembre",
+    "octubre",
+    "noviembre",
+    "diciembre",
+  ];
+
+  return `En Málaga a ${weekdays[date.getDay()]}, ${date.getDate()} de ${months[date.getMonth()]} de ${date.getFullYear()}`;
+}
+
+function joinNonEmpty(values) {
+  return values
+    .map((value) => String(value || "").trim())
+    .filter(Boolean)
+    .join(" ");
 }
 
 function firstValue(source, keys) {

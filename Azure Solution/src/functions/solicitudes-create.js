@@ -1,7 +1,11 @@
 const { app } = require("@azure/functions");
 const { validateSolicitudPayload } = require("../shared/validation");
 const { generarTokenForType } = require("../shared/token");
-const { getAccessTokenConfig, validateAccessToken } = require("../shared/access-token");
+const {
+  getAccessTokenConfig,
+  validateAccessToken,
+  createTableClient,
+} = require("../shared/access-token");
 const { getSiteUrlForType } = require("../shared/config");
 const {
   getGraphAccessToken,
@@ -16,222 +20,327 @@ app.http("crearSolicitud", {
   authLevel: "anonymous",
   route: "solicitudes/crear",
   handler: async (request, context) => {
-    context.log("crearSolicitud - inicio");
-
-    // Seguridad: validar el token temporal antes de procesar el body, adjuntos, firmas o SharePoint.
-    const accessTokenConfig = getAccessTokenConfig();
-    if (accessTokenConfig.requireForSolicitudes) {
-      let accessTokenValidation;
-      try {
-        accessTokenValidation = await validateAccessToken(request, { config: accessTokenConfig });
-      } catch (error) {
-        context.error("crearSolicitud - error validando token temporal:", error.message);
-        return jsonResponse(500, {
-          ok: false,
-          error: "Error validando el token temporal.",
-        });
-      }
-
-      if (!accessTokenValidation.valid) {
-        context.warn?.(`crearSolicitud - token temporal rechazado: ${accessTokenValidation.error || "no valido"}`);
-        return jsonResponse(accessTokenValidation.status || 401, {
-          ok: false,
-          error: accessTokenValidation.error || "Token temporal no valido.",
-        });
-      }
-    }
-
-    let body;
-    let files = [];
     try {
-      const parsedRequest = await parseSolicitudRequest(request);
-      body = parsedRequest.payload;
-      files = parsedRequest.files;
-      context.log(
-        `crearSolicitud - payload recibido tipo=${body?.tipoFormulario || "desconocido"} adjuntos=${files.length}`
-      );
-      files.forEach((file, index) => {
-        context.log(
-          `crearSolicitud - adjunto[${index}] field=${file.fieldName || ""} nombre='${file.fileName || ""}' tipo=${file.contentType || ""} bytes=${file.sizeBytes || file.content?.length || 0}`
-        );
-      });
+      return await handleCrearSolicitud(request, context);
     } catch (error) {
-      return jsonResponse(400, {
-        ok: false,
-        error: error.message || "El cuerpo de la peticion no es valido.",
-      });
-    }
+      context.error("crearSolicitud - error no controlado:", error.message, error.stack);
 
-
-    const validation = validateSolicitudPayload(body);
-    if (!validation.valid) {
-      context.log(`crearSolicitud - ${validation.errors.length} error(es) de validacion`);
-      return jsonResponse(400, {
-        ok: false,
-        errors: validation.errors,
-      });
-    }
-
-    const createdAt = new Date().toISOString();
-    const token = generarTokenForType(validation.type);
-    const fields = buildSharePointFields(validation.payload, validation.type, token, createdAt);
-
-    let accessToken;
-    try {
-      accessToken = await getGraphAccessToken();
-    } catch (error) {
-      context.error("crearSolicitud - error autenticando con Microsoft Graph:", error.message);
       return jsonResponse(500, {
         ok: false,
-        error: "Error de autenticacion con Microsoft Graph.",
+        error: "Error interno no controlado en la creacion de la solicitud.",
         diagnostics: buildDiagnostics(error),
       });
     }
-
-    let createdItem;
-    try {
-      createdItem = await createListItem(
-        accessToken,
-        validation.type,
-        fields,
-        undefined,
-        context
-      );
-    } catch (error) {
-      context.error("crearSolicitud - error creando item SharePoint:", error.message, error.response?.data);
-      return jsonResponse(500, {
-        ok: false,
-        error: "Error al registrar la solicitud en SharePoint.",
-        diagnostics: buildDiagnostics(error),
-      });
-    }
-
-    const attachmentWarnings = [];
-    const uploadedAttachments = [];
-
-    // Para el resto de formularios se conserva exactamente el flujo original.
-    // El generador PDF solo se carga y ejecuta para TARJETAS_METRO.
-    if (isTarjetaMasMetro(validation.type)) {
-      let generatedReport;
-
-      try {
-        const {
-          generarInformeTarjetaMasMetro,
-        } = require("../shared/tarjeta-mas-metro-report");
-
-        generatedReport = await generarInformeTarjetaMasMetro(
-          validation.payload,
-          {
-            createdAt,
-            token,
-            files,
-            itemId: createdItem.id,
-            logoPath: process.env.METRO_MALAGA_LOGO_PATH,
-          }
-        );
-
-        validateGeneratedReport(generatedReport);
-
-        context.log(
-          `crearSolicitud - informe Tarjeta Mas Metro generado nombre='${generatedReport.fileName}' bytes=${generatedReport.sizeBytes}`
-        );
-      } catch (error) {
-        context.error(
-          "crearSolicitud - item creado, pero no se pudo generar el informe Tarjeta Mas Metro:",
-          error.message
-        );
-
-        return jsonResponse(500, {
-          ok: false,
-          partialSuccess: true,
-          solicitudId: createdItem.id,
-          token,
-          error: "La solicitud se ha creado, pero no se pudo generar el informe PDF.",
-          diagnostics: buildDiagnostics(error),
-        });
-      }
-
-      try {
-
-        await new Promise(resolve => setTimeout(resolve, 5000));
-        context.log(`Item ID creado: ${createdItem.id}`);
-        
-        const uploadResult = await uploadNativeListItemAttachments(
-          accessToken,
-          validation.type,
-          createdItem.id,
-          [...files, generatedReport],
-          undefined,
-          context
-        );
-
-        uploadedAttachments.push(...(uploadResult.uploaded || []));
-        attachmentWarnings.push(...(uploadResult.warnings || []));
-
-        if ((uploadResult.uploaded || []).length === 0) {
-          throw new Error(
-            (uploadResult.warnings || []).join(" | ") ||
-            "No se pudo adjuntar ningun documento al item."
-          );
-        }
-      } catch (error) {
-        context.error(
-          "crearSolicitud - item e informe generados, pero no se pudieron subir los adjuntos de Tarjeta Mas Metro:",
-          error.message
-        );
-
-        return jsonResponse(500, {
-          ok: false,
-          partialSuccess: true,
-          solicitudId: createdItem.id,
-          token,
-          error: "La solicitud se ha creado, pero no se pudieron adjuntar los documentos.",
-          diagnostics: buildDiagnostics(error),
-        });
-      }
-    } else if (files.length > 0) {
-      try {
-        const uploadResult = await uploadListItemAttachments(
-          accessToken,
-          validation.type,
-          createdItem.id,
-          files,
-          undefined,
-          context,
-          token
-        );
-        uploadedAttachments.push(...uploadResult.uploaded);
-        attachmentWarnings.push(...uploadResult.warnings);
-      } catch (error) {
-        context.warn?.(`crearSolicitud - solicitud creada sin adjuntos por error de subida: ${error.message}`);
-        attachmentWarnings.push(`Solicitud creada, pero no se pudieron subir adjuntos: ${error.message}`);
-      }
-    }
-
-    return jsonResponse(201, {
-      ok: true,
-      solicitudId: createdItem.id,
-      token,
-      tipoFormulario: validation.type.formValue,
-      listaDestino: validation.type.key,
-      nombreLista: validation.type.sharePoint.listName,
-      siteDestino: getSiteUrlForType(validation.type),
-      listaUrl: validation.type.sharePoint.listUrl,
-      creadoEn: createdAt,
-      email: validation.payload.CorreoElectronico || validation.payload.EmailCliente,
-      adjuntos: uploadedAttachments,
-      warnings: attachmentWarnings,
-      debug: {
-        adjuntosRecibidos: describeFilesForDebug(files),
-      },
-      mensaje: "Solicitud registrada correctamente. Se enviara el token de consulta al correo indicado.",
-    });
   },
 });
 
+async function handleCrearSolicitud(request, context) {
+  context.log("crearSolicitud - inicio");
+
+  const accessTokenConfig = getAccessTokenConfig();
+  let accessTokenValidation = null;
+
+  // Seguridad: se valida el token antes de procesar la solicitud, pero NO se marca
+  // como usado en este punto. Se cerrara solo cuando el item se haya creado.
+  if (accessTokenConfig.requireForSolicitudes) {
+    try {
+      accessTokenValidation = await validateAccessToken(request, {
+        config: {
+          ...accessTokenConfig,
+          singleUse: false,
+        },
+      });
+    } catch (error) {
+      context.error("crearSolicitud - error validando token temporal:", error.message);
+      return jsonResponse(500, {
+        ok: false,
+        error: "Error validando el token temporal.",
+        diagnostics: buildDiagnostics(error),
+      });
+    }
+
+    if (!accessTokenValidation.valid) {
+      context.warn?.(`crearSolicitud - token temporal rechazado: ${accessTokenValidation.error || "no valido"}`);
+      return jsonResponse(accessTokenValidation.status || 401, {
+        ok: false,
+        error: accessTokenValidation.error || "Token temporal no valido.",
+      });
+    }
+
+    if (accessTokenConfig.singleUse && isAccessTokenEntityUsed(accessTokenValidation.entity)) {
+      context.warn?.("crearSolicitud - token temporal rechazado: Token de acceso ya utilizado.");
+      return jsonResponse(401, {
+        ok: false,
+        error: "Token de acceso ya utilizado.",
+      });
+    }
+  }
+
+  let body;
+  let files = [];
+  try {
+    const parsedRequest = await parseSolicitudRequest(request);
+    body = parsedRequest.payload;
+    files = parsedRequest.files;
+    context.log(
+      `crearSolicitud - payload recibido tipo=${body?.tipoFormulario || "desconocido"} adjuntos=${files.length}`
+    );
+    files.forEach((file, index) => {
+      context.log(
+        `crearSolicitud - adjunto[${index}] field=${file.fieldName || ""} nombre='${file.fileName || ""}' tipo=${file.contentType || ""} bytes=${file.sizeBytes || file.content?.length || 0}`
+      );
+    });
+  } catch (error) {
+    return jsonResponse(400, {
+      ok: false,
+      error: error.message || "El cuerpo de la peticion no es valido.",
+    });
+  }
+
+  const validation = validateSolicitudPayload(body);
+  if (!validation.valid) {
+    context.log(`crearSolicitud - ${validation.errors.length} error(es) de validacion`);
+    return jsonResponse(400, {
+      ok: false,
+      errors: validation.errors,
+    });
+  }
+
+  const createdAt = new Date().toISOString();
+  const token = generarTokenForType(validation.type);
+  const fields = buildSharePointFields(validation.payload, validation.type, token, createdAt);
+
+  let accessToken;
+  try {
+    accessToken = await getGraphAccessToken();
+  } catch (error) {
+    context.error("crearSolicitud - error autenticando con Microsoft Graph:", error.message);
+    return jsonResponse(500, {
+      ok: false,
+      error: "Error de autenticacion con Microsoft Graph.",
+      diagnostics: buildDiagnostics(error),
+    });
+  }
+
+  let createdItem;
+  try {
+    createdItem = await createListItem(
+      accessToken,
+      validation.type,
+      fields,
+      undefined,
+      context
+    );
+  } catch (error) {
+    context.error("crearSolicitud - error creando item SharePoint:", error.message, error.response?.data);
+    return jsonResponse(500, {
+      ok: false,
+      error: "Error al registrar la solicitud en SharePoint.",
+      diagnostics: buildDiagnostics(error),
+    });
+  }
+
+  const attachmentWarnings = [];
+  const uploadedAttachments = [];
+
+  // Para el resto de formularios se conserva el flujo original.
+  // El generador PDF solo se carga y ejecuta para TARJETAS_METRO.
+  if (isTarjetaMasMetro(validation.type)) {
+    let generatedReport;
+
+    try {
+      const {
+        generarInformeTarjetaMasMetro,
+      } = require("../shared/tarjeta-mas-metro-report");
+
+      generatedReport = await generarInformeTarjetaMasMetro(
+        validation.payload,
+        {
+          createdAt,
+          token,
+          files,
+          itemId: createdItem.id,
+          logoPath: process.env.METRO_MALAGA_LOGO_PATH,
+        }
+      );
+
+      validateGeneratedReport(generatedReport);
+
+      context.log(
+        `crearSolicitud - informe Tarjeta Mas Metro generado nombre='${generatedReport.fileName}' bytes=${generatedReport.sizeBytes}`
+      );
+    } catch (error) {
+      context.error(
+        "crearSolicitud - item creado, pero no se pudo generar el informe Tarjeta Mas Metro:",
+        error.message
+      );
+
+      const closeTokenErrorResponse = await closeTemporalAccessTokenAfterItemCreated({
+        accessTokenConfig,
+        accessTokenValidation,
+        solicitudId: createdItem.id,
+        token,
+        context,
+      });
+      if (closeTokenErrorResponse) return closeTokenErrorResponse;
+
+      return jsonResponse(500, {
+        ok: false,
+        partialSuccess: true,
+        solicitudId: createdItem.id,
+        token,
+        error: "La solicitud se ha creado, pero no se pudo generar el informe PDF.",
+        diagnostics: buildDiagnostics(error),
+      });
+    }
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      context.log(`Item ID creado: ${createdItem.id}`);
+
+      const uploadResult = await uploadNativeListItemAttachments(
+        accessToken,
+        validation.type,
+        createdItem.id,
+        [...files, generatedReport],
+        undefined,
+        context
+      );
+
+      uploadedAttachments.push(...(uploadResult.uploaded || []));
+      attachmentWarnings.push(...(uploadResult.warnings || []));
+
+      if ((uploadResult.uploaded || []).length === 0) {
+        throw new Error(
+          (uploadResult.warnings || []).join(" | ") ||
+          "No se pudo adjuntar ningun documento al item."
+        );
+      }
+    } catch (error) {
+      context.error(
+        "crearSolicitud - item e informe generados, pero no se pudieron subir los adjuntos de Tarjeta Mas Metro:",
+        error.message
+      );
+
+      const closeTokenErrorResponse = await closeTemporalAccessTokenAfterItemCreated({
+        accessTokenConfig,
+        accessTokenValidation,
+        solicitudId: createdItem.id,
+        token,
+        context,
+      });
+      if (closeTokenErrorResponse) return closeTokenErrorResponse;
+
+      return jsonResponse(500, {
+        ok: false,
+        partialSuccess: true,
+        solicitudId: createdItem.id,
+        token,
+        error: "La solicitud se ha creado, pero no se pudieron adjuntar los documentos.",
+        diagnostics: buildDiagnostics(error),
+      });
+    }
+  } else if (files.length > 0) {
+    try {
+      const uploadResult = await uploadListItemAttachments(
+        accessToken,
+        validation.type,
+        createdItem.id,
+        files,
+        undefined,
+        context,
+        token
+      );
+
+      uploadedAttachments.push(...(uploadResult.uploaded || []));
+      attachmentWarnings.push(...(uploadResult.warnings || []));
+    } catch (error) {
+      context.warn?.(`crearSolicitud - solicitud creada sin adjuntos por error de subida: ${error.message}`);
+      attachmentWarnings.push(`Solicitud creada, pero no se pudieron subir adjuntos: ${error.message}`);
+    }
+  }
+
+  const closeTokenErrorResponse = await closeTemporalAccessTokenAfterItemCreated({
+    accessTokenConfig,
+    accessTokenValidation,
+    solicitudId: createdItem.id,
+    token,
+    context,
+  });
+  if (closeTokenErrorResponse) return closeTokenErrorResponse;
+
+  return jsonResponse(201, {
+    ok: true,
+    solicitudId: createdItem.id,
+    token,
+    tipoFormulario: validation.type.formValue,
+    listaDestino: validation.type.key,
+    nombreLista: validation.type.sharePoint.listName,
+    siteDestino: getSiteUrlForType(validation.type),
+    listaUrl: validation.type.sharePoint.listUrl,
+    creadoEn: createdAt,
+    email: validation.payload.CorreoElectronico || validation.payload.EmailCliente,
+    adjuntos: uploadedAttachments,
+    warnings: attachmentWarnings,
+    debug: {
+      adjuntosRecibidos: describeFilesForDebug(files),
+    },
+    mensaje: "Solicitud registrada correctamente. Se enviara el token de consulta al correo indicado.",
+  });
+}
 
 function isTarjetaMasMetro(type) {
   return type?.key === "TARJETAS_METRO";
+}
+
+function isAccessTokenEntityUsed(entity) {
+  return entity?.used === true || String(entity?.used || "").toLowerCase() === "true";
+}
+
+async function closeTemporalAccessTokenAfterItemCreated({
+  accessTokenConfig,
+  accessTokenValidation,
+  solicitudId,
+  token,
+  context,
+}) {
+  if (
+    !accessTokenConfig?.requireForSolicitudes ||
+    !accessTokenConfig.singleUse ||
+    accessTokenConfig.storeDisabled ||
+    !accessTokenValidation?.token
+  ) {
+    return null;
+  }
+
+  try {
+    const tableClient = createTableClient(accessTokenConfig);
+    await tableClient.updateEntity({
+      partitionKey: accessTokenConfig.partitionKey,
+      rowKey: accessTokenValidation.token,
+      used: true,
+      usedAtUtc: new Date().toISOString(),
+      solicitudId: String(solicitudId || ""),
+      resultado: "created",
+    }, "Merge");
+
+    context.log(`crearSolicitud - token temporal marcado como usado solicitudId=${solicitudId}`);
+    return null;
+  } catch (error) {
+    context.error(
+      "crearSolicitud - solicitud creada pero no se pudo marcar el token temporal como usado:",
+      error.message
+    );
+
+    return jsonResponse(500, {
+      ok: false,
+      partialSuccess: true,
+      solicitudId,
+      token,
+      error: "La solicitud se ha creado, pero no se pudo cerrar el token temporal.",
+      diagnostics: buildDiagnostics(error),
+    });
+  }
 }
 
 function validateGeneratedReport(report) {
@@ -376,10 +485,11 @@ function parseMultipartBuffer(body, boundary) {
     const disposition = parseContentDisposition(headers["content-disposition"]);
 
     if (disposition.name) {
-      if (disposition.filename) {
+      const fileName = getDispositionFileName(disposition);
+      if (fileName) {
         files.push({
           fieldName: disposition.name,
-          fileName: disposition.filename,
+          fileName,
           contentType: headers["content-type"] || "application/octet-stream",
           sizeBytes: content.length,
           content,
@@ -413,6 +523,24 @@ function parseContentDisposition(header) {
     result[key] = rawValue.join("=").trim().replace(/^"|"$/g, "");
   }
   return result;
+}
+
+function getDispositionFileName(disposition = {}) {
+  return decodeRfc5987FileName(disposition["filename*"]) || disposition.filename || "";
+}
+
+function decodeRfc5987FileName(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+
+  const match = /^([^']*)'[^']*'(.*)$/.exec(raw);
+  const encoded = match ? match[2] : raw;
+
+  try {
+    return decodeURIComponent(encoded);
+  } catch {
+    return encoded;
+  }
 }
 
 function getMultipartBoundary(contentType) {

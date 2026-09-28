@@ -211,7 +211,11 @@ async function validateAccessToken(request, options = {}) {
     return { valid: false, status: 403, error: "El origen actual no coincide con el origen emisor del token." };
   }
 
-  if (config.singleUse) {
+
+  // No se marca como usado en la validación.
+ // Se marcará como usado únicamente cuando la solicitud se haya creado correctamente.
+
+/*  if (config.singleUse) {
     await tableClient.updateEntity({
       partitionKey: config.partitionKey,
       rowKey: token,
@@ -219,8 +223,33 @@ async function validateAccessToken(request, options = {}) {
       usedAtUtc: new Date().toISOString(),
     }, "Merge");
   }
-
+*/
   return { valid: true, token, entity, requester };
+}
+
+async function markAccessTokenUsed(token, options = {}) {
+  const config = options.config || getAccessTokenConfig();
+
+  if (!config.singleUse || config.storeDisabled) {
+    return;
+  }
+
+  const cleanToken = String(token || "").trim();
+
+  if (!cleanToken) {
+    throw new Error("No se ha informado token de acceso para marcarlo como usado.");
+  }
+
+  const tableClient = options.client || createTableClient(config);
+
+  await tableClient.updateEntity({
+    partitionKey: config.partitionKey,
+    rowKey: cleanToken,
+    used: true,
+    usedAtUtc: new Date().toISOString(),
+    solicitudId: String(options.solicitudId || ""),
+    resultado: String(options.resultado || "created"),
+  }, "Merge");
 }
 
 async function deleteExpiredAccessTokens(config = getAccessTokenConfig(), client) {
@@ -263,6 +292,7 @@ module.exports = {
   ensureTokenTable,
   saveAccessToken,
   validateAccessToken,
+  markAccessTokenUsed,
   deleteExpiredAccessTokens,
   isGuid,
 };

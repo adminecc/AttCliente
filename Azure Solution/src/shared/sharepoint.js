@@ -159,6 +159,65 @@ const CONTROL_PAYLOAD_FIELDS = new Set([
   "nombreCompleto",
 ]);
 
+const TARJETA_MAS_METRO_UPPERCASE_FIELDS = new Set([
+  // Nombre solicitante
+  "NombreCliente",
+  "ApellidoCliente1",
+  "ApellidoCliente2",
+  "Nombre",
+  "Apellidos",
+  "NombreCompleto",
+  "NombreSolicitante",
+  "Solicitante",
+  "NombreApellidos",
+  "NombreYApellidos",
+
+  // Documento identificativo
+  "DNICliente",
+  "DniCliente",
+  "dniCliente",
+  "DNI_NIF_NIE",
+  "DniNifNie",
+  "DocumentoIdentidad",
+  "NumeroDocumento",
+  "DNI",
+  "NIF",
+  "NIE",
+
+  // Tutor / representante
+  "NombreTutor",
+  "NombreCompletoTutor",
+  "ApellidosTutor",
+  "ApellidoTutor1",
+  "ApellidoTutor2",
+  "NombreRepresentante",
+  "NombreCompletoRepresentante",
+  "ApellidosRepresentante",
+  "ApellidoRepresentante1",
+  "ApellidoRepresentante2",
+  "NombreRep",
+  "nombreRep",
+  "apellidosRep",
+
+  // Documento tutor
+  "DNITutor",
+  "DniTutor",
+  "DNIRepresentante",
+  "NIFRepresentante",
+  "NIERepresentante",
+  "DocumentoRepresentante",
+  "DNIRep",
+  "numeroDocumentoRep",
+
+  // Dirección
+  "viaContacto",
+  "escContacto",
+  "pisoContacto",
+  "puerContacto",
+  "municipioContacto",
+  "provinciaContacto"
+]);
+
 async function getGraphAccessToken(config = getConfig()) {
   assertGraphConfig(config);
 
@@ -503,18 +562,50 @@ function normalizeIdentityValue(contact = {}) {
   return contact.kind === "phone" ? normalizePhoneComparable(value) : value.toLowerCase();
 }
 
-async function findListItemByEmailAndTokenFallbackOrDocumentFolder(accessToken, target, emailField, email, token, context) {
+async function findListItemByEmailAndTokenFallbackOrDocumentFolder(
+  accessToken,
+  target,
+  emailField,
+  email,
+  token,
+  context
+) {
   try {
-    const item = await findListItemByEmailAndTokenFallback(accessToken, target, emailField, email, token, context);
-    if (item) return item;
+    const item = await findListItemByEmailAndTokenFallback(
+      accessToken,
+      target,
+      emailField,
+      email,
+      token,
+      context
+    );
+
+    if (item) {
+      return item;
+    }
   } catch (error) {
     warn(
       context,
-      `findListItemByEmailAndTokenFallback - busqueda local no disponible: ${error.response?.data?.error?.message || error.message}`
+      `findListItemByEmailAndTokenFallback - busqueda local no disponible: ${
+        error.response?.data?.error?.message || error.message
+      }`
     );
   }
 
-  return findListItemByDocumentFolder(accessToken, target, emailField, email, token, context);
+  // Tarjeta +Metro usa adjuntos nativos del item,
+  // no la biblioteca DocumentosAdjuntos.
+  if (target?.listName === "ClientesTarjetaMetro") {
+    return null;
+  }
+
+  return findListItemByDocumentFolder(
+    accessToken,
+    target,
+    emailField,
+    email,
+    token,
+    context
+  );
 }
 
 async function findListItemByEmailAndTokenFallback(accessToken, target, emailField, email, token, context) {
@@ -592,6 +683,18 @@ async function getListItemAttachments(
   context,
   referenceToken = itemId
 ) {
+  // Tarjeta +Metro utiliza adjuntos nativos de la lista,
+  // no la biblioteca DocumentosAdjuntos.
+  if (type?.key === "TARJETAS_METRO") {
+    return getNativeListItemAttachments(
+      accessToken,
+      type,
+      itemId,
+      config,
+      context
+    );
+  }
+
   const target = await resolveSharePointTarget(
     accessToken,
     type,
@@ -644,6 +747,95 @@ async function getListItemAttachments(
   return mapDocumentLibraryAttachments(
     response.data?.value || []
   );
+}
+
+async function getNativeListItemAttachments(
+  graphAccessToken,
+  type,
+  itemId,
+  config = getConfig(),
+  context
+) {
+  const target = await resolveSharePointTarget(
+    graphAccessToken,
+    type,
+    config,
+    context
+  );
+
+  if (!target.siteUrl) {
+    throw new Error(
+      `No se ha configurado siteUrl para ${type?.key || "la solicitud"}.`
+    );
+  }
+
+  const numericItemId = Number(itemId);
+
+  if (!Number.isFinite(numericItemId)) {
+    throw new Error(
+      `El ID del item '${itemId}' no es valido.`
+    );
+  }
+
+  const sharePointAccessToken =
+    await getSharePointAccessToken(target.siteUrl, config);
+
+  const siteUrl = normalizeSiteUrl(target.siteUrl);
+
+  const listName =
+    escapeSharePointRestString(target.listName);
+
+  const url =
+    `${siteUrl}/_api/web/lists/getbytitle('${listName}')` +
+    `/items(${numericItemId})/AttachmentFiles` +
+    `?$select=FileName,ServerRelativeUrl`;
+
+  context?.log?.(
+    `getNativeListItemAttachments - GET ${url}`
+  );
+
+  const response = await axios.get(url, {
+    headers: {
+      Authorization: `Bearer ${sharePointAccessToken}`,
+      Accept: "application/json;odata=nometadata",
+    },
+    timeout: 15000,
+  });
+
+  const attachments =
+    response.data?.value ||
+    response.data?.d?.results ||
+    [];
+
+  const origin = new URL(siteUrl).origin;
+
+  return attachments.map((attachment) => {
+    const relativeUrl =
+      attachment.ServerRelativeUrl ||
+      attachment.serverRelativeUrl ||
+      "";
+
+    return {
+      nombre:
+        attachment.FileName ||
+        attachment.fileName ||
+        "Adjunto",
+
+      tipo: "",
+
+      tamanioBytes: 0,
+
+      urlDescarga:
+        relativeUrl
+          ? `${origin}${relativeUrl}`
+          : "",
+
+      webUrl:
+        relativeUrl
+          ? `${origin}${relativeUrl}`
+          : "",
+    };
+  });
 }
 
 async function getListItemAttachmentsFallback(accessToken, siteId, libraryListId, referenceToken, context) {
@@ -718,10 +910,29 @@ function buildSharePointFields(payload, type, token, createdAt) {
   }
 
   for (const [payloadField, value] of Object.entries(payload)) {
-    if (shouldCopyPayloadField(payloadField, value)) {
-      fields[payloadField] = transformSharePointValue(payloadField, value, type);
+  if (shouldCopyPayloadField(payloadField, value)) {
+
+    let transformedValue = transformSharePointValue(
+      payloadField,
+      value,
+      type
+    );
+
+    // Tarjeta +Metro:
+    // los datos personales se almacenan en mayúsculas
+    if (
+      type?.key === "TARJETAS_METRO" &&
+      TARJETA_MAS_METRO_UPPERCASE_FIELDS.has(payloadField) &&
+      typeof transformedValue === "string"
+    ) {
+      transformedValue = transformedValue
+        .trim()
+        .toLocaleUpperCase("es-ES");
     }
+
+    fields[payloadField] = transformedValue;
   }
+}
 
   return fields;
 }
