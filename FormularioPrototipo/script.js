@@ -4,40 +4,32 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    const API_BASE_URL = 'https://metroattfn-e0gucabgedacccey.spaincentral-01.azurewebsites.net';
-    const API_CREATE_ENDPOINT = `${API_BASE_URL}/api/solicitudes/crear`;
-    const API_LOG_STORAGE_KEY = 'metroApiLogs';
-
     // ============================================
     // ELEMENTOS DEL DOM
     // ============================================
     const form = document.getElementById('mainForm');
     const tipoFormulario = document.getElementById('tipoFormulario');
     const formContainer = document.getElementById('formContainer');
-
+    
     // Secciones del formulario
     const secciones = {
         datosPersonales: document.getElementById('datosPersonales'),
-        avisoConsultas: document.getElementById('avisoConsultas'),
         reclamaciones: document.getElementById('seccionReclamaciones'),
-        consultas: document.getElementById('seccionConsultas'),
         sugerencias: document.getElementById('seccionSugerencias'),
         agradecimientos: document.getElementById('seccionAgradecimientos'),
         objetos: document.getElementById('seccionObjetos'),
         tarjetas: document.getElementById('seccionTarjetas'),
-
         consentimiento: document.getElementById('seccionConsentimiento')
     };
-
+    
     // Modal
     const modalOverlay = document.getElementById('modalOverlay');
     const modalClose = document.getElementById('modalClose');
     const modalReference = document.getElementById('modalReference');
-    const modalWarnings = document.getElementById('modalWarnings');
-
+    
     // Botones
     const btnLimpiar = document.getElementById('btnLimpiar');
-
+    
     // Campos específicos
     const tipologia = document.getElementById('tipologia');
     const subtipologia = document.getElementById('subtipologia');
@@ -46,14 +38,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const trenIncidencia = document.getElementById('trenIncidencia');
     const grupoOtroLugarIncidencia = document.getElementById('grupoOtroLugarIncidencia');
     const otroLugarIncidencia = document.getElementById('otroLugarIncidencia');
-    const lugarSugerencia = document.getElementById('lugarSugerencia');
-    const grupoTrenSugerencia = document.getElementById('grupoTrenSugerencia');
-    const trenSugerencia = document.getElementById('trenSugerencia');
-    const grupoOtroLugarSugerencia = document.getElementById('grupoOtroLugarSugerencia');
-    const otroLugarSugerencia = document.getElementById('otroLugarSugerencia');
     const descripcionCorta = document.getElementById('descripcionCorta');
     const charCount = document.getElementById('charCount');
-
+    
     // ============================================
     // DATOS DE SUBTIPOLOGÍAS
     // ============================================
@@ -115,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
             { value: 'otro-general', text: 'Otro motivo' }
         ]
     };
-
+    
     // ============================================
     // CONFIGURACIÓN DE SECCIONES POR TIPO
     // ============================================
@@ -123,10 +110,6 @@ document.addEventListener('DOMContentLoaded', () => {
         reclamaciones: {
             titulo: 'Reclamaciones y Quejas',
             secciones: ['datosPersonales', 'reclamaciones', 'consentimiento']
-        },
-        consultas: {
-            titulo: 'Consulta de Información',
-            secciones: ['avisoConsultas', 'datosPersonales', 'consultas', 'consentimiento']
         },
         sugerencias: {
             titulo: 'Sugerencias',
@@ -145,11 +128,11 @@ document.addEventListener('DOMContentLoaded', () => {
             secciones: ['datosPersonales', 'tarjetas', 'consentimiento']
         }
     };
-
+    
     // ============================================
     // FUNCIONES PRINCIPALES
     // ============================================
-
+    
     /**
      * Muestra las secciones correspondientes al tipo de formulario seleccionado
      */
@@ -158,88 +141,29 @@ document.addEventListener('DOMContentLoaded', () => {
         Object.values(secciones).forEach(seccion => {
             if (seccion) seccion.classList.add('hidden');
         });
-
+        
         if (!tipo || !configuracionTipos[tipo]) {
             formContainer.classList.add('hidden');
             return;
         }
-
+        
         // Mostrar el contenedor principal
         formContainer.classList.remove('hidden');
-
+        
         // Mostrar las secciones correspondientes
         configuracionTipos[tipo].secciones.forEach(nombreSeccion => {
             if (secciones[nombreSeccion]) {
                 secciones[nombreSeccion].classList.remove('hidden');
             }
         });
-
-        // Ajustar elementos específicos para tarjeta +Metro
-        const txtTituloDatosPersonales = document.getElementById('txtTituloDatosPersonales');
-        const disclaimerTarjetas = document.getElementById('disclaimerTarjetas');
-        const grupoRepresentanteCheck = document.getElementById('grupoRepresentanteCheck');
-        const grupoDatosCorrectosCheck = document.getElementById('grupoDatosCorrectosCheck');
-        const containerFirmaTarjetas = document.getElementById('containerFirmaTarjetas');
-        const lopdTextoTarjetas = document.getElementById('lopdTextoTarjetas');
-        const recibirPostalNormalContainer = document.getElementById('recibirPostalNormalContainer');
-        const recibirPostal = document.getElementById('recibirPostal');
-
-        if (tipo === 'tarjetas') {
-            if (txtTituloDatosPersonales) txtTituloDatosPersonales.textContent = 'Datos personales del interesado';
-            if (disclaimerTarjetas) disclaimerTarjetas.classList.remove('hidden');
-            if (grupoRepresentanteCheck) grupoRepresentanteCheck.classList.remove('hidden');
-            if (grupoDatosCorrectosCheck) grupoDatosCorrectosCheck.classList.remove('hidden');
-            if (containerFirmaTarjetas) containerFirmaTarjetas.classList.remove('hidden');
-            if (lopdTextoTarjetas) lopdTextoTarjetas.classList.remove('hidden');
-            if (recibirPostalNormalContainer) recibirPostalNormalContainer.classList.add('hidden');
-            if (recibirPostal) recibirPostal.checked = false;
-            if (typeof actualizarVisibilidadEnvio === 'function') {
-                actualizarVisibilidadEnvio();
-            }
-
-            // Actualizar visibilidad de representante/dirección según el checkbox
-            if (typeof actualizarVisibilidadRepresentante === 'function') {
-                actualizarVisibilidadRepresentante();
-            }
-            // Actualizar estado de la firma (habilitar/deshabilitar)
-            if (typeof actualizarEstadoFirma === 'function') {
-                actualizarEstadoFirma();
-            }
-        } else {
-            if (txtTituloDatosPersonales) txtTituloDatosPersonales.textContent = 'Datos personales';
-            if (disclaimerTarjetas) disclaimerTarjetas.classList.add('hidden');
-            if (grupoRepresentanteCheck) {
-                grupoRepresentanteCheck.classList.add('hidden');
-                const checkboxRep = grupoRepresentanteCheck.querySelector('input[type="checkbox"]');
-                if (checkboxRep) checkboxRep.checked = false;
-            }
-            if (grupoDatosCorrectosCheck) {
-                grupoDatosCorrectosCheck.classList.add('hidden');
-                const checkboxCorrectos = grupoDatosCorrectosCheck.querySelector('input[type="checkbox"]');
-                if (checkboxCorrectos) checkboxCorrectos.checked = false;
-            }
-            if (containerFirmaTarjetas) containerFirmaTarjetas.classList.add('hidden');
-            if (lopdTextoTarjetas) lopdTextoTarjetas.classList.add('hidden');
-            if (recibirPostalNormalContainer) recibirPostalNormalContainer.classList.remove('hidden');
-
-            // Si no es tarjetas, restauramos comportamiento normal para representante
-            const bloqueRepresentante = document.getElementById('bloqueRepresentante');
-            if (bloqueRepresentante) bloqueRepresentante.classList.add('hidden');
-
-            // Actualizar visibilidad de envío y de dirección de contacto
-            if (typeof actualizarVisibilidadEnvio === 'function') {
-                actualizarVisibilidadEnvio();
-            }
-        }
-
+        
         // Resetear campos required según la sección
         actualizarCamposRequired(tipo);
-        comprobarCamposObligatorios();
-
+        
         // Scroll suave al inicio del formulario
         formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-
+    
     /**
      * Actualiza los campos required según el tipo de formulario
      */
@@ -249,24 +173,23 @@ document.addEventListener('DOMContentLoaded', () => {
         todosLosCampos.forEach(campo => {
             campo.removeAttribute('required');
         });
-
+        
         // Los campos de datos personales siempre son required
-        const camposPersonalesRequired = ['tipoDocumento', 'numeroDocumento', 'nombre', 'apellidos', 'email', 'confirmEmail', 'telefono', 'viaContacto', 'numContacto', 'cpContacto', 'municipioContacto', 'provinciaContacto'];
+        const camposPersonalesRequired = ['tipoDocumento', 'numeroDocumento', 'nombre', 'apellidos', 'email'];
         camposPersonalesRequired.forEach(id => {
             const campo = document.getElementById(id);
             if (campo) campo.setAttribute('required', '');
         });
-
+        
         // Campos específicos por tipo
         const camposEspecificos = {
-            reclamaciones: ['clasificacion', 'fechaIncidencia', 'lugarIncidencia', 'descripcionDetallada'],
-            consultas: ['descripcionDetalladaConsulta'],
-            sugerencias: ['lugarSugerencia', 'descripcionSugerencia'],
-            agradecimientos: ['motivoAgradecimiento', 'dirigidoAgradecimiento', 'descripcionAgradecimiento'],
-            objetos: ['FechaPerdida', 'LineaMetro', 'Localizacion', 'TipoObjeto', 'Descripcion'],
-            tarjetas: ['medioNotificacionTarjeta']
+            reclamaciones: ['clasificacion', 'canalRecepcion', 'fechaIncidencia', 'tipologia', 'lugarIncidencia', 'descripcionCorta', 'descripcionDetallada'],
+            sugerencias: ['areaSugerencia', 'tituloSugerencia', 'descripcionSugerencia'],
+            agradecimientos: ['motivoAgradecimiento', 'descripcionAgradecimiento'],
+            objetos: ['tipoObjeto', 'categoriaObjeto', 'fechaPerdida', 'descripcionObjeto'],
+            tarjetas: ['motivoTarjeta', 'tipoTarjeta', 'fechaNacimiento', 'direccionCompleta', 'codigoPostal', 'municipio', 'provincia', 'puntoRecogida']
         };
-
+        
         if (camposEspecificos[tipo]) {
             camposEspecificos[tipo].forEach(id => {
                 const campo = document.getElementById(id);
@@ -274,13 +197,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }
-
+    
     /**
      * Actualiza las opciones de subtipología según la tipología seleccionada
      */
     function actualizarSubtipologias(tipologiaValue) {
         subtipologia.innerHTML = '<option value="">Seleccione...</option>';
-
+        
         if (tipologiaValue && subtipologias[tipologiaValue]) {
             subtipologias[tipologiaValue].forEach(opcion => {
                 const option = document.createElement('option');
@@ -294,26 +217,18 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Muestra campos opcionales según Estación / Lugar
      */
-    function actualizarCamposLugar(lugarValue, grupoTren, tren, grupoOtroLugar, otroLugar) {
-        if (grupoTren && tren) {
-            grupoTren.classList.toggle('hidden', lugarValue !== 'tren');
-            if (lugarValue !== 'tren') tren.value = '';
-        }
-
-        if (grupoOtroLugar && otroLugar) {
-            grupoOtroLugar.classList.toggle('hidden', lugarValue !== 'otro');
-            if (lugarValue !== 'otro') otroLugar.value = '';
-        }
-    }
-
     function actualizarCamposLugarIncidencia(lugarValue) {
-        actualizarCamposLugar(lugarValue, grupoTrenIncidencia, trenIncidencia, grupoOtroLugarIncidencia, otroLugarIncidencia);
-    }
+        if (grupoTrenIncidencia && trenIncidencia) {
+            grupoTrenIncidencia.classList.toggle('hidden', lugarValue !== 'tren');
+            if (lugarValue !== 'tren') trenIncidencia.value = '';
+        }
 
-    function actualizarCamposLugarSugerencia(lugarValue) {
-        actualizarCamposLugar(lugarValue, grupoTrenSugerencia, trenSugerencia, grupoOtroLugarSugerencia, otroLugarSugerencia);
+        if (grupoOtroLugarIncidencia && otroLugarIncidencia) {
+            grupoOtroLugarIncidencia.classList.toggle('hidden', lugarValue !== 'otro');
+            if (lugarValue !== 'otro') otroLugarIncidencia.value = '';
+        }
     }
-
+    
     /**
      * Genera un número de referencia único
      */
@@ -323,49 +238,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const aleatorio = Math.floor(Math.random() * 90000) + 10000;
         return `ATT-${año}-${aleatorio}`;
     }
-
+    
     /**
      * Valida el formulario antes del envío
      */
-    /**
-     * Comprueba si todos los campos requeridos visibles están rellenos y habilita/deshabilita el botón de enviar
-     */
-    function comprobarCamposObligatorios() {
-        const camposRequired = form.querySelectorAll('[required]');
-        let todosRellenos = true;
-
-        camposRequired.forEach(campo => {
-            if (!campo.closest('.hidden')) {
-                if (campo.type === 'checkbox') {
-                    if (!campo.checked) {
-                        todosRellenos = false;
-                    }
-                } else {
-                    if (!campo.value.trim()) {
-                        todosRellenos = false;
-                    }
-                }
-            }
-        });
-
-        const btnEnviar = document.getElementById('btnEnviar');
-        if (btnEnviar) {
-            btnEnviar.disabled = !todosRellenos;
-        }
-    }
-
     function validarFormulario() {
         const camposRequired = form.querySelectorAll('[required]');
         let primerError = null;
         let esValido = true;
-
+        
         // Limpiar errores previos
         form.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
-
+        
         camposRequired.forEach(campo => {
             // Solo validar campos visibles
-
-            if (!campo.closest('.hidden')) {
+            const seccion = campo.closest('.form-section');
+            if (seccion && !seccion.classList.contains('hidden')) {
                 if (!campo.value.trim()) {
                     campo.classList.add('error');
                     esValido = false;
@@ -373,121 +261,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
-
-        // Validar campos PAN con longitudes exactas (solo si son visibles)
-        const inputsPan = form.querySelectorAll('.input-pan');
-        inputsPan.forEach(input => {
-            if (!input.closest('.hidden')) {
-                const val = input.value.trim();
-                if (val === '' && !input.hasAttribute('required')) {
-                    return;
-                }
-                const maxLength = parseInt(input.getAttribute('maxlength'), 10);
-                if (val.length !== maxLength || /\D/.test(val)) {
-                    input.classList.add('error');
-                    esValido = false;
-                    if (!primerError) primerError = input;
-                }
-            }
-        });
-
+        
         // Validar checkbox de consentimiento
         const consentimiento = document.getElementById('consentimiento');
         if (!consentimiento.checked) {
             esValido = false;
             if (!primerError) primerError = consentimiento;
         }
-
+        
         // Validar email
         const email = document.getElementById('email');
-        const confirmEmail = document.getElementById('confirmEmail');
         if (email.value && !validarEmail(email.value)) {
             email.classList.add('error');
             esValido = false;
             if (!primerError) primerError = email;
         }
-        if (confirmEmail && confirmEmail.value && (confirmEmail.value !== email.value || !validarEmail(confirmEmail.value))) {
-            confirmEmail.classList.add('error');
-            esValido = false;
-            if (!primerError) primerError = confirmEmail;
-        }
-
-        // Validar teléfono español (9 dígitos con prefijo opcional)
-        const telefono = document.getElementById('telefono');
-        if (telefono && telefono.value) {
-            const normalizedPhone = telefono.value.replace(/[\s-]/g, '');
-            const phoneRegex = /^(?:\+34|34|0034)?[6789]\d{8}$/;
-            if (!phoneRegex.test(normalizedPhone)) {
-                telefono.classList.add('error');
-                esValido = false;
-                if (!primerError) primerError = telefono;
-            }
-        }
-
-        // Validar DNI/NIE español
-        const tipoDocumento = document.getElementById('tipoDocumento');
-        const numeroDocumento = document.getElementById('numeroDocumento');
-        if (tipoDocumento && numeroDocumento && numeroDocumento.value) {
-            const tipo = tipoDocumento.value;
-            if (tipo === 'NIF' || tipo === 'NIE') {
-                if (!validarDNI_NIE(numeroDocumento.value)) {
-                    numeroDocumento.classList.add('error');
-                    esValido = false;
-                    if (!primerError) primerError = numeroDocumento;
-                }
-            }
-        }
-
-        // Validar email del representante (si está visible)
-        const emailRep = document.getElementById('emailRep');
-        const confirmEmailRep = document.getElementById('confirmEmailRep');
-        if (emailRep && !emailRep.closest('.hidden')) {
-            if (emailRep.value && !validarEmail(emailRep.value)) {
-                emailRep.classList.add('error');
-                esValido = false;
-                if (!primerError) primerError = emailRep;
-            }
-            if (confirmEmailRep && confirmEmailRep.value && (confirmEmailRep.value !== emailRep.value || !validarEmail(confirmEmailRep.value))) {
-                confirmEmailRep.classList.add('error');
-                esValido = false;
-                if (!primerError) primerError = confirmEmailRep;
-            }
-        }
-
-        // Validar teléfono del representante (si está visible)
-        const telefonoRep = document.getElementById('telefonoRep');
-        if (telefonoRep && !telefonoRep.closest('.hidden') && telefonoRep.value) {
-            const normalizedPhone = telefonoRep.value.replace(/[\s-]/g, '');
-            const phoneRegex = /^(?:\+34|34|0034)?[6789]\d{8}$/;
-            if (!phoneRegex.test(normalizedPhone)) {
-                telefonoRep.classList.add('error');
-                esValido = false;
-                if (!primerError) primerError = telefonoRep;
-            }
-        }
-
-        // Validar DNI/NIE del representante (si está visible)
-        const tipoDocumentoRep = document.getElementById('tipoDocumentoRep');
-        const numeroDocumentoRep = document.getElementById('numeroDocumentoRep');
-        if (tipoDocumentoRep && numeroDocumentoRep && !numeroDocumentoRep.closest('.hidden') && numeroDocumentoRep.value) {
-            const tipo = tipoDocumentoRep.value;
-            if (tipo === 'NIF' || tipo === 'NIE') {
-                if (!validarDNI_NIE(numeroDocumentoRep.value)) {
-                    numeroDocumentoRep.classList.add('error');
-                    esValido = false;
-                    if (!primerError) primerError = numeroDocumentoRep;
-                }
-            }
-        }
-
+        
         if (primerError) {
             primerError.focus();
             primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-
+        
         return esValido;
     }
-
+    
     /**
      * Valida formato de email
      */
@@ -495,120 +292,40 @@ document.addEventListener('DOMContentLoaded', () => {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);
     }
-
-    /**
-     * Valida formato y letra de DNI/NIE español
-     */
-    function validarDNI_NIE(value) {
-        const cleanValue = value.trim().toUpperCase().replace(/[\s-]/g, '');
-        const dniNieRegex = /^[XYZ\d]\d{7}[A-Z]$/;
-        if (!dniNieRegex.test(cleanValue)) {
-            return false;
-        }
-
-        let numberStr = cleanValue.substring(0, 8);
-        if (numberStr.startsWith('X')) {
-            numberStr = '0' + numberStr.substring(1);
-        } else if (numberStr.startsWith('Y')) {
-            numberStr = '1' + numberStr.substring(1);
-        } else if (numberStr.startsWith('Z')) {
-            numberStr = '2' + numberStr.substring(1);
-        }
-
-        const number = parseInt(numberStr, 10);
-        const letter = cleanValue.charAt(8);
-        const validLetters = "TRWAGMYFPDXBNJZSQVHLCKE";
-        const expectedLetter = validLetters.charAt(number % 23);
-
-        return letter === expectedLetter;
-    }
-
+    
     /**
      * Limpia todos los campos del formulario
      */
     function limpiarFormulario() {
         form.reset();
         formContainer.classList.add('hidden');
-
+        
         // Limpiar errores
         form.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
-
+        
         // Limpiar lista de archivos
         const fileList = document.getElementById('fileList');
         if (fileList) fileList.innerHTML = '';
-        const fileListConsultas = document.getElementById('fileListConsultas');
-        if (fileListConsultas) fileListConsultas.innerHTML = '';
-        limpiarListasArchivos();
-
+        
         // Resetear contador de caracteres
         if (charCount) charCount.textContent = '0';
-        const charCountConsulta = document.getElementById('charCountConsulta');
-        if (charCountConsulta) charCountConsulta.textContent = '0';
 
         // Ocultar campos opcionales de ubicación
         actualizarCamposLugarIncidencia('');
-        actualizarCamposLugarSugerencia('');
-        const recibirPostal = document.getElementById('recibirPostal');
-        if (recibirPostal) recibirPostal.checked = false;
-        // La visibilidad de la dirección de contacto se actualizará al inicializar el formulario
-
-        // Limpiar dirección de envío
-        const direccionEnvioSelect = document.getElementById('direccionEnvioSelect');
-        if (direccionEnvioSelect) direccionEnvioSelect.value = 'misma';
-        if (typeof actualizarVisibilidadEnvio === 'function') {
-            actualizarVisibilidadEnvio();
-        }
-        const grupoTrenConsulta = document.getElementById('grupoTrenConsulta');
-        if (grupoTrenConsulta) grupoTrenConsulta.classList.add('hidden');
-        const grupoOtroLugarConsulta = document.getElementById('grupoOtroLugarConsulta');
-        if (grupoOtroLugarConsulta) grupoOtroLugarConsulta.classList.add('hidden');
-
-        // Resetear elementos del representante y firma de +Metro
-        const solicitudRepresentante = document.getElementById('solicitudRepresentante');
-        if (solicitudRepresentante) solicitudRepresentante.checked = false;
-
-        if (typeof limpiarFirma === 'function') {
-            limpiarFirma();
-        }
-        if (typeof actualizarEstadoFirma === 'function') {
-            actualizarEstadoFirma();
-        }
-
-        // Limpiar y ocultar bloques condicionales de títulos de viaje
-        if (typeof ocultarYResetearTodosLosBloques === 'function') {
-            ocultarYResetearTodosLosBloques();
-        }
-
-        // Resetear contadores de textareas
-        document.querySelectorAll('textarea.textarea').forEach(textarea => {
-            const currentCount = document.getElementById('charCount_' + textarea.id);
-            if (currentCount) currentCount.textContent = '0';
-        });
-
-        comprobarCamposObligatorios();
-
+        
         // Scroll al inicio
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-
+    
     /**
      * Muestra el modal de confirmación
      */
-    function mostrarModal(referencia = generarReferencia(), warnings = []) {
-        modalReference.textContent = referencia;
-        if (modalWarnings) {
-            if (Array.isArray(warnings) && warnings.length > 0) {
-                modalWarnings.textContent = `Aviso: ${warnings.join(' ')}`;
-                modalWarnings.classList.remove('hidden');
-            } else {
-                modalWarnings.textContent = '';
-                modalWarnings.classList.add('hidden');
-            }
-        }
+    function mostrarModal() {
+        modalReference.textContent = generarReferencia();
         modalOverlay.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
-
+    
     /**
      * Cierra el modal y resetea el formulario
      */
@@ -617,16 +334,16 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = '';
         limpiarFormulario();
     }
-
+    
     // ============================================
     // EVENT LISTENERS
     // ============================================
-
+    
     // Cambio de tipo de formulario
     tipoFormulario.addEventListener('change', (e) => {
         mostrarSecciones(e.target.value);
     });
-
+    
     // Cambio de tipología (para reclamaciones)
     if (tipologia) {
         tipologia.addEventListener('change', (e) => {
@@ -640,27 +357,21 @@ document.addEventListener('DOMContentLoaded', () => {
             actualizarCamposLugarIncidencia(e.target.value);
         });
     }
-
-    if (lugarSugerencia) {
-        lugarSugerencia.addEventListener('change', (e) => {
-            actualizarCamposLugarSugerencia(e.target.value);
-        });
-    }
-
+    
     // Contador de caracteres para descripción corta
     if (descripcionCorta) {
         descripcionCorta.addEventListener('input', (e) => {
             charCount.textContent = e.target.value.length;
         });
     }
-
+    
     // Gestión de archivos adjuntos
     const fileInputs = document.querySelectorAll('.file-input');
     fileInputs.forEach(input => {
         input.addEventListener('change', (e) => {
             const files = Array.from(e.target.files);
             const fileListContainer = input.closest('.file-upload').querySelector('.file-list');
-
+            
             if (fileListContainer) {
                 fileListContainer.innerHTML = '';
                 files.forEach((file, index) => {
@@ -678,16 +389,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-
+    
     // Eliminar archivos individuales
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('file-item-remove')) {
             const fileItem = e.target.closest('.file-item');
             const fileUpload = e.target.closest('.file-upload');
             const input = fileUpload.querySelector('.file-input');
-
+            
             fileItem.remove();
-
+            
             // Si no quedan archivos, limpiar el input
             const remainingFiles = fileUpload.querySelectorAll('.file-item');
             if (remainingFiles.length === 0) {
@@ -695,688 +406,55 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-
-    function ensureFileList(input) {
-        const fileUpload = input.closest('.file-upload');
-        if (!fileUpload) return null;
-
-        let fileListContainer = fileUpload.querySelector('.file-list');
-        if (!fileListContainer) {
-            fileListContainer = document.createElement('div');
-            fileListContainer.className = 'file-list';
-            fileUpload.appendChild(fileListContainer);
-        }
-
-        return fileListContainer;
-    }
-
-    function renderSelectedFiles(input) {
-        const fileListContainer = ensureFileList(input);
-        if (!fileListContainer) return;
-
-        const files = Array.from(input.files || []);
-        fileListContainer.innerHTML = '';
-        fileListContainer.hidden = files.length === 0;
-
-        files.forEach((file, index) => {
-            const fileItem = document.createElement('div');
-            fileItem.className = 'file-item';
-            fileItem.innerHTML = `
-                <span class="file-item-name">${escapeHtml(file.name)}</span>
-                <span class="file-item-size">${formatFileSize(file.size)}</span>
-                <button type="button" class="file-item-remove" data-index="${index}" title="Eliminar archivo" aria-label="Eliminar ${escapeHtml(file.name)}">Eliminar</button>
-            `;
-            fileListContainer.appendChild(fileItem);
-        });
-    }
-
-    function fileMatchesAccept(file, accept) {
-        const rules = String(accept || '').split(',').map(rule => rule.trim().toLowerCase()).filter(Boolean);
-        if (rules.length === 0) return true;
-
-        const fileName = String(file.name || '').toLowerCase();
-        const fileType = String(file.type || '').toLowerCase();
-
-        return rules.some(rule => {
-            if (rule.startsWith('.')) return fileName.endsWith(rule);
-            if (rule.endsWith('/*')) return fileType.startsWith(rule.slice(0, -1));
-            return fileType === rule;
-        });
-    }
-
-    function addFilesToInput(input, incomingFiles) {
-        const acceptedFiles = Array.from(incomingFiles || [])
-            .filter(file => fileMatchesAccept(file, input.accept));
-        if (acceptedFiles.length === 0) return;
-
-        const dataTransfer = new DataTransfer();
-        const currentFiles = input.multiple ? Array.from(input.files || []) : [];
-        [...currentFiles, ...acceptedFiles].forEach(file => dataTransfer.items.add(file));
-
-        input.files = input.multiple
-            ? dataTransfer.files
-            : (() => {
-                const single = new DataTransfer();
-                single.items.add(acceptedFiles[0]);
-                return single.files;
-            })();
-        renderSelectedFiles(input);
-    }
-
-    function formatFileSize(bytes) {
-        const size = Number(bytes) || 0;
-        if (size >= 1024 * 1024) return `${(size / (1024 * 1024)).toFixed(1)} MB`;
-        return `${(size / 1024).toFixed(1)} KB`;
-    }
-
-    function escapeHtml(value) {
-        return String(value || '').replace(/[&<>"']/g, (char) => ({
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#39;',
-        }[char]));
-    }
-
-    function limpiarListasArchivos() {
-        form.querySelectorAll('.file-list').forEach((fileList) => {
-            fileList.innerHTML = '';
-            fileList.hidden = true;
-        });
-        form.querySelectorAll('.file-input').forEach((input) => {
-            input.value = '';
-        });
-    }
-
-    fileInputs.forEach(input => {
-        input.addEventListener('change', () => renderSelectedFiles(input));
-
-        const fileUpload = input.closest('.file-upload');
-        if (!fileUpload) return;
-
-        fileUpload.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            fileUpload.classList.add('is-dragover');
-        });
-
-        fileUpload.addEventListener('dragleave', (e) => {
-            if (!fileUpload.contains(e.relatedTarget)) {
-                fileUpload.classList.remove('is-dragover');
-            }
-        });
-
-        fileUpload.addEventListener('drop', (e) => {
-            e.preventDefault();
-            fileUpload.classList.remove('is-dragover');
-            addFilesToInput(input, e.dataTransfer?.files);
-        });
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!e.target.classList.contains('file-item-remove')) return;
-
-        e.stopImmediatePropagation();
-        const fileUpload = e.target.closest('.file-upload');
-        const input = fileUpload?.querySelector('.file-input');
-        if (!input) return;
-
-        const removeIndex = Number(e.target.dataset.index);
-        const dataTransfer = new DataTransfer();
-        Array.from(input.files || []).forEach((file, index) => {
-            if (index !== removeIndex) dataTransfer.items.add(file);
-        });
-
-        input.files = dataTransfer.files;
-        renderSelectedFiles(input);
-    }, true);
-
-    /**
-     * Comprueba si un elemento está oculto en el DOM o dentro de un contenedor oculto.
-     * Sirve para implementar la opción A (enviar campos condicionales ocultos como null).
-     */
-    function esElementoOculto(el) {
-        return el.closest('.hidden') !== null || el.offsetParent === null;
-    }
-
-    /**
-     * Genera el payload estructurado completo listo para su envío (o descarga de prueba)
-     * unificando las secciones de datos comunes, representante, envío y values por tipo.
-     */
-    /**
-     * Genera el payload estructurado completo listo para su envío (o descarga de prueba)
-     * unificando las secciones de datos comunes, representante, envío y values por tipo.
-     *
-     * NOTA: 'referenceClientSide' se envía como null porque la generación del identificador
-     * de referencia único (ej. ATT-2026-XXXXX) ha sido delegada al backend para mayor robustez.
-     */
-    function generarPayloadFormulario() {
-        const tipoHtml = tipoFormulario.value;
-        const typeCode = {
-            reclamaciones: 'REC',
-            consultas: 'CON',
-            sugerencias: 'SUG',
-            agradecimientos: 'AGR',
-            objetos: 'OBJ',
-            tarjetas: 'TAR'
-        }[tipoHtml] || 'GEN';
-
-        // 1. Obtener datos del solicitante
-        const direccionContactoContainer = document.getElementById('direccionContactoContainer');
-        const direccionContacto = (direccionContactoContainer && !esElementoOculto(direccionContactoContainer)) ? {
-            via: document.getElementById('viaContacto').value || null,
-            numero: document.getElementById('numContacto').value || null,
-            escalera: document.getElementById('escContacto').value || null,
-            piso: document.getElementById('pisoContacto').value || null,
-            puerta: document.getElementById('puerContacto').value || null,
-            codigoPostal: document.getElementById('cpContacto').value || null,
-            municipio: document.getElementById('municipioContacto').value || null,
-            provincia: textoSeleccionado('provinciaContacto')
-        } : null;
-
-        // 2. Obtener datos del representante (si aplica y está visible)
-        const bloqueRepresentante = document.getElementById('bloqueRepresentante');
-        const representative = (bloqueRepresentante && !esElementoOculto(bloqueRepresentante)) ? {
-            nombre: document.getElementById('nombreRep').value || null,
-            apellidos: document.getElementById('apellidosRep').value || null,
-            tipoDocumento: document.getElementById('tipoDocumentoRep').value || null,
-            numeroDocumento: document.getElementById('numeroDocumentoRep').value || null,
-            email: document.getElementById('emailRep').value || null,
-            telefono: document.getElementById('telefonoRep').value || null
-        } : null;
-
-        // 3. Obtener respuesta postal
-        const recibirPostal = document.getElementById('recibirPostal');
-        const postalReplyEnabled = recibirPostal ? recibirPostal.checked : false;
-
-        const direccionEnvioSelect = document.getElementById('direccionEnvioSelect');
-        const addressMode = (direccionEnvioSelect && !esElementoOculto(direccionEnvioSelect)) ? direccionEnvioSelect.value : 'misma';
-
-        const direccionEnvioContainer = document.getElementById('direccionEnvioContainer');
-        const direccionEnvio = (direccionEnvioContainer && !esElementoOculto(direccionEnvioContainer)) ? {
-            via: document.getElementById('viaEnvio').value || null,
-            numero: document.getElementById('numEnvio').value || null,
-            escalera: document.getElementById('escEnvio').value || null,
-            piso: document.getElementById('pisoEnvio').value || null,
-            puerta: document.getElementById('puerEnvio').value || null,
-            codigoPostal: document.getElementById('cpEnvio').value || null,
-            municipio: document.getElementById('municipioEnvio').value || null,
-            provincia: textoSeleccionado('provinciaEnvio')
-        } : null;
-
-        // 4. Obtener campos específicos del formulario activo (valores dinámicos en 'values')
-        const values = {};
-        const seccionActiva = secciones[tipoHtml];
-        if (seccionActiva) {
-            // Obtener inputs, selects y textareas dentro de la sección activa
-            const camposEspecificos = seccionActiva.querySelectorAll('input, select, textarea');
-            camposEspecificos.forEach(campo => {
-                // Ignorar inputs de tipo file (están en attachments) o botones
-                if (campo.type === 'file' || campo.type === 'submit' || campo.type === 'button') {
-                    return;
-                }
-
-                // Mapear nombre de campo usando su name o id
-                let nombreCampo = campo.name || campo.id;
-
-                // Opción A: Si el campo está oculto (su contenedor está oculto), se envía como null
-                if (esElementoOculto(campo)) {
-                    values[nombreCampo] = null;
-                } else {
-                    if (campo.type === 'checkbox') {
-                        values[nombreCampo] = campo.checked;
-                    } else if (campo.type === 'radio') {
-                        if (campo.checked) {
-                            values[nombreCampo] = campo.value;
-                        }
-                    } else {
-                        values[nombreCampo] = campo.value !== '' ? campo.value : null;
-                    }
-                }
-            });
-        }
-
-        // 5. Adjuntos en formato estructurado (referenciando el multipart)
-        const attachments = [];
-
-        // Archivos adjuntos
-        const fileInputs = form.querySelectorAll('.file-input');
-        fileInputs.forEach(input => {
-            if (esElementoOculto(input)) return;
-            const files = input.files;
-            if (files && files.length > 0) {
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    attachments.push({
-                        fieldId: input.id,
-                        fileName: file.name,
-                        contentType: file.type || 'application/octet-stream',
-                        sizeBytes: file.size,
-                        storageMode: 'multipart',
-                        multipartFieldName: `file_${input.id}_${i}`,
-                        sha256: "" // Reservado para checksum opcional
-                    });
-                }
-            }
-        });
-
-        // 6. Consentimientos
-        const consents = [];
-        const consentimientoCheckbox = document.getElementById('consentimiento');
-        if (consentimientoCheckbox && consentimientoCheckbox.checked) {
-            consents.push({
-                id: "consentimiento",
-                accepted: true,
-                acceptedAt: new Date().toISOString(),
-                textVersion: "lopd-general-2026-06"
-            });
-        }
-
-        const datosCorrectosCheckbox = document.getElementById('datosCorrectos');
-        if (datosCorrectosCheckbox && !esElementoOculto(datosCorrectosCheckbox) && datosCorrectosCheckbox.checked) {
-            consents.push({
-                id: "datosCorrectos",
-                accepted: true,
-                acceptedAt: new Date().toISOString(),
-                textVersion: "declaracion-veracidad-2026-06"
-            });
-        }
-
-        // Devolver el payload estructurado
-        return {
-            tipoFormulario: typeCode,
-            form: {
-                id: "metro-atencion-cliente-unificado",
-                version: "1.0.0",
-                typeCode: typeCode,
-                legacyType: tipoHtml
-            },
-            submission: {
-                id: crypto.randomUUID ? crypto.randomUUID() : 'f' + (Math.random() * 1e16).toString(16),
-                submittedAt: new Date().toISOString(),
-                source: "wordpress",
-                sourceSite: window.location.origin,
-                language: "es-ES"
-            },
-            applicant: {
-                nombre: document.getElementById('nombre').value || null,
-                apellidos: document.getElementById('apellidos').value || null,
-                tipoDocumento: document.getElementById('tipoDocumento').value || null,
-                numeroDocumento: document.getElementById('numeroDocumento').value || null,
-                email: document.getElementById('email').value || null,
-                telefono: document.getElementById('telefono').value || null,
-                nacionalidad: textoSeleccionado('nacionalidad'),
-                direccionContacto: direccionContacto
-            },
-            representative: representative,
-            postalReply: {
-                enabled: postalReplyEnabled,
-                addressMode: addressMode,
-                direccionEnvio: direccionEnvio
-            },
-            values: values,
-            attachments: attachments,
-            consents: consents,
-            metadata: {
-                referenceClientSide: null, // Asignado como null por delegar la creación al backend
-                notes: `Envío automático de prueba - tipo ${typeCode}`
-            }
-        };
-    }
-
-    function primerTextoDisponible(...valores) {
-        return valores.find(valor => typeof valor === 'string' && valor.trim() !== '')?.trim() || null;
-    }
-
-    function textoSeleccionado(id) {
-        const select = document.getElementById(id);
-        if (!select?.value || esElementoOculto(select)) return null;
-        return select.selectedOptions?.[0]?.textContent?.trim() || select.value;
-    }
-
-    function normalizarTipoDocumento(tipoDocumento) {
-        return tipoDocumento === 'DNI' ? 'NIF' : tipoDocumento;
-    }
-
-    function normalizarNacionalidad(nacionalidad) {
-        const valores = {
-            ES: 'ESPAÑA',
-            MA: 'MARRUECOS',
-            GB: 'REINO UNIDO',
-            FR: 'FRANCIA',
-            IT: 'ITALIA',
-            DE: 'ALEMANIA',
-            PT: 'PORTUGAL',
-            OTRO: 'OTROS',
-            OTHER: 'OTROS',
-            Otro: 'OTROS',
-            'Arabia Saudí': 'ARABIA SAUDITA',
-            Mali: 'MALÍ',
-        };
-        return valores[nacionalidad] || nacionalidad?.toLocaleUpperCase('es-ES') || null;
-    }
-
-    function combinarFechaHora(fecha, hora) {
-        if (!fecha) return null;
-        return `${fecha}T${hora || '00:00'}:00`;
-    }
-
-    function separarApellidos(apellidos) {
-        const partes = String(apellidos || '').trim().split(/\s+/).filter(Boolean);
-        if (partes.length <= 1) {
-            return { primero: partes[0] || '', segundo: '' };
-        }
-        return {
-            primero: partes[0],
-            segundo: partes.slice(1).join(' '),
-        };
-    }
-
-    function adaptarPayloadParaApi(payloadUnificado) {
-        const applicant = payloadUnificado.applicant || {};
-        const direccion = applicant.direccionContacto || {};
-        const values = payloadUnificado.values || {};
-        const apellidosTarjeta = separarApellidos(applicant.apellidos);
-        const tipoFormularioActual = payloadUnificado.form?.legacyType || tipoFormulario.value;
-
-        const payloadApi = {
-            tipoFormulario: tipoFormularioActual,
-            Nombre: applicant.nombre,
-            Apellidos: applicant.apellidos,
-            TipoDeDocumento: normalizarTipoDocumento(applicant.tipoDocumento),
-            NumeroDeDocumento: applicant.numeroDocumento,
-            CorreoElectronico: applicant.email,
-            confirmEmail: applicant.email,
-            Telefono: applicant.telefono,
-            Nacionalidad: normalizarNacionalidad(applicant.nacionalidad),
-            Direccion: direccion.via,
-            Numero: direccion.numero,
-            Escalera: direccion.escalera,
-            Piso: direccion.piso,
-            Puerta: direccion.puerta,
-            CP: direccion.codigoPostal,
-            Localidad: direccion.municipio,
-            Provincia: direccion.provincia,
-            recibirPostal: payloadUnificado.postalReply?.enabled === true,
-            consentimiento: payloadUnificado.consents?.some(consent => consent.id === 'consentimiento' && consent.accepted === true) === true,
-        };
-
-        if (tipoFormularioActual === 'consultas') {
-            payloadApi.TipoDeTitulo = values.tipoTituloConsulta;
-            payloadApi.NumTituloViaje = values.numeracionTituloConsulta;
-            payloadApi.Descripcion = values.descripcionDetalladaConsulta;
-        }
-
-        if (tipoFormularioActual === 'sugerencias') {
-            const lugarSugerencia = values.lugarSugerencia;
-            payloadApi.Estacion = ['tren', 'otro'].includes(lugarSugerencia) ? null : primerTextoDisponible(lugarSugerencia, 'general');
-            payloadApi.OtraUbicacion = lugarSugerencia === 'tren'
-                ? [textoSeleccionado('lugarSugerencia'), textoSeleccionado('trenSugerencia')].filter(Boolean).join(' - ')
-                : values.otroLugarSugerencia;
-            payloadApi.TipoDeTitulo = values.tipoTituloSugerencia;
-            payloadApi.NumTituloViaje = values.numeracionTituloSugerencia;
-            payloadApi.Descripcion = values.descripcionSugerencia;
-        }
-
-        if (tipoFormularioActual === 'agradecimientos') {
-            payloadApi.Motivo = values.motivoAgradecimiento;
-            payloadApi.FechaEpisodio = values.fechaAgradecimiento;
-            payloadApi.Lugar = values.lugarAgradecimiento;
-            payloadApi.Estacion = values.estacionAgradecimientoDetalle;
-            payloadApi.Tren = values.trenAgradecimiento;
-            payloadApi.DirigidoA = values.dirigidoAgradecimiento;
-            payloadApi.Colectivos = values.variosColectivos;
-            payloadApi.NumIdentificacionPersonaTrabajad = values.nombreEmpleado;
-            payloadApi.Descripcion = values.descripcionAgradecimiento;
-        }
-
-        if (tipoFormularioActual === 'reclamaciones') {
-            const otroTipoTarjetaBancaria = primerTextoDisponible(
-                values.tipo_tarjeta_bancaria_otras_11,
-                values.tipo_tarjeta_bancaria_otras_dab_fisica,
-                values.tipo_tarjeta_bancaria_otras_dab_movil,
-                values.tipo_tarjeta_bancaria_otras_2,
-                values.tipo_tarjeta_bancaria_otras_3
-            );
-            const tipoTarjetaBancaria = otroTipoTarjetaBancaria || primerTextoDisponible(
-                textoSeleccionado('tipo_tarjeta_bancaria_11'),
-                textoSeleccionado('tipo_tarjeta_bancaria_dab_fisica'),
-                textoSeleccionado('tipo_tarjeta_bancaria_dab_movil'),
-                textoSeleccionado('tipo_tarjeta_bancaria_2'),
-                textoSeleccionado('tipo_tarjeta_bancaria_3')
-            );
-            payloadApi.Clasificacion = values.clasificacion;
-            payloadApi.FechaYHoraConsulta = combinarFechaHora(values.fechaIncidencia, values.horaIncidencia);
-            payloadApi.Lugar = values.lugarIncidencia;
-            payloadApi.TipoDeTitulo = values.tipoTitulo;
-            payloadApi.NBilleteTitulo = values.numeracion_titulo_viaje;
-            payloadApi.PuntoDeVenta = values.estacion;
-            payloadApi.DAB = values.numero_dab;
-            payloadApi.TipoDeInstalacion = values.numero_dab ? 'dab' : null;
-            payloadApi.ImporteAPagar = values.importe_reclamado_1 || values.importe_reclamado_2 || values.importe_reclamado_3;
-            payloadApi.ModoPago = textoSeleccionado('modo_pago');
-            payloadApi.TipoTarjetaBancaria = tipoTarjetaBancaria;
-            payloadApi.PANFisicaPrimeros6 = primerTextoDisponible(values.pan_tarjeta_primeros_6_11, values.pan_dab_fisica_primeros_6, values.pan_dab_movil_fisica_asoc_primeros_6, values.pan_emv_fisica_primeros_6, values.pan_emv_movil_fisica_asoc_primeros_6, values.pan_tarjeta_registrada_primeros_6);
-            payloadApi.PANFisicaUltimos4 = primerTextoDisponible(values.pan_tarjeta_ultimos_4_11, values.pan_dab_fisica_ultimos_4, values.pan_dab_movil_fisica_asoc_ultimos_4, values.pan_emv_fisica_ultimos_4, values.pan_emv_movil_fisica_asoc_ultimos_4, values.pan_tarjeta_registrada_ultimos_4);
-            payloadApi.PANVirtualPrimeros6 = primerTextoDisponible(values.pan_dab_movil_virtual_primeros_6, values.pan_emv_movil_virtual_primeros_6);
-            payloadApi.PANVirtualUltimos4 = primerTextoDisponible(values.pan_dab_movil_virtual_ultimos_4, values.pan_emv_movil_virtual_ultimos_4);
-            payloadApi.EmailMetroPay = values.email_usuario_metro_pay;
-            payloadApi.DescripcionConsulta = values.descripcionDetallada;
-            payloadApi.Observaciones = [
-                values.otroLugarIncidencia ? `Otro lugar: ${values.otroLugarIncidencia}` : '',
-                values.trenIncidencia ? `Tren: ${textoSeleccionado('trenIncidencia')}` : '',
-                values.punto_venta_recarga ? `Punto venta/recarga: ${textoSeleccionado('punto_venta_recarga')}` : '',
-                values.plataforma_pago ? `Plataforma de pago: ${textoSeleccionado('plataforma_pago')}` : '',
-                values.tipo_operacion ? `Tipo operacion: ${textoSeleccionado('tipo_operacion')}` : '',
-                values.numeracion_titulo_recarga ? `Titulo recargado: ${values.numeracion_titulo_recarga}` : '',
-            ].filter(Boolean).join('\n') || null;
-        }
-
-        if (tipoFormularioActual === 'objetos') {
-            payloadApi.FechaPerdida = values.FechaPerdida;
-            payloadApi.LineaMetro = values.LineaMetro;
-            payloadApi.Localizacion = values.Localizacion;
-            payloadApi.EstPerdida = values.EstPerdida;
-            payloadApi.NUnidadTren = values.NUnidadTren;
-            payloadApi.EstOrig = values.EstOrig;
-            payloadApi.EstDest = values.EstDest;
-            payloadApi.TipoObjeto = values.TipoObjeto;
-            payloadApi.ColorObj = values.ColorObj;
-            payloadApi.DistintivoObj = values.DistintivoObj;
-            payloadApi.TipoDeTitulo = values.TipoDeTitulo;
-            payloadApi.NumTituloViaje = values.NumTituloViaje;
-            payloadApi.Descripcion = values.Descripcion;
-            payloadApi.Observaciones = [
-                values.horaPerdida ? `Hora aproximada: ${values.horaPerdida}` : '',
-            ].filter(Boolean).join('\n') || null;
-        }
-
-        if (tipoFormularioActual === 'tarjetas') {
-            const firmaDataUrl = document.getElementById('signature-data')?.value || null;
-            const direccionTarjeta = payloadUnificado.postalReply?.direccionEnvio || direccion;
-            if (firmaDataUrl && !firmaDataUrl.startsWith('data:image/')) {
-                console.warn('[Metro API] Firma de Tarjetas con formato inesperado; se esperaba data:image/... base64.', {
-                    firmaPreview: firmaDataUrl.slice(0, 40)
-                });
-            }
-            return {
-                tipoFormulario: tipoFormularioActual,
-                Title: null,
-                NombreCliente: applicant.nombre,
-                ApellidoCliente1: apellidosTarjeta.primero,
-                ApellidoCliente2: apellidosTarjeta.segundo,
-                DNICliente: applicant.numeroDocumento,
-                EmailCliente: applicant.email,
-                confirmEmail: applicant.email,
-                TelefonoCliente1: applicant.telefono,
-                Direccion: direccionTarjeta.via,
-                Numero: direccionTarjeta.numero,
-                Escalera: direccionTarjeta.escalera,
-                Piso: direccionTarjeta.piso,
-                Puerta: direccionTarjeta.puerta,
-                CP: direccionTarjeta.codigoPostal,
-                Localidad: direccionTarjeta.municipio,
-                Provincia: direccionTarjeta.provincia,
-                MetodoNotificacion: values.medioNotificacionTarjeta,
-                Firma: firmaDataUrl,
-                attachments: payloadUnificado.attachments,
-                consentimiento: payloadApi.consentimiento,
-            };
-        }
-        payloadApi.attachments = payloadUnificado.attachments;
-        return payloadApi;
-    }
-
-    function tieneBinariosParaApi(payloadUnificado) {
-        return Boolean(payloadUnificado.attachments?.length);
-    }
-
-    function crearRequestApi(payloadApi, payloadUnificado) {
-        if (!tieneBinariosParaApi(payloadUnificado)) {
-            return {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payloadApi),
-            };
-        }
-
-        const formData = new FormData();
-        formData.append('payload', JSON.stringify(payloadApi));
-
-        const fileInputs = form.querySelectorAll('.file-input');
-        fileInputs.forEach(input => {
-            if (esElementoOculto(input) || !input.files?.length) return;
-            Array.from(input.files).forEach((file, index) => {
-                formData.append(`file_${input.id}_${index}`, file, file.name);
-            });
-        });
-
-        return {
-            body: formData,
-        };
-    }
-
-    function registrarLogApi(entry) {
-        const logEntry = {
-            timestamp: new Date().toISOString(),
-            ...entry,
-        };
-
-        console.log('[Metro API]', logEntry);
-
-        try {
-            const logs = JSON.parse(localStorage.getItem(API_LOG_STORAGE_KEY) || '[]');
-            logs.push(logEntry);
-            localStorage.setItem(API_LOG_STORAGE_KEY, JSON.stringify(logs.slice(-25)));
-        } catch (error) {
-            console.warn('[Metro API] No se pudo guardar el log local.', error);
-        }
-    }
-
-    async function enviarSolicitudApi(payloadUnificado) {
-        const request = adaptarPayloadParaApi(payloadUnificado);
-        const apiRequest = crearRequestApi(request, payloadUnificado);
-
-        try {
-            const response = await fetch(API_CREATE_ENDPOINT, {
-                method: 'POST',
-                ...apiRequest,
-            });
-
-            let responseBody = {};
-            try {
-                responseBody = await response.json();
-            } catch {
-                responseBody = {};
-            }
-
-            registrarLogApi({
-                endpoint: API_CREATE_ENDPOINT,
-                request,
-                status: response.status,
-                ok: response.ok,
-                response: responseBody,
-            });
-
-            if (!response.ok) {
-                const detail = Array.isArray(responseBody.errors) && responseBody.errors.length > 0
-                    ? responseBody.errors.join(', ')
-                    : responseBody.error || `HTTP ${response.status}`;
-                throw new Error(detail);
-            }
-
-            return responseBody;
-        } catch (error) {
-            registrarLogApi({
-                endpoint: API_CREATE_ENDPOINT,
-                ok: false,
-                error: error.message,
-            });
-            throw error;
-        }
-    }
-
+    
     // Envío del formulario
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', (e) => {
         e.preventDefault();
-
-        // Asegurar sincronización de dirección si procede
-        if (typeof sincronizarDireccionEnvio === 'function') {
-            sincronizarDireccionEnvio();
-        }
-
+        
         if (validarFormulario()) {
-            console.log('Formulario valido, enviando a la API...');
-
+            // Aquí iría la lógica de envío real (fetch/AJAX)
+            console.log('Formulario válido, enviando...');
+            
+            // Simular envío
             const btnEnviar = document.getElementById('btnEnviar');
             btnEnviar.disabled = true;
-            btnEnviar.innerHTML = '<span class="btn-icon">...</span> Enviando...';
-
-            try {
-                const payload = generarPayloadFormulario();
-                const resultado = await enviarSolicitudApi(payload);
-                mostrarModal(
-                    resultado.token || resultado.solicitudId || resultado.id || 'Solicitud registrada',
-                    resultado.warnings || []
-                );
-            } catch (errorEnvio) {
-                console.error('Error enviando la solicitud a la API:', errorEnvio);
-                alert(`No se pudo enviar la solicitud: ${errorEnvio.message}`);
-            } finally {
+            btnEnviar.innerHTML = '<span class="btn-icon">⏳</span> Enviando...';
+            
+            setTimeout(() => {
                 btnEnviar.disabled = false;
-                btnEnviar.innerHTML = '<span class="btn-icon">Enviar</span> Enviar solicitud';
-            }
+                btnEnviar.innerHTML = '<span class="btn-icon">📤</span> Enviar solicitud';
+                mostrarModal();
+            }, 1500);
         }
     });
-
+    
     // Botón limpiar
     btnLimpiar.addEventListener('click', () => {
         if (confirm('¿Está seguro de que desea limpiar todos los campos del formulario?')) {
             limpiarFormulario();
         }
     });
-
+    
     // Cerrar modal
     modalClose.addEventListener('click', cerrarModal);
     modalOverlay.addEventListener('click', (e) => {
         if (e.target === modalOverlay) cerrarModal();
     });
-
+    
     // Cerrar modal con Escape
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && !modalOverlay.classList.contains('hidden')) {
             cerrarModal();
         }
     });
-
+    
     // Quitar clase error al escribir
     form.addEventListener('input', (e) => {
         if (e.target.classList.contains('error')) {
             e.target.classList.remove('error');
         }
     });
-
+    
     // Validación en tiempo real del email
     const emailInput = document.getElementById('email');
     if (emailInput) {
@@ -1388,34 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
-    // Validación en tiempo real del confirmEmail y bloqueo de paste
-    const confirmEmailInput = document.getElementById('confirmEmail');
-    if (confirmEmailInput && emailInput) {
-        confirmEmailInput.addEventListener('blur', (e) => {
-            if (e.target.value && (e.target.value !== emailInput.value || !validarEmail(e.target.value))) {
-                e.target.classList.add('error');
-            } else {
-                e.target.classList.remove('error');
-            }
-        });
-
-        confirmEmailInput.addEventListener('paste', (e) => {
-            e.preventDefault();
-        });
-
-        // Al perder el foco el email principal, si ya hay valor en la confirmación, re-validar coincidencia
-        emailInput.addEventListener('blur', (e) => {
-            if (confirmEmailInput.value) {
-                if (confirmEmailInput.value !== e.target.value) {
-                    confirmEmailInput.classList.add('error');
-                } else {
-                    confirmEmailInput.classList.remove('error');
-                }
-            }
-        });
-    }
-
+    
     // Preview de foto carnet
     const fotoCarnet = document.getElementById('fotoCarnet');
     const fotoPreview = document.getElementById('fotoPreview');
@@ -1431,975 +482,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
+    
     // Establecer fecha máxima en campos de fecha (hoy)
     const today = new Date().toISOString().split('T')[0];
     document.querySelectorAll('input[type="date"]').forEach(input => {
-        if (input.id.includes('Cita')) {
-            input.setAttribute('min', today);
-        } else if (!input.id.includes('Nacimiento')) {
+        if (!input.id.includes('Nacimiento')) {
             input.setAttribute('max', today);
         }
     });
-
-    // ============================================
-    // GESTIÓN DINÁMICA DE SECCIÓN CONSULTAS
-    // ============================================
-    function actualizarSubtipologiasConsulta(tipologiaValue) {
-        const subtipologiaConsulta = document.getElementById('subtipologiaConsulta');
-        if (!subtipologiaConsulta) return;
-        subtipologiaConsulta.innerHTML = '<option value="">Seleccione...</option>';
-
-        if (tipologiaValue && subtipologias[tipologiaValue]) {
-            subtipologias[tipologiaValue].forEach(opcion => {
-                const option = document.createElement('option');
-                option.value = opcion.value;
-                option.textContent = opcion.text;
-                subtipologiaConsulta.appendChild(option);
-            });
-        }
-    }
-
-    const tipologiaConsulta = document.getElementById('tipologiaConsulta');
-    if (tipologiaConsulta) {
-        tipologiaConsulta.addEventListener('change', (e) => {
-            actualizarSubtipologiasConsulta(e.target.value);
-        });
-    }
-
-    const lugarConsulta = document.getElementById('lugarConsulta');
-    const grupoTrenConsulta = document.getElementById('grupoTrenConsulta');
-    const trenConsulta = document.getElementById('trenConsulta');
-    const grupoOtroLugarConsulta = document.getElementById('grupoOtroLugarConsulta');
-    const otroLugarConsulta = document.getElementById('otroLugarConsulta');
-    if (lugarConsulta) {
-        lugarConsulta.addEventListener('change', (e) => {
-            const value = e.target.value;
-            if (grupoTrenConsulta && trenConsulta) {
-                grupoTrenConsulta.classList.toggle('hidden', value !== 'tren');
-                if (value !== 'tren') trenConsulta.value = '';
-            }
-            if (grupoOtroLugarConsulta && otroLugarConsulta) {
-                grupoOtroLugarConsulta.classList.toggle('hidden', value !== 'otro');
-                if (value !== 'otro') otroLugarConsulta.value = '';
-            }
-        });
-    }
-
-    const descripcionCortaConsulta = document.getElementById('descripcionCortaConsulta');
-    const charCountConsulta = document.getElementById('charCountConsulta');
-    if (descripcionCortaConsulta && charCountConsulta) {
-        descripcionCortaConsulta.addEventListener('input', (e) => {
-            charCountConsulta.textContent = e.target.value.length;
-        });
-    }
-
-
-
-    // ============================================
-    // GESTIÓN CONDICIONAL POR TIPO DE TÍTULO (RECLAMACIONES)
-    // ============================================
-    const dabsPorEstacion = {
-        'guadalmedina-l1': ['GDL-DAB-101', 'GDL-DAB-102', 'GDL-DAB-103', 'GDL-DAB-104'],
-        'guadalmedina-l2': ['GDL-DAB-101', 'GDL-DAB-102', 'GDL-DAB-103', 'GDL-DAB-104'],
-        'atarazanas': ['ATZ-DAB-101', 'ATZ-DAB-102', 'ATZ-DAB-103'],
-        'andalucia-tech': ['TCH-DAB-101', 'TCH-DAB-102'],
-        'carranque': ['CRR-DAB-101', 'CRR-DAB-102'],
-        'barbarela': ['BBL-DAB-101', 'BBL-DAB-102'],
-        'el-clinico': ['CLI-DAB-101', 'CLI-DAB-102'],
-        'la-union': ['LUN-DAB-101', 'LUN-DAB-102'],
-        'universidad': ['UNI-DAB-101', 'UNI-DAB-102'],
-        'ciudad-justicia': ['CDJ-DAB-101', 'CDJ-DAB-102', 'CDJ-DAB-201'],
-        'el-consul': ['CNS-DAB-101', 'CNS-DAB-102'],
-        'el-perchel-l1': ['PCH-DAB-101', 'PCH-DAB-102', 'PCH-DAB-103', 'PCH-DAB-104', 'PCH-DAB-105'],
-        'el-perchel-l2': ['PCH-DAB-101', 'PCH-DAB-102', 'PCH-DAB-103', 'PCH-DAB-104', 'PCH-DAB-105'],
-        'paraninfo': ['PRF-DAB-101'],
-        'portada-alta': ['PTD-DAB-101', 'PTD-DAB-102'],
-        'la-luz-la-paz': ['LZP-DAB-101', 'LZP-DAB-102', 'LZP-DAB-201'],
-        'la-isla': ['ISL-DAB-101', 'ISL-DAB-102'],
-        'puerta-blanca': ['PBL-DAB-101', 'PBL-DAB-102', 'PBL-DAB-201'],
-        'princesa-huelin': ['PRI-DAB-101', 'PRI-DAB-102'],
-        'el-torcal': ['TOR-DAB-101', 'TOR-DAB-102'],
-        'palacio-deportes': ['PDD-DAB-101', 'PDD-DAB-102', 'PDD-DAB-103']
-    };
-
-    function resetearBloque(bloque) {
-        if (!bloque) return;
-        bloque.querySelectorAll('input, select, textarea').forEach(campo => {
-            if (campo.type === 'checkbox' || campo.type === 'radio') {
-                campo.checked = false;
-            } else {
-                campo.value = '';
-            }
-            campo.classList.remove('error');
-        });
-        bloque.querySelectorAll('.form-grid, .form-group').forEach(subBloque => {
-            if (subBloque.id && (
-                subBloque.id.startsWith('bloqueOnline') ||
-                subBloque.id.startsWith('bloqueIncidenciaRecargaCompra') ||
-                subBloque.id.startsWith('bloqueMaquina') ||
-                subBloque.id.startsWith('bloqueTituloRecargado') ||
-                subBloque.id.startsWith('bloqueDabTarjeta') ||
-                subBloque.id.startsWith('bloqueTarjetaOtras') ||
-                subBloque.id.startsWith('bloqueTituloViajeObjetos') ||
-                subBloque.id.startsWith('bloqueEstacionObjetos') ||
-                subBloque.id.startsWith('bloqueTrenObjetos') ||
-                subBloque.id.startsWith('bloqueTituloViajeConsulta') ||
-                subBloque.id.startsWith('bloqueTituloViajeSugerencia')
-            )) {
-                subBloque.classList.add('hidden');
-            }
-        });
-    }
-
-    function ocultarYResetearTodosLosBloques() {
-        const bloques = [
-            'bloqueTituloViaje',
-            'bloqueIncidenciaRecargaCompra',
-            'bloqueEMV',
-            'bloqueEMVFisica',
-            'bloqueEMVMovil',
-            'bloqueABT',
-            'bloqueOnline',
-            'bloqueOnlineTarjeta',
-            'bloqueMaquina',
-            'bloqueTituloRecargado',
-            'bloqueDabTarjeta',
-            'bloqueDabTarjetaFisica',
-            'bloqueDabTarjetaMovil',
-            'bloqueTarjetaOtras11',
-            'bloqueTarjetaOtrasDabFisica',
-            'bloqueTarjetaOtrasDabMovil',
-            'bloqueTarjetaOtras2',
-            'bloqueTarjetaOtras3',
-            'bloqueTituloViajeObjetos',
-            'bloqueEstacionObjetos',
-            'bloqueTrenObjetos',
-            'bloqueTituloViajeConsulta',
-            'bloqueTituloViajeSugerencia',
-            'grupoEstacionAgradecimiento',
-            'grupoTrenAgradecimiento',
-            'grupoVariosColectivos',
-            'bloqueRepresentante',
-            'grupoDatosCorrectosCheck',
-            'containerFirmaTarjetas'
-        ];
-        bloques.forEach(id => {
-            const bloque = document.getElementById(id);
-            if (bloque) {
-                resetearBloque(bloque);
-                bloque.classList.add('hidden');
-            }
-        });
-    }
-
-    // Sanitizador PAN: Solo números
-    const inputsPan = document.querySelectorAll('.input-pan');
-    inputsPan.forEach(input => {
-        input.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/\D/g, '');
-        });
-    });
-
-    // Event Listener Principal para tipo de título
-    const clasificacion = document.getElementById('clasificacion');
-    const tipoTitulo = document.getElementById('tipoTitulo');
-    const bloqueTituloViaje = document.getElementById('bloqueTituloViaje');
-    const bloqueIncidenciaRecargaCompra = document.getElementById('bloqueIncidenciaRecargaCompra');
-    const bloqueEMV = document.getElementById('bloqueEMV');
-    const bloqueABT = document.getElementById('bloqueABT');
-    const gruposImporteReclamado = [
-        document.getElementById('grupoImporteReclamado1'),
-        document.getElementById('grupoImporteReclamado2'),
-        document.getElementById('grupoImporteReclamado3')
-    ];
-
-    function actualizarVisibilidadImportesReclamados() {
-        const esReclamacion = clasificacion && clasificacion.value === 'reclamacion';
-
-        gruposImporteReclamado.forEach(grupo => {
-            if (!grupo) return;
-            grupo.classList.toggle('hidden', !esReclamacion);
-            if (!esReclamacion) {
-                resetearBloque(grupo);
-            }
-        });
-    }
-
-    function actualizarVisibilidadIncidenciaRecargaCompra() {
-        const esReclamacion = clasificacion && clasificacion.value === 'reclamacion';
-        const tituloViajeVisible = bloqueTituloViaje && !bloqueTituloViaje.classList.contains('hidden');
-
-        if (esReclamacion && tituloViajeVisible) {
-            if (bloqueIncidenciaRecargaCompra) bloqueIncidenciaRecargaCompra.classList.remove('hidden');
-        } else if (bloqueIncidenciaRecargaCompra) {
-            resetearBloque(bloqueIncidenciaRecargaCompra);
-            bloqueIncidenciaRecargaCompra.classList.add('hidden');
-        }
-        actualizarVisibilidadImportesReclamados();
-        comprobarCamposObligatorios();
-    }
-
-    if (clasificacion) {
-        clasificacion.addEventListener('change', actualizarVisibilidadIncidenciaRecargaCompra);
-    }
-
-    if (tipoTitulo) {
-        tipoTitulo.addEventListener('change', (e) => {
-            ocultarYResetearTodosLosBloques();
-            const opcion = e.target.value;
-            const opcionesTituloViaje = [
-                'monedero-metro-malaga',
-                'billete-ocasional',
-                'masmetro',
-                'tarjeta-consorcio',
-                'tarjeta-consorcio-joven',
-                'tarjeta-consorcio-familia-numerosa'
-            ];
-
-            if (opcionesTituloViaje.includes(opcion)) {
-                if (bloqueTituloViaje) bloqueTituloViaje.classList.remove('hidden');
-                actualizarVisibilidadIncidenciaRecargaCompra();
-            } else if (opcion === 'validacion-emv-fisica' || opcion === 'validacion-emv-movil') {
-                if (bloqueEMV) bloqueEMV.classList.remove('hidden');
-                const bloqueEMVFisica = document.getElementById('bloqueEMVFisica');
-                const bloqueEMVMovil = document.getElementById('bloqueEMVMovil');
-                if (opcion === 'validacion-emv-fisica') {
-                    if (bloqueEMVFisica) bloqueEMVFisica.classList.remove('hidden');
-                } else if (opcion === 'validacion-emv-movil') {
-                    if (bloqueEMVMovil) bloqueEMVMovil.classList.remove('hidden');
-                }
-            } else if (opcion === 'metropay') {
-                if (bloqueABT) bloqueABT.classList.remove('hidden');
-            }
-            actualizarVisibilidadImportesReclamados();
-        });
-    }
-
-    // Sub-condicionales: Punto de venta o recarga
-    const puntoVentaRecarga = document.getElementById('punto_venta_recarga');
-    const bloqueOnline = document.getElementById('bloqueOnline');
-    const plataformaPago = document.getElementById('plataforma_pago');
-    const bloqueOnlineTarjeta = document.getElementById('bloqueOnlineTarjeta');
-    const bloqueMaquina = document.getElementById('bloqueMaquina');
-
-    function actualizarVisibilidadOnlineTarjeta() {
-        if (!plataformaPago || !bloqueOnlineTarjeta) return;
-
-        if (plataformaPago.value === 'AppWeb') {
-            bloqueOnlineTarjeta.classList.remove('hidden');
-        } else {
-            resetearBloque(bloqueOnlineTarjeta);
-            bloqueOnlineTarjeta.classList.add('hidden');
-        }
-        comprobarCamposObligatorios();
-    }
-
-    if (puntoVentaRecarga) {
-        puntoVentaRecarga.addEventListener('change', (e) => {
-            const opcion = e.target.value;
-            if (opcion === 'Online') {
-                if (bloqueOnline) bloqueOnline.classList.remove('hidden');
-                if (bloqueMaquina) {
-                    resetearBloque(bloqueMaquina);
-                    bloqueMaquina.classList.add('hidden');
-                }
-            } else if (opcion === 'Maquina') {
-                if (bloqueMaquina) bloqueMaquina.classList.remove('hidden');
-                if (bloqueOnline) {
-                    resetearBloque(bloqueOnline);
-                    bloqueOnline.classList.add('hidden');
-                }
-            } else {
-                if (bloqueOnline) {
-                    resetearBloque(bloqueOnline);
-                    bloqueOnline.classList.add('hidden');
-                }
-                if (bloqueMaquina) {
-                    resetearBloque(bloqueMaquina);
-                    bloqueMaquina.classList.add('hidden');
-                }
-            }
-        });
-    }
-
-    if (plataformaPago) {
-        plataformaPago.addEventListener('change', actualizarVisibilidadOnlineTarjeta);
-    }
-
-    // Filtrado de DABs por estación
-    const estacionSelect = document.getElementById('estacion');
-    const numeroDabSelect = document.getElementById('numero_dab');
-    if (estacionSelect && numeroDabSelect) {
-        estacionSelect.addEventListener('change', (e) => {
-            const estacion = e.target.value;
-            numeroDabSelect.innerHTML = '<option value="">Seleccione...</option>';
-            if (estacion && dabsPorEstacion[estacion]) {
-                dabsPorEstacion[estacion].forEach(dab => {
-                    const option = document.createElement('option');
-                    option.value = dab;
-                    option.textContent = dab;
-                    numeroDabSelect.appendChild(option);
-                });
-            } else {
-                const option = document.createElement('option');
-                option.value = "";
-                option.textContent = "Seleccione primero una estación...";
-                numeroDabSelect.appendChild(option);
-            }
-        });
-    }
-
-    // Sub-condicionales de tipo_operacion
-    const tipoOperacion = document.getElementById('tipo_operacion');
-    const bloqueTituloRecargado = document.getElementById('bloqueTituloRecargado');
-    if (tipoOperacion) {
-        tipoOperacion.addEventListener('change', (e) => {
-            if (e.target.value === 'Recarga') {
-                if (bloqueTituloRecargado) bloqueTituloRecargado.classList.remove('hidden');
-            } else {
-                if (bloqueTituloRecargado) {
-                    resetearBloque(bloqueTituloRecargado);
-                    bloqueTituloRecargado.classList.add('hidden');
-                }
-            }
-        });
-    }
-
-    // Sub-condicionales de modo_pago
-    const modoPago = document.getElementById('modo_pago');
-    const bloqueDabTarjeta = document.getElementById('bloqueDabTarjeta');
-    if (modoPago) {
-        modoPago.addEventListener('change', (e) => {
-            const opcion = e.target.value;
-            if (opcion === 'Tarjeta-fisica' || opcion === 'Tarjeta-movil') {
-                if (bloqueDabTarjeta) bloqueDabTarjeta.classList.remove('hidden');
-                const bloqueDabTarjetaFisica = document.getElementById('bloqueDabTarjetaFisica');
-                const bloqueDabTarjetaMovil = document.getElementById('bloqueDabTarjetaMovil');
-                if (opcion === 'Tarjeta-fisica') {
-                    if (bloqueDabTarjetaFisica) bloqueDabTarjetaFisica.classList.remove('hidden');
-                    if (bloqueDabTarjetaMovil) {
-                        resetearBloque(bloqueDabTarjetaMovil);
-                        bloqueDabTarjetaMovil.classList.add('hidden');
-                    }
-                } else {
-                    if (bloqueDabTarjetaMovil) bloqueDabTarjetaMovil.classList.remove('hidden');
-                    if (bloqueDabTarjetaFisica) {
-                        resetearBloque(bloqueDabTarjetaFisica);
-                        bloqueDabTarjetaFisica.classList.add('hidden');
-                    }
-                }
-            } else {
-                if (bloqueDabTarjeta) {
-                    resetearBloque(bloqueDabTarjeta);
-                    bloqueDabTarjeta.classList.add('hidden');
-                }
-            }
-        });
-    }
-
-    function configurarCampoOtraTarjeta(selectId, bloqueId) {
-        const select = document.getElementById(selectId);
-        const bloque = document.getElementById(bloqueId);
-        if (!select || !bloque) return;
-
-        select.addEventListener('change', (e) => {
-            if (e.target.value === 'Otras') {
-                bloque.classList.remove('hidden');
-            } else {
-                resetearBloque(bloque);
-                bloque.classList.add('hidden');
-            }
-            comprobarCamposObligatorios();
-        });
-    }
-
-    configurarCampoOtraTarjeta('tipo_tarjeta_bancaria_11', 'bloqueTarjetaOtras11');
-    configurarCampoOtraTarjeta('tipo_tarjeta_bancaria_dab_fisica', 'bloqueTarjetaOtrasDabFisica');
-    configurarCampoOtraTarjeta('tipo_tarjeta_bancaria_dab_movil', 'bloqueTarjetaOtrasDabMovil');
-    configurarCampoOtraTarjeta('tipo_tarjeta_bancaria_2', 'bloqueTarjetaOtras2');
-    configurarCampoOtraTarjeta('tipo_tarjeta_bancaria_3', 'bloqueTarjetaOtras3');
-
-    // ============================================
-    // GESTIÓN DINÁMICA DE OBJETOS PERDIDOS
-    // ============================================
-    const estacionesPorLinea = {
-        '1': [
-            { value: 'guadalmedina-l1', text: 'Guadalmedina' },
-            { value: 'atarazanas', text: 'Atarazanas' },
-            { value: 'andalucia-tech', text: 'Andalucía Tech' },
-            { value: 'carranque', text: 'Carranque' },
-            { value: 'barbarela', text: 'Barbarela' },
-            { value: 'el-clinico', text: 'El Clínico' },
-            { value: 'la-union', text: 'La Unión' },
-            { value: 'universidad', text: 'Universidad' },
-            { value: 'ciudad-justicia', text: 'Ciudad de la Justicia' },
-            { value: 'el-consul', text: 'El Cónsul' },
-            { value: 'el-perchel-l1', text: 'El Perchel' },
-            { value: 'paraninfo', text: 'Paraninfo' },
-            { value: 'portada-alta', text: 'Portada Alta' }
-        ],
-        '2': [
-            { value: 'guadalmedina-l2', text: 'Guadalmedina' },
-            { value: 'la-luz-la-paz', text: 'La Luz - La Paz' },
-            { value: 'la-isla', text: 'La Isla' },
-            { value: 'el-perchel-l2', text: 'El Perchel' },
-            { value: 'puerta-blanca', text: 'Puerta Blanca' },
-            { value: 'princesa-huelin', text: 'Princesa - Huelin' },
-            { value: 'el-torcal', text: 'El Torcal' },
-            { value: 'palacio-deportes', text: 'Palacio de los Deportes' }
-        ],
-        'ambas': [
-            { value: 'guadalmedina-l1', text: 'Guadalmedina' },
-            { value: 'atarazanas', text: 'Atarazanas' },
-            { value: 'andalucia-tech', text: 'Andalucía Tech' },
-            { value: 'carranque', text: 'Carranque' },
-            { value: 'barbarela', text: 'Barbarela' },
-            { value: 'el-clinico', text: 'El Clínico' },
-            { value: 'la-union', text: 'La Unión' },
-            { value: 'universidad', text: 'Universidad' },
-            { value: 'ciudad-justicia', text: 'Ciudad de la Justicia' },
-            { value: 'el-consul', text: 'El Cónsul' },
-            { value: 'el-perchel-l1', text: 'El Perchel' },
-            { value: 'paraninfo', text: 'Paraninfo' },
-            { value: 'portada-alta', text: 'Portada Alta' },
-            { value: 'guadalmedina-l2', text: 'Guadalmedina' },
-            { value: 'la-luz-la-paz', text: 'La Luz - La Paz' },
-            { value: 'la-isla', text: 'La Isla' },
-            { value: 'el-perchel-l2', text: 'El Perchel' },
-            { value: 'puerta-blanca', text: 'Puerta Blanca' },
-            { value: 'princesa-huelin', text: 'Princesa - Huelin' },
-            { value: 'el-torcal', text: 'El Torcal' },
-            { value: 'palacio-deportes', text: 'Palacio de los Deportes' }
-        ]
-    };
-
-    // 1. Desplegable tipo de título para Objetos
-    const TipoDeTitulo = document.getElementById('TipoDeTitulo');
-    const bloqueTituloViajeObjetos = document.getElementById('bloqueTituloViajeObjetos');
-
-    if (TipoDeTitulo) {
-        TipoDeTitulo.addEventListener('change', (e) => {
-            const opcion = e.target.value;
-
-            // Ocultar y resetear bloques específicos de Objetos
-            if (bloqueTituloViajeObjetos) {
-                resetearBloque(bloqueTituloViajeObjetos);
-                bloqueTituloViajeObjetos.classList.add('hidden');
-            }
-
-            const opcionesFisicas = [
-                'monedero-metro-malaga',
-                'billete-ocasional',
-                'masmetro',
-                'tarjeta-consorcio',
-                'tarjeta-consorcio-joven',
-                'tarjeta-consorcio-familia-numerosa'
-            ];
-
-            if (opcionesFisicas.includes(opcion)) {
-                if (bloqueTituloViajeObjetos) bloqueTituloViajeObjetos.classList.remove('hidden');
-            }
-        });
-    }
-
-    // 1c. Desplegables y campos condicionales para Consulta de Información
-    const tipoTituloConsulta = document.getElementById('tipoTituloConsulta');
-    const bloqueTituloViajeConsulta = document.getElementById('bloqueTituloViajeConsulta');
-
-    if (tipoTituloConsulta) {
-        tipoTituloConsulta.addEventListener('change', (e) => {
-            const opcion = e.target.value;
-
-            // Ocultar y resetear los bloques de Consulta
-            if (bloqueTituloViajeConsulta) {
-                resetearBloque(bloqueTituloViajeConsulta);
-                bloqueTituloViajeConsulta.classList.add('hidden');
-            }
-
-            const opcionesFisicas = [
-                'monedero-metro-malaga',
-                'billete-ocasional',
-                'masmetro',
-                'tarjeta-consorcio',
-                'tarjeta-consorcio-joven',
-                'tarjeta-consorcio-familia-numerosa'
-            ];
-
-            if (opcionesFisicas.includes(opcion)) {
-                if (bloqueTituloViajeConsulta) bloqueTituloViajeConsulta.classList.remove('hidden');
-            }
-
-            comprobarCamposObligatorios();
-        });
-    }
-
-    // 1d. Desplegables y campos condicionales para Sugerencias
-    const tipoTituloSugerencia = document.getElementById('tipoTituloSugerencia');
-    const bloqueTituloViajeSugerencia = document.getElementById('bloqueTituloViajeSugerencia');
-
-    if (tipoTituloSugerencia) {
-        tipoTituloSugerencia.addEventListener('change', (e) => {
-            const opcion = e.target.value;
-
-            // Ocultar y resetear los bloques de Sugerencia
-            if (bloqueTituloViajeSugerencia) {
-                resetearBloque(bloqueTituloViajeSugerencia);
-                bloqueTituloViajeSugerencia.classList.add('hidden');
-            }
-
-            const opcionesFisicas = [
-                'monedero-metro-malaga',
-                'billete-ocasional',
-                'masmetro',
-                'tarjeta-consorcio',
-                'tarjeta-consorcio-joven',
-                'tarjeta-consorcio-familia-numerosa'
-            ];
-
-            if (opcionesFisicas.includes(opcion)) {
-                if (bloqueTituloViajeSugerencia) bloqueTituloViajeSugerencia.classList.remove('hidden');
-            }
-
-            comprobarCamposObligatorios();
-        });
-    }
-
-    // 2. Filtrado dinámico de estaciones por línea
-    const LineaMetro = document.getElementById('LineaMetro');
-    const EstPerdida = document.getElementById('EstPerdida');
-    const EstOrig = document.getElementById('EstOrig');
-    const EstDest = document.getElementById('EstDest');
-
-    function poblarSelectEstaciones(select, lista) {
-        if (!select) return;
-        select.innerHTML = '<option value="">Seleccione...</option>';
-        lista.forEach(estacion => {
-            const option = document.createElement('option');
-            option.value = estacion.value;
-            option.textContent = estacion.text;
-            select.appendChild(option);
-        });
-    }
-
-    function resetearSelectEstaciones(select) {
-        if (!select) return;
-        select.innerHTML = '<option value="">Seleccione primero una línea...</option>';
-    }
-
-    if (LineaMetro) {
-        LineaMetro.addEventListener('change', (e) => {
-            const linea = e.target.value;
-
-            // Si cambia la línea, resetear valores seleccionados de ubicación
-            if (EstPerdida) {
-                EstPerdida.value = '';
-                EstPerdida.classList.remove('error');
-            }
-            if (EstOrig) {
-                EstOrig.value = '';
-                EstOrig.classList.remove('error');
-            }
-            if (EstDest) {
-                EstDest.value = '';
-                EstDest.classList.remove('error');
-            }
-
-            if (linea && estacionesPorLinea[linea]) {
-                const lista = estacionesPorLinea[linea];
-                poblarSelectEstaciones(EstPerdida, lista);
-                poblarSelectEstaciones(EstOrig, lista);
-                poblarSelectEstaciones(EstDest, lista);
-            } else {
-                resetearSelectEstaciones(EstPerdida);
-                resetearSelectEstaciones(EstOrig);
-                resetearSelectEstaciones(EstDest);
-            }
-        });
-    }
-
-    // 3. ¿Dónde lo has perdido? (Estación vs Tren vs No lo sé)
-    const Localizacion = document.getElementById('Localizacion');
-    const bloqueEstacionObjetos = document.getElementById('bloqueEstacionObjetos');
-    const bloqueTrenObjetos = document.getElementById('bloqueTrenObjetos');
-    const grupoNumeroTrenObjetos = document.getElementById('grupoNumeroTrenObjetos');
-
-    if (Localizacion) {
-        Localizacion.addEventListener('change', (e) => {
-            const opcion = e.target.value;
-
-            if (opcion === 'estacion') {
-                if (bloqueEstacionObjetos) bloqueEstacionObjetos.classList.remove('hidden');
-                if (bloqueTrenObjetos) {
-                    resetearBloque(bloqueTrenObjetos);
-                    bloqueTrenObjetos.classList.add('hidden');
-                }
-            } else if (opcion === 'tren') {
-                if (bloqueTrenObjetos) {
-                    bloqueTrenObjetos.classList.remove('hidden');
-                    if (grupoNumeroTrenObjetos) grupoNumeroTrenObjetos.classList.remove('hidden');
-                }
-                if (bloqueEstacionObjetos) {
-                    resetearBloque(bloqueEstacionObjetos);
-                    bloqueEstacionObjetos.classList.add('hidden');
-                }
-            } else if (opcion === 'desconocido') {
-                if (bloqueTrenObjetos) {
-                    bloqueTrenObjetos.classList.remove('hidden');
-                    if (grupoNumeroTrenObjetos) {
-                        const inputTren = grupoNumeroTrenObjetos.querySelector('input');
-                        if (inputTren) inputTren.value = '';
-                        grupoNumeroTrenObjetos.classList.add('hidden');
-                    }
-                }
-                if (bloqueEstacionObjetos) {
-                    resetearBloque(bloqueEstacionObjetos);
-                    bloqueEstacionObjetos.classList.add('hidden');
-                }
-            } else {
-                if (bloqueEstacionObjetos) {
-                    resetearBloque(bloqueEstacionObjetos);
-                    bloqueEstacionObjetos.classList.add('hidden');
-                }
-                if (bloqueTrenObjetos) {
-                    resetearBloque(bloqueTrenObjetos);
-                    bloqueTrenObjetos.classList.add('hidden');
-                }
-            }
-        });
-    }
-
-    // 4. Gestión de Lugar en Agradecimientos (Estación vs Tren vs OAC)
-    const lugarAgradecimiento = document.getElementById('lugarAgradecimiento');
-    const grupoEstacionAgradecimiento = document.getElementById('grupoEstacionAgradecimiento');
-    const grupoTrenAgradecimiento = document.getElementById('grupoTrenAgradecimiento');
-
-    if (lugarAgradecimiento) {
-        lugarAgradecimiento.addEventListener('change', (e) => {
-            const val = e.target.value;
-            if (val === 'estacion') {
-                if (grupoEstacionAgradecimiento) grupoEstacionAgradecimiento.classList.remove('hidden');
-                if (grupoTrenAgradecimiento) {
-                    resetearBloque(grupoTrenAgradecimiento);
-                    grupoTrenAgradecimiento.classList.add('hidden');
-                }
-            } else if (val === 'tren') {
-                if (grupoTrenAgradecimiento) grupoTrenAgradecimiento.classList.remove('hidden');
-                if (grupoEstacionAgradecimiento) {
-                    resetearBloque(grupoEstacionAgradecimiento);
-                    grupoEstacionAgradecimiento.classList.add('hidden');
-                }
-            } else {
-                if (grupoEstacionAgradecimiento) {
-                    resetearBloque(grupoEstacionAgradecimiento);
-                    grupoEstacionAgradecimiento.classList.add('hidden');
-                }
-                if (grupoTrenAgradecimiento) {
-                    resetearBloque(grupoTrenAgradecimiento);
-                    grupoTrenAgradecimiento.classList.add('hidden');
-                }
-            }
-        });
-    }
-
-    // 5. Gestión de Destinatario en Agradecimientos (Colectivos varios)
-    const dirigidoAgradecimiento = document.getElementById('dirigidoAgradecimiento');
-    const grupoVariosColectivos = document.getElementById('grupoVariosColectivos');
-
-    if (dirigidoAgradecimiento) {
-        dirigidoAgradecimiento.addEventListener('change', (e) => {
-            const val = e.target.value;
-            if (val === 'varios') {
-                if (grupoVariosColectivos) grupoVariosColectivos.classList.remove('hidden');
-            } else {
-                if (grupoVariosColectivos) {
-                    resetearBloque(grupoVariosColectivos);
-                    grupoVariosColectivos.classList.add('hidden');
-                }
-            }
-        });
-    }
-
-    // ============================================
-    // GESTIÓN DE TARJETAS +METRO Y FIRMA
-    // ============================================
-
-    // 1. Visibilidad del representante y la dirección postal
-    const solicitudRepresentante = document.getElementById('solicitudRepresentante');
-    const bloqueRepresentante = document.getElementById('bloqueRepresentante');
-    const recibirPostalNormalContainer = document.getElementById('recibirPostalNormalContainer');
-    const recibirPostal = document.getElementById('recibirPostal');
-    const direccionContactoContainer = document.getElementById('direccionContactoContainer');
-
-    function actualizarVisibilidadRepresentante() {
-        if (!solicitudRepresentante || !bloqueRepresentante) return;
-
-        const esTarjetas = (tipoFormulario.value === 'tarjetas');
-
-        if (esTarjetas && solicitudRepresentante.checked) {
-            // Mostrar representante
-            bloqueRepresentante.classList.remove('hidden');
-        } else {
-            // Ocultar representante
-            bloqueRepresentante.classList.add('hidden');
-        }
-        comprobarCamposObligatorios();
-    }
-
-    if (solicitudRepresentante) {
-        solicitudRepresentante.addEventListener('change', actualizarVisibilidadRepresentante);
-    }
-
-    // 1b. Visibilidad y sincronización de la dirección de envío postal
-    const grupoDireccionEnvioSelect = document.getElementById('grupoDireccionEnvioSelect');
-    const direccionEnvioSelect = document.getElementById('direccionEnvioSelect');
-    const direccionEnvioContainer = document.getElementById('direccionEnvioContainer');
-    const tituloDireccionContacto = document.getElementById('tituloDireccionContacto');
-
-    function sincronizarDireccionEnvio() {
-        const esTarjetas = (tipoFormulario.value === 'tarjetas');
-        if (esTarjetas && recibirPostal && recibirPostal.checked && direccionEnvioSelect && direccionEnvioSelect.value === 'misma') {
-            const fields = [
-                { src: 'viaContacto', dest: 'viaEnvio' },
-                { src: 'numContacto', dest: 'numEnvio' },
-                { src: 'escContacto', dest: 'escEnvio' },
-                { src: 'pisoContacto', dest: 'pisoEnvio' },
-                { src: 'puerContacto', dest: 'puerEnvio' },
-                { src: 'cpContacto', dest: 'cpEnvio' },
-                { src: 'municipioContacto', dest: 'municipioEnvio' },
-                { src: 'provinciaContacto', dest: 'provinciaEnvio' }
-            ];
-            fields.forEach(pair => {
-                const srcEl = document.getElementById(pair.src);
-                const destEl = document.getElementById(pair.dest);
-                if (srcEl && destEl) {
-                    destEl.value = srcEl.value;
-                }
-            });
-        }
-    }
-
-    function limpiarDireccionEnvio() {
-        const fields = ['viaEnvio', 'numEnvio', 'escEnvio', 'pisoEnvio', 'puerEnvio', 'cpEnvio', 'municipioEnvio', 'provinciaEnvio'];
-        fields.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.value = '';
-                el.classList.remove('error');
-            }
-        });
-    }
-
-    function actualizarVisibilidadEnvio() {
-        if (!recibirPostal || !direccionContactoContainer) return;
-
-        const esTarjetas = (tipoFormulario.value === 'tarjetas');
-
-        if (esTarjetas) {
-            // Para tarjetas: Dirección de contacto y título "Dirección del interesado" siempre visibles
-            direccionContactoContainer.classList.remove('hidden');
-            if (tituloDireccionContacto) tituloDireccionContacto.classList.remove('hidden');
-
-            if (recibirPostal.checked) {
-                // Mostrar selector de dirección de envío
-                if (grupoDireccionEnvioSelect) grupoDireccionEnvioSelect.classList.remove('hidden');
-
-                if (direccionEnvioSelect && direccionEnvioSelect.value === 'misma') {
-                    if (direccionEnvioContainer) direccionEnvioContainer.classList.add('hidden');
-                    sincronizarDireccionEnvio();
-                } else {
-                    if (direccionEnvioContainer) direccionEnvioContainer.classList.remove('hidden');
-                }
-            } else {
-                // Ocultar selector de dirección de envío y campos alternativos
-                if (grupoDireccionEnvioSelect) grupoDireccionEnvioSelect.classList.add('hidden');
-                if (direccionEnvioContainer) direccionEnvioContainer.classList.add('hidden');
-                limpiarDireccionEnvio();
-            }
-        } else {
-            // Para otros formularios: Ocultar selector de dirección de envío, campos alternativos y título
-            if (grupoDireccionEnvioSelect) grupoDireccionEnvioSelect.classList.add('hidden');
-            if (direccionEnvioContainer) direccionEnvioContainer.classList.add('hidden');
-            if (tituloDireccionContacto) tituloDireccionContacto.classList.add('hidden');
-            limpiarDireccionEnvio();
-
-            // La visibilidad de la dirección de contacto depende del check normal
-            direccionContactoContainer.classList.toggle('hidden', !recibirPostal.checked);
-        }
-        comprobarCamposObligatorios();
-    }
-
-    if (recibirPostal) {
-        recibirPostal.addEventListener('change', actualizarVisibilidadEnvio);
-    }
-
-    if (direccionEnvioSelect) {
-        direccionEnvioSelect.addEventListener('change', (e) => {
-            if (e.target.value === 'diferente') {
-                limpiarDireccionEnvio();
-            }
-            actualizarVisibilidadEnvio();
-        });
-    }
-
-    // Escuchar cambios en la dirección del interesado para mantener sincronizada la de envío si corresponde
-    const contactFields = ['viaContacto', 'numContacto', 'escContacto', 'pisoContacto', 'puerContacto', 'cpContacto', 'municipioContacto', 'provinciaContacto'];
-    contactFields.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.addEventListener('input', sincronizarDireccionEnvio);
-            el.addEventListener('change', sincronizarDireccionEnvio);
-        }
-    });
-
-    // 2. Control del estado de la Firma y Checkboxes de Consentimiento
-    const datosCorrectos = document.getElementById('datosCorrectos');
-    const consentimiento = document.getElementById('consentimiento');
-    const containerFirmaTarjetas = document.getElementById('containerFirmaTarjetas');
-
-    function actualizarEstadoFirma() {
-        if (!datosCorrectos || !consentimiento || !containerFirmaTarjetas) return;
-
-        const esTarjetas = (tipoFormulario.value === 'tarjetas');
-
-        if (esTarjetas && datosCorrectos.checked && consentimiento.checked) {
-            containerFirmaTarjetas.style.opacity = '1';
-            containerFirmaTarjetas.style.pointerEvents = 'auto';
-        } else {
-            // Atenuar y bloquear interacción
-            containerFirmaTarjetas.style.opacity = '0.4';
-            containerFirmaTarjetas.style.pointerEvents = 'none';
-            // Limpiar la firma
-            limpiarFirma();
-        }
-        comprobarCamposObligatorios();
-    }
-
-    if (datosCorrectos) {
-        datosCorrectos.addEventListener('change', actualizarEstadoFirma);
-    }
-    if (consentimiento) {
-        consentimiento.addEventListener('change', actualizarEstadoFirma);
-    }
-
-    // 3. Lógica del Signature Pad (HTML5 Canvas)
-    const canvas = document.getElementById('signature-canvas');
-    const signatureData = document.getElementById('signature-data');
-    const clearSignatureBtn = document.getElementById('clear-signature-btn');
-
-    let drawing = false;
-
-    function limpiarFirma() {
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-        if (signatureData) {
-            signatureData.value = '';
-        }
-        comprobarCamposObligatorios();
-    }
-
-    if (clearSignatureBtn) {
-        clearSignatureBtn.addEventListener('click', limpiarFirma);
-    }
-
-    if (canvas && signatureData) {
-        const ctx = canvas.getContext('2d');
-        ctx.strokeStyle = '#1e293b'; // Slate 800 (sleek dark gray/black)
-        ctx.lineWidth = 3;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-
-        function getMousePos(canvasDom, e) {
-            const rect = canvasDom.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            return {
-                x: (clientX - rect.left) * (canvasDom.width / rect.width),
-                y: (clientY - rect.top) * (canvasDom.height / rect.height)
-            };
-        }
-
-        function startDrawing(e) {
-            // Solo permitir firmar si está activado
-            if (containerFirmaTarjetas.style.pointerEvents === 'none') return;
-            drawing = true;
-            const pos = getMousePos(canvas, e);
-            ctx.beginPath();
-            ctx.moveTo(pos.x, pos.y);
-        }
-
-        function draw(e) {
-            if (!drawing) return;
-            const pos = getMousePos(canvas, e);
-            ctx.lineTo(pos.x, pos.y);
-            ctx.stroke();
-        }
-
-        function stopDrawing() {
-            if (!drawing) return;
-            drawing = false;
-            // Guardar firma en hidden input
-            signatureData.value = canvas.toDataURL();
-            comprobarCamposObligatorios();
-        }
-
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', stopDrawing);
-        canvas.addEventListener('mouseleave', stopDrawing);
-
-        canvas.addEventListener('touchstart', (e) => {
-            if (e.target === canvas) e.preventDefault();
-            startDrawing(e);
-        }, { passive: false });
-
-        canvas.addEventListener('touchmove', (e) => {
-            if (e.target === canvas) e.preventDefault();
-            draw(e);
-        }, { passive: false });
-
-        canvas.addEventListener('touchend', (e) => {
-            if (e.target === canvas) e.preventDefault();
-            stopDrawing();
-        }, { passive: false });
-    }
-
-    // Contador de caracteres dinámico para campos de descripción (textarea)
-    const textareas = document.querySelectorAll('textarea.textarea');
-    textareas.forEach(textarea => {
-        textarea.setAttribute('maxlength', '2500');
-
-        // Crear el span del contador
-        const counterSpan = document.createElement('span');
-        counterSpan.className = 'char-counter';
-        counterSpan.style.display = 'block';
-        counterSpan.style.textAlign = 'right';
-        counterSpan.style.marginTop = '0.25rem';
-        counterSpan.style.fontSize = '0.75rem';
-        counterSpan.style.color = 'var(--color-gray-500)';
-
-        const currentCount = document.createElement('span');
-        currentCount.id = 'charCount_' + textarea.id;
-        currentCount.textContent = textarea.value.length;
-
-        counterSpan.appendChild(currentCount);
-        counterSpan.appendChild(document.createTextNode('/2500'));
-
-        // Insertar después de la textarea en el DOM
-        textarea.parentNode.insertBefore(counterSpan, textarea.nextSibling);
-
-        // Escuchar el input para actualizar el valor
-        textarea.addEventListener('input', (e) => {
-            currentCount.textContent = e.target.value.length;
-        });
-    });
-
-    // Event listeners para habilitar/deshabilitar botón de enviar dinámicamente
-    form.addEventListener('input', comprobarCamposObligatorios);
-    form.addEventListener('change', comprobarCamposObligatorios);
-
-    // Ejecución inicial para asegurar el estado correcto del botón
-    comprobarCamposObligatorios();
 });

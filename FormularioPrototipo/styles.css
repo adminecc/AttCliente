@@ -339,12 +339,6 @@ body {
     background: white;
 }
 
-.file-upload.is-dragover .file-label {
-    border-color: var(--color-primary);
-    background: white;
-    box-shadow: 0 0 0 3px rgba(227, 24, 55, 0.1);
-}
-
 .file-input:focus + .file-label {
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(227, 24, 55, 0.1);
@@ -383,27 +377,13 @@ body {
     font-size: 0.875rem;
 }
 
-.file-item-name {
-    min-width: 0;
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.file-item-size {
-    color: var(--color-gray-500);
-    font-size: 0.8125rem;
-    white-space: nowrap;
-}
-
 .file-item-remove {
     margin-left: auto;
-    background: white;
-    border: 1px solid var(--color-gray-300);
+    background: none;
+    border: none;
     color: var(--color-gray-500);
     cursor: pointer;
-    padding: 0.25rem 0.5rem;
+    padding: 0.25rem;
     border-radius: var(--radius-sm);
     transition: all var(--transition-fast);
 }
@@ -614,12 +594,6 @@ body {
 /* ============================================
    UTILIDADES
    ============================================ */
-.grid-3-cols {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-lg);
-}
-
 .hidden {
     display: none !important;
 }
@@ -657,11 +631,6 @@ body {
     }
     
     .form-grid {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-md);
-    }
-    
-    .grid-3-cols {
         grid-template-columns: 1fr;
         gap: var(--spacing-md);
     }

@@ -1,0 +1,767 @@
+// Obtiene todos los parametro por Query String 
+var queryStringVals = $().SPServices.SPGetQueryString();
+
+// Pasamos en QueryString el nombre de una seccion por defecto para expandir
+var expandSection = queryStringVals.section;
+
+// Variables que indican departamento al que pertenece el usuario
+var isAttCliente = false;
+var isOperaciones = false;
+var isTecnicoOperador = false;
+
+function PreSaveAction() {
+    return true;
+}
+
+function checkUserGroup() {
+    $().SPServices({
+        operation: "GetGroupCollectionFromUser",
+        userLoginName: $().SPServices.SPGetCurrentUser(),
+        async: false,
+        completefunc: function (xData, Status) {
+            if ($(xData.responseXML).find("Group[Name='Atención al Cliente']").length == 1) {
+                isAttCliente = true;
+            }
+            if (($(xData.responseXML).find("Group[Name='Pem Técnicos de Operaciones']").length == 1) || ($(xData.responseXML).find("Group[Name='Pem Operadores de Línea']").length == 1) ||
+                ($(xData.responseXML).find("Group[Name='Pem Coordinadores']").length == 1)) {
+                isOperaciones = true;
+            }
+            if (($(xData.responseXML).find("Group[Name='Pem Técnicos de Operaciones']").length == 1) || ($(xData.responseXML).find("Group[Name='Pem Operadores de Línea']").length == 1)) {
+                isTecnicoOperador = true;
+            }
+
+        }
+    });
+}
+
+$(document).ready(function () {
+    // Verificamos el grupo del usuario logado.
+    checkUserGroup();
+    
+   // Asignamos el valor del dia actual al campo fecha: Solicitado por MM 3/12/2018	
+   var today = new Date();
+   var dd = today.getDate();
+   var mm = today.getMonth() + 1; //January is 0!
+ 
+   var yyyy = today.getFullYear();
+   if (dd < 10) {
+     dd = '0' + dd;
+   } 
+   if (mm < 10) {
+     mm = '0' + mm;
+   } 
+   var today = dd + '/' + mm + '/' + yyyy;
+   $("input[Title='Fecha']").val(today);
+
+    // Ocultamos el contenido del formulario
+    $("#contentRow").css("display", "none");
+    // Mostramos popup con los tipos de sanciones disponibles
+    if (isAttCliente)
+        showModalDialogTiposSanciones();
+    
+    else
+    {
+        // Obtiene el valor de TipoRegistro y muestra el formulario del tipo
+        var tipoInfraccion = 'Recargo Extraordinario';
+        $("input[Title='Tipo de Registro']").prop('disabled', true);
+        $("input[Title='Tipo de Registro']").val(tipoInfraccion);
+        //showForms(tipoInfraccion);
+        showModalDialogTipoSolicitud();
+    }
+
+    if (isOperaciones) {
+        $(function () {
+            var idHoraInicio = '#' + $("input[Title='Hora de Inicio']").prop('id').replace("$", "\\$");
+            var idHoraFin = '#' + $("input[Title='Hora de Fin']").prop('id').replace("$", "\\$");
+
+           /* $(idHoraInicio).timepicker(
+                $.timepicker.regional['es']
+            );
+            $(idHoraFin).timepicker(
+                $.timepicker.regional['es']
+            );
+	    */
+        });
+    }
+
+    if (isTecnicoOperador) {
+        $(function () {
+            var currentUserID = _spPageContextInfo.userId;
+            var requestUri = _spPageContextInfo.webAbsoluteUrl + "/_api/web/getuserbyid(" + currentUserID + ")";
+            var requestHeaders = { "accept": "application/json;odata=verbose" };
+            $.ajax({
+                url: requestUri,
+                contentType: "application/json;odata=verbose",
+                headers: requestHeaders,
+                success: onSuccess,
+                error: onError
+            });
+
+            function onSuccess(data, request) {
+                SP.SOD.executeFunc('sp.js', 'SP.ClientContext', function () {
+                    // Asigna usuario al campo tecnico
+                    var userName = data.d.Title;
+                    var controlName = "Técnico/Operador";					// My People Picker Control is called "Técnico/Operador"
+                    var ppDiv = $("[id$='ClientPeoplePicker'][title='" + controlName + "']");			// Select the People Picker DIV
+                    var ppEditor = ppDiv.find("[title='" + controlName + "']");	// Use the PP DIV to narrow the jQuery scope
+                    var spPP = SPClientPeoplePicker.SPClientPeoplePickerDict[ppDiv[0].id];			// Get the instance of the People Picker from the Dictionary
+                    ppEditor.val(userName);
+                    spPP.AddUnresolvedUserFromEditor(true);
+
+                    var userKeys = spPP.GetAllUserInfo();
+                    var myUser = userKeys[0];
+
+                    // Asgina el valor del numero de SAP
+                    if (myUser != undefined) {
+                        //Condiciones de la CAML query. Busca por el campo Title (Nombre personal PAS). Debe utilizarse el nombre interno del campo
+                        var query = "<Query>" +
+                                        "<Where>" +
+                                            "<Eq><FieldRef Name='Title'/><Value Type='Text'>" + myUser.AutoFillDisplayText + "</Value></Eq>" +
+                                        "</Where>" +
+                                    "</Query>";
+
+                        // Llamada a SPServices que a su vez llama al método GetListItems con la query definida arriba
+                        $().SPServices({
+                            operation: "GetListItems",
+                            async: false,
+                            listName: "Personal Control PAS",
+                            CAMLViewFields: "<ViewFields><FieldRef Name='NSAP'/></ViewFields>",
+                            CAMLQuery: query,
+                            // Esto básicamente indica "ejecuta el siguiente código cuando la llamada se haya completado"
+                            completefunc: function (xData, Status) {
+                                // Este código se ejecuta para cada fila de datos devuelta por la llamada al servicio web
+                                $(xData.responseXML).SPFilterNode("z:row").each(function () {
+                                    // Aqui es donde se leen los valores devueltos por la consulta y se meten en variables JavaScript.
+                                    // Observar "ows_" delante del nombre interno del campo. Esto es un convenido de los servicios web de SharePoint
+                                    // Lo del split es porque el campo es numérico y hay que quitarles los ceros despues del punto de decimales.
+                                    var nSAP = ($(this).attr("ows_NSAP")).split(".")[0];
+                                    $("input[Title='Nº SAP']").val(nSAP);
+                                });
+                            }
+                        });
+
+                        // Deshabilita el campo Tecnico
+                        $("input.sp-peoplepicker-editorInput[title='Técnico/Operador']").prop('disabled', true); //disable input textbox
+                        $(".sp-peoplepicker-delImage").hide(); //hide the 'x' after the link
+                        $("div.sp-peoplepicker-topLevel[title='Técnico/Operador']").addClass("sp-peoplepicker-topLevelDisabled"); //set the correct css class for disabled
+
+                        // Deshabilita el campo NumSap
+                        $("[id*=NSap]").prop("disabled", true);
+                    }
+                });
+                
+            }
+
+            function onError(error) {
+                alert("error");
+            }            
+        });
+    }
+
+    // Seteamos los tamaños de los desplegables
+    //$('select[title="Lugar de entrega"]').width(200);
+    $("input[Title='Hora(estación)']").width(50);
+    $("input[Title='Hora de Inicio']").width(50);
+    //$("input[Title='Hora de Inicio']").prop('readonly', true);
+    $("input[Title='Hora de Fin']").width(50);
+    $("textarea[Title='Motivo Anulación/Devolución']").width(386);
+    $("textarea[Title='Domicilio']").width(386);
+    $("textarea[Title='Motivo Sanción']").width(386);
+    //$("input[Title='Hora de Fin']").prop('readonly', true);
+    $("select[Title='Tipo infracción']").width(386);
+    $("textarea[Title='Informe de estación/oficina']").width(386);
+    $("textarea[Title='Motivo Anulación']").width(386);
+    
+    // Si se mete Tecnico/Operador, autorrellenar Nº SAP
+    $(".sp-peoplepicker-topLevel").bind("focusout", function () {
+        var controlName = "Técnico/Operador";					// My People Picker Control is called "Técnico/Operador"
+        var ppDiv = $("[id$='ClientPeoplePicker'][title='" + controlName + "']");			// Select the People Picker DIV
+        var ppEditor = ppDiv.find("[title='" + controlName + "']");	// Use the PP DIV to narrow the jQuery scope
+        var spPP = SPClientPeoplePicker.SPClientPeoplePickerDict[ppDiv[0].id];			// Get the instance of the People Picker from the Dictionary
+        var userKeys = spPP.GetAllUserInfo();
+        var myUser = userKeys[0];
+
+        if (myUser != undefined) {
+            //Condiciones de la CAML query. Busca por el campo Title (Nombre personal PAS). Debe utilizarse el nombre interno del campo
+            var query = "<Query>" +
+                            "<Where>" +
+                                "<Eq><FieldRef Name='Title'/><Value Type='Text'>" + myUser.AutoFillDisplayText + "</Value></Eq>" +
+                            "</Where>" +
+                        "</Query>";
+
+            // Llamada a SPServices que a su vez llama al método GetListItems con la query definida arriba
+            $().SPServices({
+                operation: "GetListItems",
+                async: false,
+                listName: "Personal Control PAS",
+                CAMLViewFields: "<ViewFields><FieldRef Name='NSAP'/></ViewFields>",
+                CAMLQuery: query,
+                // Esto básicamente indica "ejecuta el siguiente código cuando la llamada se haya completado"
+                completefunc: function (xData, Status) {
+                    // Este código se ejecuta para cada fila de datos devuelta por la llamada al servicio web
+                    $(xData.responseXML).SPFilterNode("z:row").each(function () {
+                        // Aqui es donde se leen los valores devueltos por la consulta y se meten en variables JavaScript.
+                        // Observar "ows_" delante del nombre interno del campo. Esto es un convenido de los servicios web de SharePoint
+                        // Lo del split es porque el campo es numérico y hay que quitarles los ceros despues del punto de decimales.
+                        var nSAP = ($(this).attr("ows_NSAP")).split(".")[0];
+                        $("input[Title='Nº SAP']").val(nSAP);
+                    });
+                }
+            });
+
+        } else {
+            $("input[Title='Nº SAP']").val("");
+        }
+    });
+
+    // Si se mete Nº SAP, autorrellenar Tecnico/Operador
+    $('input[title="Nº SAP"]').change(function () {
+        var nSAP = $('input[title="Nº SAP"]').val();
+
+        //Condiciones de la CAML query. Busca por el campo Title (Nombre personal PAS). Debe utilizarse el nombre interno del campo
+        var query = "<Query>" +
+                        "<Where>" +
+                            "<Eq><FieldRef Name='NSAP'/><Value Type='Number'>" + nSAP + "</Value></Eq>" +
+                        "</Where>" +
+                    "</Query>";
+
+        // Llamada a SPServices que a su vez llama al método GetListItems con la query definida arriba
+        $().SPServices({
+            operation: "GetListItems",
+            async: false,
+            listName: "Personal Control PAS",
+            CAMLViewFields: "<ViewFields><FieldRef Name='Title'/></ViewFields>",
+            CAMLQuery: query,
+            completefunc: function (xData, Status) {
+                var itemCount = parseFloat($(xData.responseXML).SPFilterNode("rs:data").attr("ItemCount"));
+                var controlName = "Técnico/Operador";					// My People Picker Control is called "Técnico/Operador"
+                var ppDiv = $("[id$='ClientPeoplePicker'][title='" + controlName + "']");			// Select the People Picker DIV
+                var ppEditor = ppDiv.find("[title='" + controlName + "']");	// Use the PP DIV to narrow the jQuery scope
+                var spPP = SPClientPeoplePicker.SPClientPeoplePickerDict[ppDiv[0].id];			// Get the instance of the People Picker from the Dictionary
+                spPP.DeleteProcessedUser();
+                if (itemCount > 0) {
+                    $(xData.responseXML).SPFilterNode("z:row").each(function () {
+                        var tecnico = ($(this).attr("ows_Title"));
+                        ppEditor.val(tecnico);
+                    });
+                }
+                spPP.AddUnresolvedUserFromEditor(true);
+            }
+        });
+    });
+
+    // Aplicamos las validaciones a los campos
+    setValidateFields();
+    
+});
+
+function setValidateFields() {
+    // Validacion numerica para los campos numericos
+    $("input[Title='Código de la infracción']").keypress(function(event) {
+        return event.charCode >= 48 && event.charCode <= 57;
+    });
+    $("input[Title='Nº Fiscalizador']").keypress(function(event) {
+        return event.charCode >= 48 && event.charCode <= 57;
+    });
+    $("input[Title='Nº SAP']").keypress(function(event) {
+        return event.charCode >= 48 && event.charCode <= 57;
+    });
+    $("input[Title='Importe']").keypress(function(event) {
+        return ((event.charCode >= 48 && event.charCode <= 57) || (event.charCode == 44));
+    });
+    $("input[Title='Nº de Intervenciones']").keypress(function(event) {
+        return event.charCode >= 48 && event.charCode <= 57;
+    });
+    $("input[Title='Nº Reclamación']").keypress(function (event) {
+        return event.charCode >= 48 && event.charCode <= 57;
+    });
+
+
+    //hh:mm
+    $("input[Title='Hora(estación)']").inputmask("hh:mm", {
+        placeholder: "hh:mm",
+        insertMode: false,
+        showMaskOnHover: false
+    });
+
+    $("input[Title='Hora de Inicio']").inputmask("hh:mm", {
+        placeholder: "hh:mm",
+        insertMode: false,
+        showMaskOnHover: false
+    });
+
+    $("input[Title='Hora de Fin']").inputmask("hh:mm", {
+        placeholder: "hh:mm",
+        insertMode: false,
+        showMaskOnHover: false
+    });
+
+
+    // Deshabilitamos inicialmente el campo Motivos Anulacion, hasta que se active la casilla de anulacion infraccion
+    $("textarea[Title='Motivo Anulación']").prop('disabled', true);
+    $("input[Title='Anulación infracción']").change(function () {
+        if($(this)[0].checked)
+            $("textarea[Title='Motivo Anulación']").prop('disabled', false);
+        else
+            $("textarea[Title='Motivo Anulación']").prop('disabled', true);
+    });
+};
+
+function showModalDialogTipoSolicitud() {
+    var title = "Nueva Solicitud";
+    var html = '<div class="well" style="margin-bottom: 5px;">' +
+        '<div class="row"><div class="companeros col col-md-12">' +
+        '<div class="col col-md-5"><span>Por favor seleccione el tipo de solicitud</span></div>' +
+        '<div class="col col-md-7" style="font-size:16px;">' +
+        '<div class="form-group"><select id="sltTipoSolicitud" class="form-control text-muted" style="width:90%; font-size:10pt;">' +
+        '<option value="Intervención">Intervención</option>' +
+        '<option value="Sanción">Sanción</option></select></div>';
+
+
+    html += '</div></div></div></div>';
+    swal({
+        title: title, html: html, width: '650px', confirmButtonColor: "#008033", allowOutsideClick: false
+    },
+        function (isConfirm) {
+            if (isConfirm) {
+                var tipoSolicitud = $("#sltTipoSolicitud option:selected").text();
+                $("input[Title='Tipo de Solicitud']").val(tipoSolicitud);
+                $("input[Title='Tipo de Solicitud']").prop('disabled', true);
+                showForms(tipoSolicitud);
+            }
+        });
+};
+
+function showModalDialogTiposSanciones() {
+    var title = "Nueva Infracción";
+    var html = '<div class="well" style="margin-bottom: 5px;">' +
+        '<div class="row"><div class="companeros col col-md-12">' +
+        '<div class="col col-md-5"><span>Por favor seleccione el tipo de Infracción</span></div>' +
+        '<div class="col col-md-7" style="font-size:16px;">' +
+        '<div class="form-group"><select id="sltTipoInfraccion" class="form-control text-muted" style="width:90%; font-size:10pt;">' +
+        '<option value="RecargoExtraordinario">Recargo Extraordinario</option>'+
+        '<option value="InfraccionRRS">Infracción RRS</option>' +        
+        '<option value="Apercibimiento">Apercibimiento</option></select></div>';
+    
+
+    html += '</div></div></div></div>';
+    swal({
+        title: title, html: html, width: '650px', confirmButtonColor: "#008033", allowOutsideClick: false},
+        function (isConfirm) {
+            if (isConfirm) {
+                var tipoInfraccion = $("#sltTipoInfraccion option:selected").text();
+                $("input[Title='Tipo de Registro']").val(tipoInfraccion);
+                $("input[Title='Tipo de Registro']").prop('disabled', true);
+                showForms(tipoInfraccion);
+            }
+        });
+};
+
+function showForms(option) {
+    if (option == "Infracción RRS") {
+        // Añadimos las secciones
+        setupSection("DatosDeRegistro", "Datos de Registro", "Tipo de Solicitud", "Origen infracción");
+        setupSection("Lugar", "Lugar", "Estación", "Hora de Fin");
+        setupSection("DatosCliente", "Datos Cliente", "Tipo de Titulo", "Teléfono Tutor");
+        setupSection("DatosInfraccion", "Datos Infracción", "Tipo infracción", "¿Es menor de edad?");
+        setupSection("DatosSeguimientoInfraccion", "Datos Seguimiento Infracción", "Informe de estación/oficina", "Motivo Anulación");
+
+        // Agregamos y eliminamos la seccion
+        setupSection("DatosToRemove", "Datos To Remove", "Importe", "Nº Reclamación");
+        setupSection("DatosToRemove", "Datos To Remove", "Tipo", "Tipo");
+        setupSection("DatosToRemove", "Datos To Remove", "Tipo de infracción", "Tipo de infracción");        
+        setupSection("DatosToRemove", "Datos To Remove", "Nº de Intervenciones", "Nº de Intervenciones");
+
+        removeSectionFromField("Importe");
+        removeSectionFromField("Tipo");
+        removeSectionFromField("Tipo de infracción");        
+        removeSectionFromField("Nº de Intervenciones");
+
+        // Ocultamos campos
+        setInterval(function () {
+            $("input[Title='Nº Fiscalizador']").parent().parent().parent().css('display', 'none');
+            $("input[Title='Nº de Intervenciones']").parent().parent().parent().css('display', 'none');
+            $("textarea[Title='Motivo Sanción']").parent().parent().parent().css('display', 'none');            
+        }, 100);
+        
+    }
+
+    else if (option == "Recargo Extraordinario") {
+        setupSection("DatosDeRegistro", "Datos de Registro", "Tipo de Solicitud", "Origen infracción");
+        setupSection("Lugar", "Lugar", "Estación", "Hora de Fin");
+
+        //if (!isOperaciones)
+        //    setupSection("DatosDelPago", "Datos del Pago", "Importe", "Nº Reclamación");
+        //setupSection("DatosCliente", "Datos Cliente", "Tipo de Titulo", "Teléfono Tutor");
+        //setupSection("DatosRecargoExtraordinario", "Datos Recargo Extraordinario", "Tipo", "Informe de estación/oficina");
+        //setupSection("DatosSeguimientoRecargoExtraordinario", "Datos Seguimiento Recargo Extraordinario","Comunicado a AOPJ", "Reclamaciones OAC Asociadas");
+        
+        
+
+        if (isAttCliente)
+        {
+            setupSection("DatosDelPago", "Datos del Pago", "Importe", "Nº Reclamación");
+            setupSection("DatosCliente", "Datos Cliente", "Tipo de Titulo", "Teléfono Tutor");
+        }
+        else
+        {
+            setupSection("DatosToRemove", "Datos To Remove", "Importe", "Nº Reclamación");
+            removeSectionFromField("Importe");
+
+            setupSection("DatosToRemove", "Datos To Remove", "Tipo de Titulo", "Teléfono Tutor");
+            removeSectionFromField("Tipo de Titulo");
+        }
+        
+        setupSection("DatosRecargoExtraordinario", "Datos Recargo Extraordinario", "Tipo", "Informe de estación/oficina");
+
+        if (isAttCliente)
+            setupSection("DatosSeguimientoRecargoExtraordinario", "Datos Seguimiento Recargo Extraordinario", "Comunicado a AOPJ", "Reclamaciones OAC Asociadas");
+        else
+        {
+            setupSection("DatosToRemove", "Datos To Remove", "Comunicado a AOPJ", "Reclamaciones OAC Asociadas");
+            removeSectionFromField("Comunicado a AOPJ");
+        }
+        
+
+        // Mueve el campo Nº de Intervenciones y lo agrega a la seccion 'LUGAR'
+        // Agrega el campo a la seccion LUGAR
+        addFieldToSection("Nº de Intervenciones","Hora de Fin","Lugar");
+
+
+        // Agregamos y eliminamos la seccion
+        setupSection("DatosToRemove", "Datos To Remove", "Tipo infracción", "Tipo infracción");
+        removeSectionFromField("Tipo infracción");
+
+        setupSection("DatosToRemove", "Datos To Remove", "Tipo de infracción", "Tipo de infracción");
+        removeSectionFromField("Tipo de infracción");
+
+        setupSection("DatosToRemove", "Datos To Remove", "Anulación infracción", "Motivo Anulación");
+        removeSectionFromField("Anulación infracción");
+
+        if (isOperaciones)
+        {
+            setupSection("DatosToRemove", "Datos To Remove", "Importe", "Nº Reclamación");
+            removeSectionFromField("Importe");
+        }
+        // Ocultamos campos
+        setInterval(function () {
+            //$("input[Title='Fecha']").parent().parent().parent().parent().parent().parent().parent().css('display', 'none');
+            //$("input[Title='Hora']").parent().parent().parent().css('display', 'none');
+            if(isOperaciones)
+            {
+                $("input[Title='Fecha comunicación a AOPJA']").parent().parent().parent().parent().parent().parent().parent().css('display', 'none');
+                $("select[Title='Reclamaciones OAC Asociadas valores posibles']").parent().parent().parent().parent().parent().parent().parent().css('display', 'none');
+            }
+
+        }, 100);
+    }
+
+    else if (option == "Sanción") {
+
+        setupSection("DatosDeRegistro", "Datos de Registro", "Tipo de Solicitud", "Origen infracción");
+		//setupSection("DatosToRemove", "Datos To Remove", "Nº Notificación", "Nº Notificación");
+	//	removeSectionFromField("Nº Notificación");
+	//	setupSection("DatosToRemove", "Datos To Remove", "Origen infracción", "Origen infracción");
+	//	removeSectionFromField("Origen infracción");
+		
+        setupSection("Lugar", "Lugar", "Estación", "Hora de Fin");
+        setupSection("DatosToRemove", "Datos To Remove", "Lugar de Inicio", "Hora de Fin");
+        removeSectionFromField("Lugar de Inicio");
+
+
+        if (isAttCliente) {
+            setupSection("DatosDelPago", "Datos del Pago", "Importe", "Nº Reclamación");
+            setupSection("DatosCliente", "Datos Cliente", "Tipo de Titulo", "Teléfono Tutor");
+        }
+        else {
+            setupSection("DatosToRemove", "Datos To Remove", "Importe", "Nº Reclamación");
+            removeSectionFromField("Importe");
+
+            setupSection("DatosToRemove", "Datos To Remove", "Tipo de Titulo", "Teléfono Tutor");
+            removeSectionFromField("Tipo de Titulo");
+        }
+
+        setupSection("DatosRecargoExtraordinario", "Datos Recargo Extraordinario", "Tipo", "Informe de estación/oficina");
+
+        if (isAttCliente)
+            setupSection("DatosSeguimientoRecargoExtraordinario", "Datos Seguimiento Recargo Extraordinario", "Comunicado a AOPJ", "Reclamaciones OAC Asociadas");
+        else {
+            setupSection("DatosToRemove", "Datos To Remove", "Comunicado a AOPJ", "Reclamaciones OAC Asociadas");
+            removeSectionFromField("Comunicado a AOPJ");
+        }
+
+
+        // Mueve el campo Nº de Intervenciones y lo agrega a la seccion 'LUGAR'
+        // Agrega el campo a la seccion LUGAR
+        addFieldToSection("Nº de Intervenciones", "Hora de Fin", "Lugar");
+
+
+        // Agregamos y eliminamos la seccion
+        setupSection("DatosToRemove", "Datos To Remove", "Tipo infracción", "Tipo infracción");
+        removeSectionFromField("Tipo infracción");
+
+        setupSection("DatosToRemove", "Datos To Remove", "Tipo de infracción", "Tipo de infracción");
+        removeSectionFromField("Tipo de infracción");
+
+        setupSection("DatosToRemove", "Datos To Remove", "Anulación infracción", "Motivo Anulación");
+        removeSectionFromField("Anulación infracción");
+
+        if (isOperaciones) {
+            setupSection("DatosToRemove", "Datos To Remove", "Importe", "Nº Reclamación");
+            removeSectionFromField("Importe");
+        }
+        // Ocultamos campos
+        setInterval(function () {
+            //$("input[Title='Fecha']").parent().parent().parent().parent().parent().parent().parent().css('display', 'none');
+            //$("input[Title='Hora']").parent().parent().parent().css('display', 'none');
+            if (isOperaciones) {
+                $("input[Title='Fecha comunicación a AOPJA']").parent().parent().parent().parent().parent().parent().parent().css('display', 'none');
+                $("select[Title='Reclamaciones OAC Asociadas valores posibles']").parent().parent().parent().parent().parent().parent().parent().css('display', 'none');
+            }
+
+        }, 100);
+    }
+
+    else if (option == "Intervención") {
+
+        $("textarea[Title='Motivo Sanción']").text('SIN SANCIÓN');
+        $("textarea[Title='Motivo Sanción']").val('SIN SANCIÓN');
+
+        setupSection("DatosDeRegistro", "Datos de Registro", "Tipo de Solicitud", "Turno");
+		setupSection("DatosToRemove", "Datos To Remove", "Nº Notificación", "Nº Notificación");
+		removeSectionFromField("Nº Notificación");
+		setupSection("DatosToRemove", "Datos To Remove", "Origen infracción", "Origen infracción");
+		removeSectionFromField("Origen infracción");
+		
+		setupSection("Lugar", "Lugar", "Estación", "Hora de Fin");
+
+       
+        if (isAttCliente) {
+            setupSection("DatosDelPago", "Datos del Pago", "Importe", "Nº Reclamación");
+            setupSection("DatosCliente", "Datos Cliente", "Tipo de Titulo", "Teléfono Tutor");
+        }
+        else {
+            setupSection("DatosToRemove", "Datos To Remove", "Importe", "Nº Reclamación");
+            removeSectionFromField("Importe");
+
+            setupSection("DatosToRemove", "Datos To Remove", "Tipo de Titulo", "Teléfono Tutor");
+            removeSectionFromField("Tipo de Titulo");
+        }
+
+        //setupSection("DatosRecargoExtraordinario", "Datos Recargo Extraordinario", "Tipo", "Informe de estación/oficina");
+		setupSection("DatosRecargoExtraordinario", "Datos Recargo Extraordinario", "Informe de estación/oficina", "Informe de estación/oficina");
+        if (isAttCliente)
+            setupSection("DatosSeguimientoRecargoExtraordinario", "Datos Seguimiento Recargo Extraordinario", "Comunicado a AOPJ", "Reclamaciones OAC Asociadas");
+        else {
+            setupSection("DatosToRemove", "Datos To Remove", "Comunicado a AOPJ", "Reclamaciones OAC Asociadas");
+            removeSectionFromField("Comunicado a AOPJ");
+        }
+
+
+        // Mueve el campo Nº de Intervenciones y lo agrega a la seccion 'LUGAR'
+        // Agrega el campo a la seccion LUGAR
+        addFieldToSection("Nº de Intervenciones", "Hora de Fin", "Lugar");
+
+
+        // Agregamos y eliminamos la seccion
+        setupSection("DatosToRemove", "Datos To Remove", "Tipo infracción", "Tipo infracción");
+        removeSectionFromField("Tipo infracción");
+
+        setupSection("DatosToRemove", "Datos To Remove", "Tipo de infracción", "Tipo de infracción");
+        removeSectionFromField("Tipo de infracción");
+
+        setupSection("DatosToRemove", "Datos To Remove", "Anulación infracción", "Motivo Anulación");
+        removeSectionFromField("Anulación infracción");
+
+        setupSection("DatosToRemove", "Datos To Remove", "Tipo", "¿Es menor de edad?");
+        removeSectionFromField("Tipo");
+
+
+
+
+        if (isOperaciones) {
+            setupSection("DatosToRemove", "Datos To Remove", "Importe", "Nº Reclamación");
+            removeSectionFromField("Importe");
+        }
+        // Ocultamos campos
+        setInterval(function () {
+            //$("input[Title='Fecha']").parent().parent().parent().parent().parent().parent().parent().css('display', 'none');
+            //$("input[Title='Hora']").parent().parent().parent().css('display', 'none');
+            if (isOperaciones) {
+                $("input[Title='Fecha comunicación a AOPJA']").parent().parent().parent().parent().parent().parent().parent().css('display', 'none');
+                $("select[Title='Reclamaciones OAC Asociadas valores posibles']").parent().parent().parent().parent().parent().parent().parent().css('display', 'none');
+            }
+
+        }, 100);
+
+        
+    }
+    else if (option == "Apercibimiento") {
+        setupSection("DatosDeRegistro", "Datos de Registro", "Tipo de Solicitud", "Origen infracción");
+        setupSection("Lugar", "Lugar", "Estación", "Hora de Fin");
+        setupSection("DatosCliente", "Datos Cliente", "Tipo de Titulo", "Teléfono Tutor");
+        setupSection("DatosRecargoExtraordinario", "Datos Infracción", "Tipo de infracción", "Comunicado a AOPJ");
+        setupSection("DatosSeguimientoRecargoExtraordinario", "Datos Seguimiento Infracción", "Informe de estación/oficina", "Motivo Anulación");
+
+        // Agregamos y eliminamos la seccion
+        setupSection("DatosToRemove", "Datos To Remove", "Importe", "Nº Reclamación");
+        setupSection("DatosToRemove", "Datos To Remove", "Tipo", "Tipo infracción");   
+        setupSection("DatosToRemove", "Datos To Remove", "Nº de Intervenciones", "Nº de Intervenciones");
+        removeSectionFromField("Importe");
+        removeSectionFromField("Tipo");
+        removeSectionFromField("Nº de Intervenciones");
+
+        // Ocultamos campos
+        setInterval(function () {
+            //$("input[Title='Fecha']").parent().parent().parent().parent().parent().parent().parent().css('display', 'none');
+            //$("input[Title='Hora']").parent().parent().parent().css('display', 'none');
+            $("input[Title='Nº de Intervenciones']").parent().parent().parent().css('display', 'none');
+            $("textarea[Title='Motivo Sanción']").parent().parent().parent().css('display', 'none');
+        }, 100);
+
+    }
+
+    // Si no hay sección por QueryString expandir la primera
+   // if (expandSection === undefined) {
+  //      $("tr[section-name='DatosDeRegistro']").css("display", "block");
+  //      $("tr#DatosDeRegistro").addClass("demo-collapse");
+  //  }
+
+    // 13112018: Modificacion solicitada por MM, expandir por defecto todas las secciones
+$("tr.demo-section-header").each(function(){ var idSection = $(this).attr('id'); $(this).addClass("demo-collapse"); $("tr[section-name='"+idSection+"']").css("display","block");});
+
+    // Mostramos el contenido del formulario
+    $("#contentRow").css("display", "block");
+
+    // Muestra el icono de ayuda
+    $("#DatosDeRegistro").parent().prepend("<a title='Ayuda' onclick='javascript:openModalHelp();return false;' style='cursor:pointer;float:right;'>Ayuda <span class='circle-span'>?</span></a>");
+
+
+    
+};
+
+function removeSectionFromField(startColumn) {
+    /*Parametros:
+        sectionShortName: Short name para IDs de elementos no puede contener espacios o caracteres especiales.
+        sectionLongName: Display name de la cabecera.
+        startColumn: Primera columna de la sección.
+        endColumn: Última columna de la sección.
+      Los dos nombres de columnas deben ser el Display name, NO  el internal name p.ej "Nombre Producto" y no InternalName, p.ej., "Nombre_x0020_Producto"
+    */
+
+    // Busca la prim fila de la sección y borra la cabecera
+    var sectionStartRow = findFormField(startColumn).closest("tr");
+    $(sectionStartRow).prev(".demo-section-header").remove();
+};
+
+function setupSection(sectionShortName, sectionLongName, startColumn, endColumn) {
+    /*Parametros:
+        sectionShortName: Short name para IDs de elementos no puede contener espacios o caracteres especiales.
+        sectionLongName: Display name de la cabecera.
+        startColumn: Primera columna de la sección.
+        endColumn: Última columna de la sección.
+      Los dos nombres de columnas deben ser el Display name, NO  el internal name p.ej "Nombre Producto" y no InternalName, p.ej., "Nombre_x0020_Producto"
+    */
+
+    // Busca la prim y ult fila de la sección y añade la cabecera
+    var sectionStartRow = findFormField(startColumn).closest("tr");
+    var sectionEndRow = findFormField(endColumn).closest("tr");
+
+    var thisSection = null;
+
+    if (sectionStartRow[0].innerHTML == sectionEndRow[0].innerHTML) {
+        $(sectionStartRow)
+          .before("<tr class='demo-section-header' id='" + sectionShortName + "'>" +
+            "<td class='demo-section-header' colspan=2>" + sectionLongName + "</td>" +
+            "</tr>");
+        thisSection = sectionStartRow;
+        $(sectionStartRow).attr("section-name", sectionShortName);
+        $(sectionEndRow).find("td").addClass("demo-section-last-row-cell");
+    } else {
+        $(sectionStartRow)
+          .before("<tr class='demo-section-header' id='" + sectionShortName + "'>" +
+            "<td class='demo-section-header' colspan=2>" + sectionLongName + "</td>" +
+            "</tr>");
+        thisSection = $(sectionStartRow).nextUntil(sectionEndRow);
+        $(sectionStartRow).attr("section-name", sectionShortName);
+        $(sectionStartRow).nextUntil(sectionEndRow).attr("section-name", sectionShortName);
+        $(sectionEndRow).attr("section-name", sectionShortName);
+        $(sectionEndRow).find("td").addClass("demo-section-last-row-cell");
+    }
+
+    // Oculta todas las filas de la sección
+    $("tr[section-name='" + sectionShortName + "']").css("display", "none");
+
+    // Añadimos el comportamiento del click en la cabecera
+    $("tr#" + sectionShortName).click(function () {
+        var thisSectionRows = $("tr[section-name='" + sectionShortName + "']");
+        if ($(this).next("tr[section-name='" + sectionShortName + "']").css("display") == "block") {
+            $(thisSectionRows).css("display", "none");
+            $(this).removeClass("demo-collapse");
+        } else {
+            $(thisSectionRows).css("display", "block");
+            $(this).addClass("demo-collapse");
+            if (isOperaciones) {
+                $('td.ms-formlabel:contains("Nombre del Cliente")').parent().hide();
+                $('td.ms-formlabel:contains("DNI")').parent().hide();
+                $('td.ms-formlabel:contains("Nombre del Tutor")').parent().hide();
+                $('td.ms-formlabel:contains("DNI del Tutor")').parent().hide();
+                $('td.ms-formlabel:contains("Domicilio")').parent().hide();
+                $('td.ms-formlabel:contains("Teléfono")').parent().hide();
+                $('td.ms-formlabel:contains("Comunicado a AOP")').parent().hide();
+            }
+        }
+    });
+
+    // Expande la sección si hay algun error de validación
+    $("tr[section-name='" + sectionShortName + "'] .ms-formbody .ms-formvalidation").each(function () {
+        if ($(this).html().length > 0) {
+            $("tr[section-name='" + sectionShortName + "']").css("display", "block");
+            $("tr#" + sectionShortName).addClass("demo-collapse");
+            // No need to look at any more rows
+            return false;
+        }
+    });
+
+    // Expand the section if it's been passed on the Query String
+    if (sectionShortName == expandSection) {
+        $("tr[section-name='" + sectionShortName + "']").css("display", "block");
+        $("tr#" + sectionShortName).addClass("demo-collapse");
+    }
+};
+
+// This function (borrowed from SPServices) finds a column's formBody in the page
+function findFormField(columnName) {
+    var thisFormBody;
+    // There's no easy way to find one of these columns; we'll look for the comment with the columnName
+    var searchText = RegExp("FieldName=\"" + columnName.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&") + "\"", "gi");
+    // Loop through all of the ms-formbody table cells
+    $("td.ms-formbody").each(function () {
+        // Check for the right comment
+        if (searchText.test($(this).html())) {
+            thisFormBody = $(this);
+            // Found it, so we're done
+            return false;
+        }
+    });
+    return thisFormBody;
+};
+
+function addFieldToSection(columnName, endColumnName,sectionName) {
+    // Busca la ultima fila de la seccion
+    $($("input[title='" + columnName + "']").parent().parent().parent().insertAfter($("input[title='" + endColumnName + "']").parent().parent().parent()));
+
+    // Modificamos los atributos
+    $("input[title='" + columnName + "']").parent().parent().parent().css('display','none');
+    $("input[title='" + columnName + "']").parent().parent().parent().attr('section-name',sectionName);
+
+
+};
+
+function openModalHelp() {
+    //var url = _spPageContextInfo.webAbsoluteUrl+ "/Documentos%20compartidos/Documento%20de%20ayuda%20v04.pdf?Web=1";
+    var url = _spPageContextInfo.webAbsoluteUrl+ "/Documentos%20compartidos/Manual%20Gestión%20Sanciones.pdf?Web=1";    
+    window.open(url, 'blank');
+};
+
+
