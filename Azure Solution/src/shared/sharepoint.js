@@ -710,6 +710,11 @@ function buildSharePointFields(payload, type, token, createdAt) {
   if (type.key === "OBJETOS_PERDIDOS") {
     fields.Estado = payload.Estado || "Registrado";
     fields.TipoRegistro = payload.TipoRegistro || "Objeto Perdido Reclamado";
+    fields.FechaHoraRegistro = createdAt;
+  }
+
+  if (type.key === "RECLAMACIONES") {
+    fields.FechaYHoraRegistro = createdAt;
   }
 
   for (const [payloadField, value] of Object.entries(payload)) {

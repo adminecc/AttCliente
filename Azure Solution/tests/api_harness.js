@@ -562,6 +562,7 @@ async function main() {
 
       assert(validation.valid, `No se esperaban errores de validacion: ${validation.errors.join(", ")}.`);
       assert(fields.Title === "OBJ-2026-ABCDEFGH", "Title debe contener el token de solicitud.");
+      assert(fields.FechaHoraRegistro === "2026-06-29T08:00:00.000Z", "Se esperaba registrar la fecha de alta de objetos perdidos.");
       assert(fields.LineaMetro.includes("1"), "Se esperaba LineaMetro normalizada.");
       assert(fields.Localizacion === "En un tren", "Se esperaba Localizacion normalizada.");
       assert(fields.EstOrig === "Atarazanas", "Se esperaba EstOrig normalizado.");
@@ -675,6 +676,7 @@ async function main() {
       );
 
       assert(fields.DAB === "ATZ-DAB-101", `Se esperaba ATZ-DAB-101 y llego ${fields.DAB}.`);
+      assert(fields.FechaYHoraRegistro === "2026-06-29T08:00:00.000Z", "Se esperaba registrar la fecha de alta de reclamaciones.");
     }),
 
     runTest("Reclamaciones conserva los campos bancarios especificos", async () => {
