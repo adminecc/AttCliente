@@ -1,6 +1,7 @@
 const { app } = require("@azure/functions");
 const { isEmail } = require("../shared/validation");
 const { getTypeFromToken } = require("../shared/token");
+const { PUBLIC_ERRORS } = require("../shared/public-errors");
 const {
   getGraphAccessToken,
   findListItemByContactAndToken,
@@ -19,9 +20,10 @@ app.http("consultarSolicitud", {
     let body;
     try {
       body = await request.json();
-    } catch {
+    } catch (error) {
+      context.warn?.("consultarSolicitud - petición no válida:", error.message);
       return jsonResponse(400, {
-        error: "El cuerpo de la peticion no es JSON valido.",
+        error: PUBLIC_ERRORS.invalidRequest,
       });
     }
 
@@ -36,20 +38,20 @@ app.http("consultarSolicitud", {
 
     if (!contact || !token) {
       return jsonResponse(400, {
-        error: "Los campos 'token' y correo electronico o telefono son obligatorios.",
+        error: "Indica el número de expediente y el correo electrónico o teléfono asociado.",
       });
     }
 
     if (contact.kind === "email" && !isEmail(contact.value)) {
       return jsonResponse(400, {
-        error: "El formato del correo electronico no es valido.",
+        error: "El formato del correo electrónico no es válido.",
       });
     }
 
     const type = getTypeFromToken(token);
     if (!type) {
       return jsonResponse(400, {
-        error: "El token no permite identificar una lista de consulta valida.",
+        error: "El número de expediente no tiene un formato válido.",
       });
     }
 
@@ -59,7 +61,7 @@ app.http("consultarSolicitud", {
     } catch (error) {
       context.error("consultarSolicitud - error autenticando con Microsoft Graph:", error.message);
       return jsonResponse(500, {
-        error: "Error de autenticacion con Microsoft Graph.",
+        error: PUBLIC_ERRORS.serviceUnavailable,
       });
     }
 
@@ -76,7 +78,7 @@ app.http("consultarSolicitud", {
     } catch (error) {
       context.error("consultarSolicitud - error consultando SharePoint:", error.message, error.response?.data);
       return jsonResponse(500, {
-        error: "Error al consultar la solicitud en SharePoint.",
+        error: PUBLIC_ERRORS.serviceUnavailable,
       });
     }
 

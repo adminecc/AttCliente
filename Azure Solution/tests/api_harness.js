@@ -233,6 +233,7 @@ async function main() {
   } = require("../src/shared/sharepoint");
   const { validateSolicitudPayload } = require("../src/shared/validation");
   const { isGuid, normalizeOrigin, isRequesterAllowed } = require("../src/shared/access-token");
+  const { PUBLIC_ERRORS } = require("../src/shared/public-errors");
 
   const tests = [
     runTest("generateAccessToken genera GUID temporal cuando el origen esta permitido", async () => {
@@ -272,6 +273,7 @@ async function main() {
         );
 
         assert(result.response.status === 403, `Se esperaba 403 y llego ${result.response.status}.`);
+        assert(result.body.error === PUBLIC_ERRORS.invalidSession, "No debe exponerse la regla interna de acceso.");
       } finally {
         process.env.ACCESS_TOKEN_STORE_DISABLED = previousStoreDisabled;
         process.env.ACCESS_TOKEN_ALLOWED_ORIGINS = previousAllowedOrigins;
@@ -337,20 +339,18 @@ async function main() {
 
 
     runTest("crearSolicitud rechaza payload incompleto con contrato real", async () => {
-      const { response, body } = await invoke("crearSolicitud", {
+      const { response, body, logs } = await invoke("crearSolicitud", {
         tipoFormulario: "reclamaciones",
         CorreoElectronico: "maria.lopez@example.com",
       });
 
       assert(response.status === 400, `Se esperaba 400 y llego ${response.status}.`);
-      assert(Array.isArray(body.errors), "Se esperaba lista de errores.");
-      assert(body.errors.includes("Nombre"), "Se esperaba error del campo Nombre.");
-      assert(body.errors.includes("Apellidos"), "Se esperaba error del campo Apellidos.");
-      assert(body.errors.includes("Telefono"), "Se esperaba error del campo Telefono.");
+      assert(body.error === PUBLIC_ERRORS.invalidFields, "Se esperaba un mensaje corregible sin nombres internos.");
+      assert(!Object.prototype.hasOwnProperty.call(body, "errors"), "No deben exponerse nombres internos de campos.");
     }),
 
     runTest("crearSolicitud acepta contrato real y falla despues al no tener credenciales Graph", async () => {
-      const { response, body } = await invoke("crearSolicitud", {
+      const { response, body, logs } = await invoke("crearSolicitud", {
         tipoFormulario: "reclamaciones",
         Nombre: "  Maria  ",
         Apellidos: "Lopez Garcia",
@@ -367,7 +367,9 @@ async function main() {
       });
 
       assert(response.status === 500, `Se esperaba 500 por credenciales no configuradas y llego ${response.status}.`);
-      assert(String(body.error || "").includes("Microsoft Graph"), "Se esperaba error controlado de Graph.");
+      assert(body.error === PUBLIC_ERRORS.serviceUnavailable, "Se esperaba un error público genérico.");
+      assert(!Object.prototype.hasOwnProperty.call(body, "diagnostics"), "No deben exponerse diagnósticos internos.");
+      assert(logs.some((entry) => entry.level === "error" && entry.message.includes("Microsoft Graph")), "El detalle debe quedar en logs.");
     }),
 
     runTest("generateToken genera token con formato esperado para reclamaciones", async () => {
@@ -389,7 +391,7 @@ async function main() {
       });
 
       assert(response.status === 400, `Se esperaba 400 y llego ${response.status}.`);
-      assert(String(body.error || "").includes("tipoFormulario"), "Se esperaba mensaje de tipoFormulario invalido.");
+      assert(String(body.error || "").includes("tipo de formulario"), "Se esperaba mensaje corregible para el usuario.");
     }),
 
     runTest("SharePoint guarda el token en Title como numero de solicitud", async () => {
@@ -812,7 +814,7 @@ async function main() {
       const { response, body } = await invoke("consultarSolicitud", {});
 
       assert(response.status === 400, `Se esperaba 400 y llego ${response.status}.`);
-      assert(String(body.error || "").includes("obligatorios"), "Se esperaba mensaje de campos obligatorios.");
+      assert(String(body.error || "").includes("número de expediente"), "Se esperaba un mensaje corregible para el usuario.");
     }),
 
     runTest("consultarSancion valida expediente y DNI", async () => {
@@ -824,6 +826,18 @@ async function main() {
         DNI: "12345678Z",
       });
       assert(invalid.response.status === 400, "Se esperaba 400 para expediente invalido.");
+    }),
+
+    runTest("consultarSancion oculta el detalle interno y lo conserva en logs", async () => {
+      const { response, body, logs } = await invoke("consultarSancion", {
+        Title: "SAN-2026-000001",
+        DNI: "12345678Z",
+      });
+
+      assert(response.status === 500, `Se esperaba 500 por credenciales no configuradas y llego ${response.status}.`);
+      assert(body.error === PUBLIC_ERRORS.serviceUnavailable, "Se esperaba un error público genérico.");
+      assert(!JSON.stringify(body).includes("SharePoint"), "No debe exponerse SharePoint al usuario.");
+      assert(logs.some((entry) => entry.level === "error" && entry.message.includes("SharePoint")), "El detalle debe quedar en logs.");
     }),
 
     runTest("respuesta de sancion conserva los nombres internos de SharePoint", async () => {
@@ -854,23 +868,24 @@ async function main() {
     }),
 
     runTest("consultarSolicitud rechaza token con prefijo desconocido sin llamar a Graph", async () => {
-      const { response, body } = await invoke("consultarSolicitud", {
+      const { response, body, logs } = await invoke("consultarSolicitud", {
         personalData: "consulta@example.com",
         token: "ZZZ-2026-ABCDEFGH",
       });
 
       assert(response.status === 400, `Se esperaba 400 y llego ${response.status}.`);
-      assert(String(body.error || "").includes("lista de consulta valida"), "Se esperaba mensaje de token no consultable.");
+      assert(String(body.error || "").includes("formato válido"), "Se esperaba mensaje de expediente no válido.");
     }),
 
     runTest("consultarSolicitud acepta prefijo real y falla despues al no tener credenciales Graph", async () => {
-      const { response, body } = await invoke("consultarSolicitud", {
+      const { response, body, logs } = await invoke("consultarSolicitud", {
         personalData: "consulta@example.com",
         token: "REC-2026-ABCDEFGH",
       });
 
       assert(response.status === 500, `Se esperaba 500 por credenciales no configuradas y llego ${response.status}.`);
-      assert(String(body.error || "").includes("Microsoft Graph"), "Se esperaba error controlado de Graph.");
+      assert(body.error === PUBLIC_ERRORS.serviceUnavailable, "Se esperaba un error público genérico.");
+      assert(logs.some((entry) => entry.level === "error" && entry.message.includes("Microsoft Graph")), "El detalle debe quedar en logs.");
     }),
 
     runTest("respuesta de consulta incluye contrato del prototipo", async () => {

@@ -6,7 +6,7 @@ const {
   validateAccessToken,
   createTableClient,
 } = require("../shared/access-token");
-const { getSiteUrlForType } = require("../shared/config");
+const { PUBLIC_ERRORS, getPublicSessionError } = require("../shared/public-errors");
 const {
   getGraphAccessToken,
   createListItem,
@@ -27,8 +27,7 @@ app.http("crearSolicitud", {
 
       return jsonResponse(500, {
         ok: false,
-        error: "Error interno no controlado en la creacion de la solicitud.",
-        diagnostics: buildDiagnostics(error),
+        error: PUBLIC_ERRORS.serviceUnavailable,
       });
     }
   },
@@ -54,8 +53,7 @@ async function handleCrearSolicitud(request, context) {
       context.error("crearSolicitud - error validando token temporal:", error.message);
       return jsonResponse(500, {
         ok: false,
-        error: "Error validando el token temporal.",
-        diagnostics: buildDiagnostics(error),
+        error: PUBLIC_ERRORS.serviceUnavailable,
       });
     }
 
@@ -63,7 +61,7 @@ async function handleCrearSolicitud(request, context) {
       context.warn?.(`crearSolicitud - token temporal rechazado: ${accessTokenValidation.error || "no valido"}`);
       return jsonResponse(accessTokenValidation.status || 401, {
         ok: false,
-        error: accessTokenValidation.error || "Token temporal no valido.",
+        error: getPublicSessionError(accessTokenValidation.error),
       });
     }
 
@@ -71,7 +69,7 @@ async function handleCrearSolicitud(request, context) {
       context.warn?.("crearSolicitud - token temporal rechazado: Token de acceso ya utilizado.");
       return jsonResponse(401, {
         ok: false,
-        error: "Token de acceso ya utilizado.",
+        error: PUBLIC_ERRORS.usedSession,
       });
     }
   }
@@ -91,18 +89,21 @@ async function handleCrearSolicitud(request, context) {
       );
     });
   } catch (error) {
+    context.warn?.("crearSolicitud - petición no válida:", error.message);
     return jsonResponse(400, {
       ok: false,
-      error: error.message || "El cuerpo de la peticion no es valido.",
+      error: PUBLIC_ERRORS.invalidRequest,
     });
   }
 
   const validation = validateSolicitudPayload(body);
   if (!validation.valid) {
-    context.log(`crearSolicitud - ${validation.errors.length} error(es) de validacion`);
+    context.warn?.(
+      `crearSolicitud - ${validation.errors.length} error(es) de validación: ${validation.errors.join(", ")}`
+    );
     return jsonResponse(400, {
       ok: false,
-      errors: validation.errors,
+      error: PUBLIC_ERRORS.invalidFields,
     });
   }
 
@@ -117,8 +118,7 @@ async function handleCrearSolicitud(request, context) {
     context.error("crearSolicitud - error autenticando con Microsoft Graph:", error.message);
     return jsonResponse(500, {
       ok: false,
-      error: "Error de autenticacion con Microsoft Graph.",
-      diagnostics: buildDiagnostics(error),
+      error: PUBLIC_ERRORS.serviceUnavailable,
     });
   }
 
@@ -135,8 +135,7 @@ async function handleCrearSolicitud(request, context) {
     context.error("crearSolicitud - error creando item SharePoint:", error.message, error.response?.data);
     return jsonResponse(500, {
       ok: false,
-      error: "Error al registrar la solicitud en SharePoint.",
-      diagnostics: buildDiagnostics(error),
+      error: PUBLIC_ERRORS.serviceUnavailable,
     });
   }
 
@@ -189,8 +188,7 @@ async function handleCrearSolicitud(request, context) {
         partialSuccess: true,
         solicitudId: createdItem.id,
         token,
-        error: "La solicitud se ha creado, pero no se pudo generar el informe PDF.",
-        diagnostics: buildDiagnostics(error),
+        error: PUBLIC_ERRORS.partialSuccess,
       });
     }
 
@@ -236,8 +234,7 @@ async function handleCrearSolicitud(request, context) {
         partialSuccess: true,
         solicitudId: createdItem.id,
         token,
-        error: "La solicitud se ha creado, pero no se pudieron adjuntar los documentos.",
-        diagnostics: buildDiagnostics(error),
+        error: PUBLIC_ERRORS.partialSuccess,
       });
     }
   } else if (files.length > 0) {
@@ -256,7 +253,7 @@ async function handleCrearSolicitud(request, context) {
       attachmentWarnings.push(...(uploadResult.warnings || []));
     } catch (error) {
       context.warn?.(`crearSolicitud - solicitud creada sin adjuntos por error de subida: ${error.message}`);
-      attachmentWarnings.push(`Solicitud creada, pero no se pudieron subir adjuntos: ${error.message}`);
+      attachmentWarnings.push(PUBLIC_ERRORS.attachmentWarning);
     }
   }
 
@@ -274,17 +271,10 @@ async function handleCrearSolicitud(request, context) {
     solicitudId: createdItem.id,
     token,
     tipoFormulario: validation.type.formValue,
-    listaDestino: validation.type.key,
-    nombreLista: validation.type.sharePoint.listName,
-    siteDestino: getSiteUrlForType(validation.type),
-    listaUrl: validation.type.sharePoint.listUrl,
     creadoEn: createdAt,
     email: validation.payload.CorreoElectronico || validation.payload.EmailCliente,
-    adjuntos: uploadedAttachments,
-    warnings: attachmentWarnings,
-    debug: {
-      adjuntosRecibidos: describeFilesForDebug(files),
-    },
+    adjuntos: uploadedAttachments.map(toPublicAttachment),
+    warnings: attachmentWarnings.length > 0 ? [PUBLIC_ERRORS.attachmentWarning] : [],
     mensaje: "Solicitud registrada correctamente. Se enviara el token de consulta al correo indicado.",
   });
 }
@@ -337,8 +327,7 @@ async function closeTemporalAccessTokenAfterItemCreated({
       partialSuccess: true,
       solicitudId,
       token,
-      error: "La solicitud se ha creado, pero no se pudo cerrar el token temporal.",
-      diagnostics: buildDiagnostics(error),
+      error: PUBLIC_ERRORS.partialSuccess,
     });
   }
 }
@@ -361,13 +350,12 @@ function validateGeneratedReport(report) {
   report.sizeBytes = report.sizeBytes || report.content.length;
 }
 
-function describeFilesForDebug(files = []) {
-  return files.map((file) => ({
-    fieldName: file.fieldName || "",
-    fileName: file.fileName || "",
-    contentType: file.contentType || "",
-    sizeBytes: file.sizeBytes || file.content?.length || 0,
-  }));
+function toPublicAttachment(file = {}) {
+  return {
+    nombre: file.nombre || "",
+    tipo: file.tipo || "",
+    tamanioBytes: file.tamanioBytes || 0,
+  };
 }
 
 async function parseSolicitudRequest(request) {
@@ -571,17 +559,6 @@ function jsonResponse(status, body) {
       "Cache-Control": "no-store",
     },
     body: JSON.stringify(body),
-  };
-}
-
-function buildDiagnostics(error) {
-  if (process.env.DEBUG_ERRORS !== "true") return undefined;
-
-  return {
-    message: error.message,
-    status: error.response?.status,
-    data: error.response?.data,
-    sharePoint: error.sharePointDiagnostics,
   };
 }
 

@@ -5,6 +5,7 @@ const {
   isRequesterAllowed,
   saveAccessToken,
 } = require("../shared/access-token");
+const { PUBLIC_ERRORS } = require("../shared/public-errors");
 
 app.http("generateAccessToken", {
   methods: ["POST", "GET"],
@@ -28,7 +29,7 @@ app.http("generateAccessToken", {
       );
       return jsonResponse(403, {
         ok: false,
-        error: "Origen no autorizado.",
+        error: PUBLIC_ERRORS.invalidSession,
       });
     }
 
@@ -51,7 +52,7 @@ app.http("generateAccessToken", {
         context.error("generateAccessToken - error guardando token temporal:", error.message);
         return jsonResponse(500, {
           ok: false,
-          error: "No se pudo generar el token temporal.",
+          error: PUBLIC_ERRORS.serviceUnavailable,
         });
       }
     }

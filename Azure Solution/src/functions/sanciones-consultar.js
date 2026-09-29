@@ -1,5 +1,6 @@
 const { app } = require("@azure/functions");
 const { getGraphAccessToken, findSanctionByExpedienteAndDni, buildSancionResponse } = require("../shared/sharepoint");
+const { PUBLIC_ERRORS } = require("../shared/public-errors");
 
 app.http("consultarSancion", {
   methods: ["POST"],
@@ -11,9 +12,10 @@ app.http("consultarSancion", {
     let body;
     try {
       body = await request.json();
-    } catch {
+    } catch (error) {
+      context.warn?.("consultarSancion - petición no válida:", error.message);
       return jsonResponse(400, {
-        error: "El cuerpo de la peticion no es JSON valido.",
+        error: PUBLIC_ERRORS.invalidRequest,
       });
     }
 
@@ -21,13 +23,13 @@ app.http("consultarSancion", {
     const dni = String(body?.DNI || "").replace(/[\s-]/g, "").toUpperCase();
     if (!expediente || !dni) {
       return jsonResponse(400, {
-        error: "Los campos 'Title' y 'DNI' son obligatorios.",
+        error: "Indica el número de expediente y el documento de identidad.",
       });
     }
 
     if (!/^SAN-\d{4}-[A-Z0-9]{6}$/.test(expediente)) {
       return jsonResponse(400, {
-        error: "El campo 'Title' no tiene un formato de expediente valido.",
+        error: "El número de expediente no tiene un formato válido.",
       });
     }
 
@@ -54,9 +56,10 @@ app.http("consultarSancion", {
     } catch (error) {
       context.error(
         "consultarSancion - error consultando SharePoint:",
-        error.message
+        error.message,
+        error.response?.data
       );
-      return jsonResponse(500, { error: "Error al consultar la sancion en SharePoint." });
+      return jsonResponse(500, { error: PUBLIC_ERRORS.serviceUnavailable });
     }
   },
 });

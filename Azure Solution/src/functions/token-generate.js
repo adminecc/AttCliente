@@ -1,6 +1,7 @@
 const { app } = require("@azure/functions");
-const { normalizeRequestType, getAcceptedTypeValues } = require("../shared/form-contract");
+const { normalizeRequestType } = require("../shared/form-contract");
 const { generarTokenForType } = require("../shared/token");
+const { PUBLIC_ERRORS } = require("../shared/public-errors");
 
 app.http("generateToken", {
   methods: ["POST"],
@@ -12,16 +13,17 @@ app.http("generateToken", {
     let body;
     try {
       body = await request.json();
-    } catch {
+    } catch (error) {
+      context.warn?.("generateToken - petición no válida:", error.message);
       return jsonResponse(400, {
-        error: "El cuerpo de la peticion no es JSON valido.",
+        error: PUBLIC_ERRORS.invalidRequest,
       });
     }
 
     const type = normalizeRequestType(body);
     if (!type) {
       return jsonResponse(400, {
-        error: `tipoFormulario no valido. Valores aceptados: ${getAcceptedTypeValues().join(", ")}`,
+        error: "El tipo de formulario no es válido.",
       });
     }
 
