@@ -590,7 +590,7 @@ async function main() {
 
       assert(validation.valid, `No se esperaban errores de validacion: ${validation.errors.join(", ")}.`);
       assert(fields.Title === "TAR-2026-ABCDEFGH", "Title debe contener el token de solicitud.");
-      assert(fields.NombreCliente === "Luis", "Se esperaba NombreCliente directo.");
+      assert(fields.NombreCliente === "LUIS", "Se esperaba NombreCliente en mayúsculas.");
       assert(fields.MetodoNotificacion === "Correo", "Se esperaba MetodoNotificacion normalizado.");
       assert(String(fields.EstadoCliente || "").toLowerCase().includes("tr"), "ClientesTarjetaMetro debe recibir EstadoCliente por defecto.");
     }),
