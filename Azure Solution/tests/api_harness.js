@@ -417,6 +417,19 @@ async function main() {
       assert(fields.EstadoCliente === "En tr\u00e1mite", "EstadoCliente inicial debe ser En tramite.");
     }),
 
+    runTest("todas las solicitudes se marcan como creadas desde formulario web", async () => {
+      for (const type of Object.values(FORM_TYPES)) {
+        const fields = buildSharePointFields(
+          { CreadoDesdeFormularioWeb: false },
+          type,
+          `${type.tokenPrefix}-2026-ABCDEFGH`,
+          "2026-06-29T08:00:00.000Z"
+        );
+
+        assert(fields.CreadoDesdeFormularioWeb === true, `${type.key} debe marcarse como alta web.`);
+      }
+    }),
+
     runTest("consultas usa nombres directos de SharePoint", async () => {
       const payload = {
         tipoFormulario: "consultas",

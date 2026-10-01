@@ -934,6 +934,7 @@ function buildSharePointFields(payload, type, token, createdAt) {
   }
 }
 
+  fields.CreadoDesdeFormularioWeb = true;
   return fields;
 }
 
